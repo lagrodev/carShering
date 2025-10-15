@@ -30,8 +30,7 @@ public class CarModel {
     @Column(name = "car_class")
     private String carClass;
 
-    @Column(name = "year_of_issue")
-    private Integer yearOfIssue;
+
 
     @OneToMany(mappedBy = "model")
     private List<Car> cars = new ArrayList<>();;

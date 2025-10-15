@@ -15,10 +15,10 @@ public class Contract {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "data_start")
+    @Column(name = "data_start",  nullable = false)
     private LocalDate dataStart;
 
-    @Column(name = "data_end")
+    @Column(name = "data_end",   nullable = false)
     private LocalDate dataEnd;
 
     @Column(name = "total_cost", nullable = false)
@@ -31,6 +31,8 @@ public class Contract {
     @ManyToOne
     @JoinColumn(name = "car_id", nullable = false)
     private Car car;
+
+
 
     @ManyToOne
     @JoinColumn(name = "state_id", nullable = false)

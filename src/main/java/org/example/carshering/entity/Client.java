@@ -16,23 +16,26 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "first_name", nullable = false)
+    @Column(name = "first_name")
     private String firstName;
 
-    @Column(name = "second_name")
-    private String secondName;
-
-    @Column(nullable = false, unique = true)
-    private String phone;
-
-    @Column(nullable = false, unique = true)
-    private String mail;
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
     @Column(nullable = false, unique = true)
     private String login;
 
+    @Column(nullable = true, unique = true)
+    private String phone;
+
+    @Column(nullable = false, unique = true, name = "email" )
+    private String email;
+
     @Column(nullable = false)
     private String password;
+
+    @Column(name = "is_banned", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean banned =  false;
 
     @ManyToOne
     @JoinColumn(name = "role_id")

@@ -2,6 +2,7 @@ package org.example.carshering.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Table(name = "car", schema = "car_rental")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +29,12 @@ public class Car {
     @Column(name = "image_url")
     private String imageUrl;
 
+
+    private Double rent;
+
+    @Column(name = "year_of_issue")
+    private Integer yearOfIssue;
+
     @ManyToOne
     @JoinColumn(name = "model_id", nullable = false)
     private CarModel model;
@@ -36,6 +44,6 @@ public class Car {
     private CarState state;
 
     @OneToMany(mappedBy = "car")
-    private List<RentalState> contracts = new ArrayList<>();;
+    private List<Contract> contracts = new ArrayList<>();;
 
 }

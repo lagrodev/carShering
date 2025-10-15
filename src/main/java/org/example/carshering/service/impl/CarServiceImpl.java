@@ -1,0 +1,103 @@
+package org.example.carshering.service.impl;
+
+import jakarta.validation.ValidationException;
+import lombok.RequiredArgsConstructor;
+import org.example.carshering.dto.request.CreateCarRequest;
+import org.example.carshering.dto.response.CarDetailResponse;
+import org.example.carshering.dto.response.CarListItemResponse;
+import org.example.carshering.entity.Car;
+import org.example.carshering.entity.CarModel;
+import org.example.carshering.entity.CarState;
+import org.example.carshering.entity.RentalState;
+import org.example.carshering.mapper.CarMapper;
+import org.example.carshering.repository.CarModelRepository;
+import org.example.carshering.repository.CarRepository;
+import org.example.carshering.repository.RentalStateRepository;
+import org.example.carshering.service.CarService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class CarServiceImpl implements CarService {
+
+    private final CarRepository carRepository;
+    private final CarMapper carMapper;
+
+
+    private final CarModelRepository carModelRepository;
+    private final RentalStateRepository rentalStateRepository;
+
+    @Override
+    public CarDetailResponse findCar(Long carId) {
+        Car car = this.carRepository.findById(carId)
+                .orElseThrow(() -> new RuntimeException("Car not found"));
+        return carMapper.toDetailDto(car);
+
+    }
+
+    @Override
+    public List<CarListItemResponse> getAllCars() {
+        return carRepository.findAll().stream()
+                .map(carMapper::toListItemDto)
+                .toList();
+    }
+
+    @Override
+    public Car getEntity(Long carId) {
+        return carRepository.findById(carId)
+                .orElseThrow(() -> new ValidationException("Автомобиль не найден"));
+    }
+
+
+    @Override
+    public CarDetailResponse findValidCar(Long carId) {
+        Car car = this.carRepository.findById(carId)
+                .orElseThrow(() -> new RuntimeException("Car not found"));
+
+        if (!car.getState().getStatus().equals("AVAILABLE")) {
+            throw new ValidationException("Автомобиль не найден");
+        }
+
+        return carMapper.toDetailDto(car);
+
+    }
+
+
+    @Override
+    public List<CarListItemResponse> getAllValidCars() {
+        return carRepository.findValidCars().stream()
+                .map(carMapper::toListItemDto)
+                .toList();
+    }
+
+    @Override
+    public CarDetailResponse createCar(CreateCarRequest request) {
+        CarModel model = carModelRepository.findById(request.modelId())
+                .orElseThrow(() -> new RuntimeException("Car model not found"));
+
+        // 2. Проверяем уникальность госномера и VIN
+        if (carRepository.existsByGosNumber(request.gosNumber())) {
+            throw new RuntimeException("Gos number already exists");
+        }
+        if (carRepository.existsByVin(request.vin())) {
+            throw new RuntimeException("VIN already exists");
+        }
+
+        // 3. Получаем статус "AVAILABLE"
+
+
+        // 4. Создаём авто
+        Car car = new Car();
+        car.setModel(model);
+        car.setGosNumber(request.gosNumber());
+        car.setVin(request.vin());
+        car.setRent(request.rent());
+
+        // 5. Сохраняем
+        Car saved = carRepository.save(car);
+        return carMapper.toDetailDto(saved);
+    }
+
+}

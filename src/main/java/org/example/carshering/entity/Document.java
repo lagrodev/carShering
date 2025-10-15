@@ -15,17 +15,23 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "document_type")
-    private String documentType;
+    @Column(name = "is_verified", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean verified = false;
 
+    @ManyToOne
+    @JoinColumn(name = "doctype_id",  nullable = false)
+    private DocumentType documentType;
+
+    @Column(nullable = false)
     private String series;
 
+    @Column(nullable = false)
     private String number;
 
-    @Column(name = "date_of_issue")
+    @Column(name = "date_of_issue",  nullable = false)
     private LocalDate dateOfIssue;
 
-    @Column(name = "issuing_authority")
+    @Column(name = "issuing_authority", nullable = false)
     private String issuingAuthority;
 
     @OneToOne

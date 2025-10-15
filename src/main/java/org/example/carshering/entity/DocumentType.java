@@ -1,24 +1,20 @@
 package org.example.carshering.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "car_state", schema = "car_rental")
+@Table(name = "doctype", schema = "car_rental")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CarState {
+public class DocumentType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String status;
-
-    @OneToMany(mappedBy = "state")
-    private List<Car> cars = new ArrayList<>();
+    private String name;
 }

@@ -1,6 +1,6 @@
 spring:
     datasource:
-        url: jdbc:postgresql://localhost:5432/car_rental
+        url: jdbc:postgresql://localhost:5433/car_rental
         username: postgres
         password: postgres
         driver-class-name: org.postgresql.Driver
@@ -13,10 +13,18 @@ spring:
             hibernate:
                 format_sql: true
 
+    logging:
+        level:
+            org.flywaydb: DEBUG
+
     flyway:
         enabled: false
-        url: jdbc:postgresql://localhost:5432/car_rental
-        user: postgres
-        password: postgres
-        baseline-on-migrate: true
+        baseline-on-migrate: true # т.к. таблицы уже существуют и я их делал без flyway, то это заглушка
         validate-on-migrate: false
+        database-type: postgresql
+server:
+    port: 8082
+jwt:
+    secret: 30i450583jdefk#23545ddG&Eshr3%aer567tlaeFS*Dj{ko3490yU8Yrik
+    lifetime: 30m
+debug: false
