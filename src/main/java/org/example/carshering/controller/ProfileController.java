@@ -40,15 +40,7 @@ public class ProfileController {
         return documentService.findDocument(userId);
     }
 
-    @PatchMapping
-    public ResponseEntity<?> updateProfile(
-            @Valid @RequestBody UpdateProfileRequest request,
-            Authentication auth
-    ) {
-        Long userId = getCurrentUserId(auth);
-        clientService.updateProfile(userId, request);
-        return ResponseEntity.noContent().build();
-    }
+
 
     @PutMapping("/delete")
     public  ResponseEntity<?> deleteProfile(Authentication auth){
@@ -86,7 +78,7 @@ public class ProfileController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping
+    @PatchMapping("/document")
     public ResponseEntity<?> updateDocument(
             @Valid @RequestBody UpdateDocumentRequest request,
             Authentication auth
@@ -94,6 +86,16 @@ public class ProfileController {
         Long userId = getCurrentUserId(auth);
         DocumentResponse doc = documentService.updateDocument(userId, request);
         return ResponseEntity.ok(doc);
+    }
+
+    @PatchMapping
+    public ResponseEntity<?> updateProfile(
+            @Valid @RequestBody UpdateProfileRequest request,
+            Authentication auth
+    ) {
+        Long userId = getCurrentUserId(auth);
+        clientService.updateProfile(userId, request);
+        return ResponseEntity.noContent().build();
     }
 
 

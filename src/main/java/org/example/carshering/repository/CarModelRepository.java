@@ -19,7 +19,9 @@ import java.util.Optional;
 public interface CarModelRepository extends JpaRepository<CarModel,Long> {
     List<CarModel> findAllByDeletedFalse();
 
-    Optional<CarModel> findByIdAndDeletedFalse(Long id);
+
+    @Query("SELECT c FROM CarModel c WHERE c.idModel = :id AND c.deleted = false")
+    Optional<CarModel> findByIdAndDeletedFalse(@Param("id") Long id);
 
     @Query("""
         SELECT m FROM CarModel m
