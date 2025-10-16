@@ -27,7 +27,7 @@ public class CarServiceImpl implements CarService {
 
     private final CarRepository carRepository;
     private final CarMapper carMapper;
-
+    private final CarModelRepository carModelRepository;
 
     private final CarStateRepository stateRepository;
 
@@ -80,6 +80,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public CarDetailResponse createCar(CreateCarRequest request) {
+        // todo
         CarModel model = carModelRepository.findById(request.modelId())
                 .orElseThrow(() -> new RuntimeException("Car model not found"));
 
