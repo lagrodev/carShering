@@ -64,7 +64,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/registration").permitAll()
 
                         // Админка — только для ADMIN
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "MANAGER")
 
                         // Личный кабинет — для всех авторизованных
                         .anyRequest().authenticated()

@@ -34,6 +34,9 @@ public class Document {
     @Column(name = "issuing_authority", nullable = false)
     private String issuingAuthority;
 
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean deleted = false;
+
     @OneToOne
     @JoinColumn(name = "client_id", nullable = false, unique = true)
     private Client client;

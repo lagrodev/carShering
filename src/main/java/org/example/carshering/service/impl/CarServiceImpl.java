@@ -2,17 +2,20 @@ package org.example.carshering.service.impl;
 
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import org.example.carshering.dto.request.CreateCarModelRequest;
 import org.example.carshering.dto.request.CreateCarRequest;
+import org.example.carshering.dto.request.UpdateCarRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
+import org.example.carshering.dto.response.CarModelResponse;
 import org.example.carshering.entity.Car;
 import org.example.carshering.entity.CarModel;
 import org.example.carshering.entity.CarState;
-import org.example.carshering.entity.RentalState;
 import org.example.carshering.mapper.CarMapper;
+import org.example.carshering.mapper.ModelMapper;
 import org.example.carshering.repository.CarModelRepository;
 import org.example.carshering.repository.CarRepository;
-import org.example.carshering.repository.RentalStateRepository;
+import org.example.carshering.repository.CarStateRepository;
 import org.example.carshering.service.CarService;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +29,7 @@ public class CarServiceImpl implements CarService {
     private final CarMapper carMapper;
 
 
-    private final CarModelRepository carModelRepository;
-    private final RentalStateRepository rentalStateRepository;
+    private final CarStateRepository stateRepository;
 
     @Override
     public CarDetailResponse findCar(Long carId) {
@@ -72,12 +74,15 @@ public class CarServiceImpl implements CarService {
                 .toList();
     }
 
+
+
+
+
     @Override
     public CarDetailResponse createCar(CreateCarRequest request) {
         CarModel model = carModelRepository.findById(request.modelId())
                 .orElseThrow(() -> new RuntimeException("Car model not found"));
 
-        // 2. Проверяем уникальность госномера и VIN
         if (carRepository.existsByGosNumber(request.gosNumber())) {
             throw new RuntimeException("Gos number already exists");
         }
@@ -85,19 +90,33 @@ public class CarServiceImpl implements CarService {
             throw new RuntimeException("VIN already exists");
         }
 
-        // 3. Получаем статус "AVAILABLE"
+        Car car = carMapper.toEntity(request, model);
+
+        CarState state = stateRepository.findByStatus("AVAILABLE")
+                .orElseThrow(() -> new RuntimeException("Car state not found"));
+
+        car.setState(state);
+
+        return carMapper.toDetailDto(carRepository.save(car));
+    }
 
 
-        // 4. Создаём авто
-        Car car = new Car();
-        car.setModel(model);
-        car.setGosNumber(request.gosNumber());
-        car.setVin(request.vin());
-        car.setRent(request.rent());
 
-        // 5. Сохраняем
-        Car saved = carRepository.save(car);
-        return carMapper.toDetailDto(saved);
+    @Override
+    public CarDetailResponse updateCar(UpdateCarRequest request) {
+        return null;
+    }
+
+    @Override
+    public void updateCarState(Long carId, String CarStateName) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new RuntimeException("Car not found"));
+
+        CarState state = stateRepository.findByStatus(CarStateName)
+                .orElseThrow(() -> new RuntimeException("State not found"));
+
+        car.setState(state);
+        carRepository.save(car);
     }
 
 }

@@ -34,10 +34,12 @@ public class AdminContractController {
         return contractService.getContractById(contractId);
     }
 
-    @PatchMapping("/{contractId}/cancel")
+    @DeleteMapping("/{contractId}/cancel")
     public ResponseEntity<?> cancelContract(@PathVariable Long contractId) {
         contractService.cancelContract(contractId);
         return ResponseEntity.noContent().build();
     }
+
+    // todo логику подтверждения контракта
 
 }

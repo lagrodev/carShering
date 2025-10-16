@@ -2,6 +2,7 @@ package org.example.carshering.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.carshering.dto.request.ChangePasswordRequest;
 import org.example.carshering.dto.request.CreateDocumentRequest;
 import org.example.carshering.dto.request.UpdateProfileRequest;
 import org.example.carshering.dto.response.DocumentResponse;
@@ -42,6 +43,9 @@ public class UserController {
         this.clientService.updateProfile(userId, request);
         return ResponseEntity.noContent().build();
     }
+
+
+
 
     @PostMapping("/{userId}/document")
     public ResponseEntity<?> createDocument(

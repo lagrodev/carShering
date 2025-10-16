@@ -45,7 +45,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 if (!userDetails.isAccountNonLocked()) {
                     log.warn("Blocked user {} tried to access", username);
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.getWriter().write("Account is banned");
+                    response.getWriter().write("Account not found");
                     return;
                 }
 

@@ -52,7 +52,7 @@ public class ContractController {
         return contractService.findContract(contractId, userId);
     }
 
-    @PatchMapping("/{contractId}/cancel")
+    @DeleteMapping("/{contractId}/cancel")
     public ResponseEntity<?> cancelContract(
             @PathVariable Long contractId,
             Authentication auth
@@ -60,7 +60,9 @@ public class ContractController {
         Long userId = getCurrentUserId(auth);
         contractService.cancelContract(contractId, userId);
         return ResponseEntity.noContent().build();
-    }
+    } // todo логику отмены
+    // todo изменение контракта
+
 
     private Long getCurrentUserId(Authentication auth) {
         return ((ClientDetails) auth.getPrincipal()).getId();

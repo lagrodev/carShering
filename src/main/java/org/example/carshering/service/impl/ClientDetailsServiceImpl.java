@@ -36,7 +36,8 @@ public class ClientDetailsServiceImpl implements ClientDetailsService {
                 client.getPassword(),
                 client.getEmail(),
                 authorities,
-                client.isBanned()
+                client.isBanned(),
+                client.isDeleted()
         );
     }
 }

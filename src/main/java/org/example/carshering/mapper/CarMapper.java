@@ -1,9 +1,11 @@
 package org.example.carshering.mapper;
 
+import org.example.carshering.dto.request.CreateCarRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
 import org.example.carshering.dto.response.UserResponse;
 import org.example.carshering.entity.Car;
+import org.example.carshering.entity.CarModel;
 import org.example.carshering.entity.Client;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,4 +27,9 @@ public interface CarMapper {
     @Mapping(source = "model.carClass", target = "carClass")
     @Mapping(source = "model.model", target = "model")
     CarListItemResponse toListItemDto(Car car);
+
+
+    @Mapping(target = "model", source = "model")
+    @Mapping(target = "state", ignore = true)
+    Car toEntity(CreateCarRequest createCarRequest, CarModel model);
 }

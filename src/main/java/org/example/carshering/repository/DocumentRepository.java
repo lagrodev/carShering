@@ -18,4 +18,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
             "SELECT d from Document d WHERE d.verified is false"
     )
     List<Document> findByVerifiedIsFalse();
+
+    Optional<Document> findByClientIdAndDeletedFalse(Long clientId);
+    boolean existsByClientIdAndDeletedFalse(Long clientId);
 }

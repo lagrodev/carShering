@@ -17,6 +17,7 @@ public class ClientDetails implements UserDetails {
     private final String email;
     private final Collection<? extends GrantedAuthority> authorities;
     private final boolean banned;
+    private final boolean deleted;
 
     @Override
     public String getUsername() {
@@ -45,6 +46,6 @@ public class ClientDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return !banned && !deleted;
     }
 }

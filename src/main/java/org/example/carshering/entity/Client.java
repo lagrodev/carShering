@@ -30,6 +30,13 @@ public class Client {
 
     @Column(nullable = false, unique = true, name = "email" )
     private String email;
+//todo сделать, чтобы email и т.п. не были unique через
+// indexes = {
+//           @Index(name = "uk_client_login_active", columnList = "login", where = "is_deleted = false"),
+//           @Index(name = "uk_client_email_active", columnList = "email", where = "is_deleted = false")
+//       }
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean deleted = false;
 
     @Column(nullable = false)
     private String password;

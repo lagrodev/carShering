@@ -30,6 +30,8 @@ public class CarModel {
     @Column(name = "car_class")
     private String carClass;
 
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean deleted = false;
 
 
     @OneToMany(mappedBy = "model")

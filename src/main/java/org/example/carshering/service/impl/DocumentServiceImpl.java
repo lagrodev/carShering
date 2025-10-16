@@ -3,6 +3,7 @@ package org.example.carshering.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.request.CreateDocumentRequest;
+import org.example.carshering.dto.request.UpdateDocumentRequest;
 import org.example.carshering.dto.response.DocumentResponse;
 import org.example.carshering.entity.Client;
 import org.example.carshering.entity.Document;
@@ -30,7 +31,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     public DocumentResponse createDocument(CreateDocumentRequest request, Long userId) {
 
-        if (documentRepository.existsByClientId(userId)) {
+        if (documentRepository.existsByClientIdAndDeletedFalse(userId)) {
             throw new RuntimeException("Документ уже существует");
         }
 
@@ -47,20 +48,42 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public boolean hasDocument(Long userId) {
-        return documentRepository.existsByClientId(userId);
+        return documentRepository.existsByClientIdAndDeletedFalse(userId);
     }
 
     @Override
     public DocumentResponse findDocument(Long userId) {
-        Document doc = documentRepository.findByClientId(userId)
+        Document doc = documentRepository.findByClientIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new RuntimeException("Document not found for user " + clientService.getEntity(userId).getFirstName()));
 
         return documentMapper.toDto(doc);
     }
 
+    @Transactional
+    @Override
+    public DocumentResponse updateDocument(Long userId, UpdateDocumentRequest request) {
+        Document document = documentRepository.findByClientIdAndDeletedFalse(userId)
+                .orElseThrow(() -> new RuntimeException("Документ не найден"));
+
+        if (request.documentTypeId() != null) {
+            DocumentType type = documentTypeService.getById(request.documentTypeId());
+            document.setDocumentType(type);
+        }
+        if (request.series() != null) document.setSeries(request.series());
+        if (request.number() != null) document.setNumber(request.number());
+        if (request.dateOfIssue() != null) document.setDateOfIssue(request.dateOfIssue());
+        if (request.issuingAuthority() != null) document.setIssuingAuthority(request.issuingAuthority());
+
+        document.setVerified(false);
+
+        return documentMapper.toDto(documentRepository.save(document));
+    }
+
+
+
     @Override
     public void verifyDocument(Long documentId) {
-        Document doc = documentRepository.findById(documentId)
+        Document doc = documentRepository.findByClientIdAndDeletedFalse(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
         doc.setVerified(true);
         documentRepository.save(doc);
@@ -77,4 +100,15 @@ public class DocumentServiceImpl implements DocumentService {
                 .map(documentMapper::toDto)
                 .toList();
     }
+
+    @Override
+    @Transactional
+    public void deleteDocument(Long userId) {
+        Document document = documentRepository.findByClientIdAndDeletedFalse(userId)
+                .orElseThrow(() -> new RuntimeException("Документ не найден"));
+
+        document.setDeleted(true);
+        documentRepository.save(document);
+    }
+
 }

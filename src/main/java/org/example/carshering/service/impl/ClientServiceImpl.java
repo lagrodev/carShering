@@ -2,6 +2,7 @@ package org.example.carshering.service.impl;
 
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import org.example.carshering.dto.request.ChangePasswordRequest;
 import org.example.carshering.dto.request.RegistrationRequest;
 import org.example.carshering.dto.request.UpdateProfileRequest;
 import org.example.carshering.dto.response.UserResponse;
@@ -11,6 +12,7 @@ import org.example.carshering.exceptions.PasswordException;
 import org.example.carshering.exceptions.UserAlreadyExistsException;
 import org.example.carshering.mapper.ClientMapper;
 import org.example.carshering.repository.ClientRepository;
+import org.example.carshering.repository.UserRepositoryCustom;
 import org.example.carshering.service.ClientService;
 import org.example.carshering.service.RoleService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +25,7 @@ import java.util.List;
 public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository clientRepository;
+    private final UserRepositoryCustom userRepositoryCustom;
     private final ClientMapper clientMapper;
 
 
@@ -35,11 +38,18 @@ public class ClientServiceImpl implements ClientService {
     }
 
 
-
-
     @Override
     public void banUser(Long userId) {
         Client client = getEntity(userId);
+        client.setBanned(true);
+        clientRepository.save(client);
+    }
+
+    @Override
+    public void deleteUser(Long userId) {
+        Client client = clientRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        client.setDeleted(true);
         client.setBanned(true);
         clientRepository.save(client);
     }
@@ -69,11 +79,25 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    public List<UserResponse> filterUsers(Boolean banned, String roleName, String sortBy, String sortOrder) {
+        String safeSortBy = switch (sortBy) {
+            case "id", "email", "login" -> sortBy;
+            default -> "id";
+        };
+
+        List<Client> clients = clientRepository.findByFilter(banned, roleName, safeSortBy);
+
+        return clients.stream()
+                .map(clientMapper::toDto)
+                .toList();
+    }
+
+    @Override
     public UserResponse createUser(RegistrationRequest request) {
-        if (clientRepository.existByLogin(request.login())) {
+        if (clientRepository.existsByLoginAndDeletedFalse(request.login())) {
             throw new UserAlreadyExistsException("Login уже используется");
         }
-        if (clientRepository.existsByEmail(request.email())) {
+        if (clientRepository.existsByEmailAndDeletedFalse(request.email())) {
             throw new UserAlreadyExistsException("Email уже зарегистрирован");
         }
 
@@ -92,15 +116,24 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        Client client = getEntity(userId);
+
+        if (!passwordEncoder.matches(request.oldPassword(), client.getPassword())) {
+            throw new PasswordException("Неверный старый пароль");
+        }
+
+        client.setPassword(passwordEncoder.encode(request.newPassword()));
+        clientRepository.save(client);
+    }
+
+    @Override
     public void updateProfile(Long userId, UpdateProfileRequest request) {
         Client client = getEntity(userId);
 
-        if (request.newPassword() != null) {
-            validatePasswordChange(request, client);
-            client.setPassword(passwordEncoder.encode(request.newPassword()));
-        }
-
-        updateClientFields(client, request);
+        if (request.firstName() != null) client.setFirstName(request.firstName());
+        if (request.lastName() != null) client.setLastName(request.lastName());
+        if (request.phone() != null) client.setPhone(request.phone());
 
         clientRepository.save(client);
     }
@@ -108,18 +141,4 @@ public class ClientServiceImpl implements ClientService {
 
 
 
-    private void validatePasswordChange(UpdateProfileRequest request, Client client) {
-        if (request.oldPassword() == null) {
-            throw new PasswordException("Старый пароль обязателен");
-        }
-        if (!passwordEncoder.matches(request.oldPassword(), client.getPassword())) {
-            throw new PasswordException("Неверный старый пароль");
-        }
-    }
-
-    private void updateClientFields(Client client, UpdateProfileRequest request) {
-        if (request.firstName() != null) client.setFirstName(request.firstName());
-        if (request.lastName() != null) client.setLastName(request.lastName());
-        if (request.phone() != null) client.setPhone(request.phone());
-    }
 }
