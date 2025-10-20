@@ -65,14 +65,16 @@ public class DocumentServiceImpl implements DocumentService {
         Document document = documentRepository.findByClientIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new RuntimeException("Документ не найден"));
 
-        if (request.documentTypeId() != null) {
-            DocumentType type = documentTypeService.getById(request.documentTypeId());
-            document.setDocumentType(type);
-        }
-        if (request.series() != null) document.setSeries(request.series());
-        if (request.number() != null) document.setNumber(request.number());
-        if (request.dateOfIssue() != null) document.setDateOfIssue(request.dateOfIssue());
-        if (request.issuingAuthority() != null) document.setIssuingAuthority(request.issuingAuthority());
+        documentMapper.update(document,request);
+
+//        if (request.documentTypeId() != null) {
+//            DocumentType type = documentTypeService.getById(request.documentTypeId());
+//            document.setDocumentType(type);
+//        }
+//        if (request.series() != null) document.setSeries(request.series());
+//        if (request.number() != null) document.setNumber(request.number());
+//        if (request.dateOfIssue() != null) document.setDateOfIssue(request.dateOfIssue());
+//        if (request.issuingAuthority() != null) document.setIssuingAuthority(request.issuingAuthority());
 
         document.setVerified(false);
 

@@ -1,9 +1,11 @@
 package org.example.carshering.service;
 
 import org.example.carshering.dto.request.CreateCarModelRequest;
+import org.example.carshering.dto.request.FilterCarModelRequest;
+import org.example.carshering.dto.request.UpdateCarModelRequest;
 import org.example.carshering.dto.response.CarModelResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface CarModelService {
 
@@ -11,7 +13,14 @@ public interface CarModelService {
     CarModelResponse createModel(CreateCarModelRequest request);
 
 
-    List<CarModelResponse> getModels(String brand, String bodyType, String carClass);
-    List<CarModelResponse> getAllModelsIncludingDeleted(String brand, String bodyType, String carClass);
+
+
+    Page<CarModelResponse> findActiveModels(FilterCarModelRequest request,
+                                            Pageable pageable);
+
+    Page<CarModelResponse> getAllModelsIncludingDeleted(FilterCarModelRequest request,
+                                                        Pageable pageable);
     CarModelResponse getModelById(Long modelId);
+
+    CarModelResponse updateModel(Long modelId, UpdateCarModelRequest request);
 }

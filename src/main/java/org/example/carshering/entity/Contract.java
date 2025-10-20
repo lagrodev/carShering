@@ -24,6 +24,8 @@ public class Contract {
     @Column(name = "total_cost", nullable = false)
     private Double totalCost;
 
+    private String comment;
+
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
@@ -33,6 +35,7 @@ public class Contract {
     private Car car;
 
 
+// todo комментарии
 
     @ManyToOne
     @JoinColumn(name = "state_id", nullable = false)

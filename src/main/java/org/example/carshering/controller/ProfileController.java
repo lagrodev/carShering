@@ -42,8 +42,10 @@ public class ProfileController {
 
 
 
-    @PutMapping("/delete")
-    public  ResponseEntity<?> deleteProfile(Authentication auth){
+    @DeleteMapping("/delete")
+    public  ResponseEntity<?> deleteProfile(
+            Authentication auth
+    ){
         Long userId = getCurrentUserId(auth);
         clientService.deleteUser(userId);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.request.CreateContractRequest;
+import org.example.carshering.dto.request.FilterContractRequest;
 import org.example.carshering.dto.response.ContractResponse;
 import org.example.carshering.entity.Car;
 import org.example.carshering.entity.Client;
@@ -16,9 +17,12 @@ import org.example.carshering.service.ContractService;
 import org.example.carshering.service.DocumentService;
 import org.example.carshering.service.ClientService;
 import org.example.carshering.service.domain.RentalDomainService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -34,6 +38,16 @@ public class ContractServiceImpl implements ContractService {
     private final DocumentService documentService;
     private final RentalDomainService rentalDomainService;
 
+    private RentalState getStateByName(String name) {
+        return rentalStateRepository.findByName(name)
+                .orElseThrow(() -> new ValidationException("Состояние " + name + " не найдено"));
+    }
+
+    private void ensureState(Contract contract, String expectedState) {
+        if (!expectedState.equals(contract.getState().getName())) {
+            throw new IllegalStateException("Ожидался статус " + expectedState + ", но текущий: " + contract.getState().getName());
+        }
+    }
 
     @Override
     @Transactional
@@ -59,15 +73,11 @@ public class ContractServiceImpl implements ContractService {
         contract.setClient(client);
         contract.setCar(car);
         contract.setTotalCost(rentalDomainService.calculateCost(car, request.dataStart(), request.dataEnd()));
-        contract.setState(getBookedState());
+        contract.setState(getStateByName("PENDING"));
 
         return contractMapper.toDto(contractRepository.save(contract));
     }
 
-    private RentalState getBookedState() {
-        return rentalStateRepository.findByName("PENDING")// в ожидании // todo надо будет потом для удобства сделать фильтрацию по этим статусам, для админа хотя бы
-                .orElseThrow(() -> new ValidationException("PENDING статус не найден"));
-    }
 
     @Override
     public void cancelContract(Long userId, Long contractId) {
@@ -78,26 +88,83 @@ public class ContractServiceImpl implements ContractService {
             throw new ValidationException("Вы не можете отменить чужой контракт");
         }
 
-        cancelContract(contractId);
+        cancelContract(contract, false);
     }
-
     @Override
-    public void cancelContract(Long contractId) {
+    public void cancelContractByAdmin(Long contractId) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new EntityNotFoundException("Контракт не найден"));
 
-        RentalState cancelled = rentalStateRepository.findByName("CANCELLED")
-                .orElseThrow(() -> new ValidationException("Состояние CANCELLED не найдено"));
+        cancelContract(contract, true); // админская отмена
+    }
 
-        contract.setState(cancelled);
+    private void cancelContract(Contract contract, boolean isAdmin) {
+        String currentState = contract.getState().getName();
+
+        if ("CANCELLED".equals(currentState)) {
+            return; // уже отменён — ничего не делаем
+        }
+
+        if (isAdmin) {
+            if ("CLOSED".equals(currentState)) {
+                throw new IllegalStateException("Нельзя отменить завершённый контракт");
+            }
+        } else {
+            // Пользователь — только PENDING или CONFIRMED
+            if (!"PENDING".equals(currentState) && !"CONFIRMED".equals(currentState)) {
+                throw new IllegalStateException("Отмена доступна только для контрактов в статусе PENDING или CONFIRMED");
+            }
+
+            // todo логику реальной отмены: пользователь отменил, но админ должен или поджтвердить, или день старта должен быть не позже чем через 5 дней
+
+        }
+
+        contract.setState(getStateByName("CANCELLED"));
         contractRepository.save(contract);
-    } // todo логику реальной отмены: пользователь отменил, но одмин должен или поджтвердить, или день старта должен быть не позже чем через 5 дней
+    }
+//    @Override
+//    public void cancelContractByAdmin(Long contractId) {
+//        Contract contract = contractRepository.findById(contractId)
+//                .orElseThrow(() -> new EntityNotFoundException("Контракт не найден"));
+//
+//        RentalState cancelled = rentalStateRepository.findByName("CANCELLED")
+//                .orElseThrow(() -> new ValidationException("Состояние CANCELLED не найдено"));
+//
+//        RentalState closed = rentalStateRepository.findByName("CLOSED")
+//                .orElseThrow(() -> new ValidationException("Состояние CLOSED не найдено"));
+//
+//        if (!contract.getState().equals(closed)) {
+//            contract.setState(cancelled);
+//            contractRepository.save(contract);
+//        } else {
+//            throw new IllegalStateException("Отмена доступна только для контрактов в статусе PENDING или CONFIRMED");
+//        }
+//
+//    }
 
+    private void setActive(Contract contract){
+        if ("CONFIRMED".equals(contract.getState().getName()) &&
+                !contract.getDataStart().isAfter(LocalDate.now())) {
+            contract.setState(getStateByName("ACTIVE"));
+            contractRepository.save(contract);
+        }
+    }
+
+    private Contract activateIfDue(Contract contract) {
+        if ("CONFIRMED".equals(contract.getState().getName()) &&
+                !contract.getDataStart().isAfter(LocalDate.now())) {
+            contract.setState(getStateByName("ACTIVE"));
+            contractRepository.save(contract);
+        }
+        return contract;
+    }
 
     @Override
     public ContractResponse findContract(Long contractId, Long userId) {
         Contract contract = contractRepository.findByIdAndUserId(contractId, userId)
                 .orElseThrow(() -> new ValidationException("Контракт не найден"));
+        setActive(contract);
+
         return contractMapper.toDto(contract);
     }
 
@@ -105,39 +172,66 @@ public class ContractServiceImpl implements ContractService {
     public List<ContractResponse> getAllContracts(Long userId) {
         return contractRepository.findByClientId(userId)
                 .stream()
+                .map(this::activateIfDue)
                 .map(contractMapper::toDto)
                 .toList();
     }
 
     @Override
-    public List<ContractResponse> getAllContracts() {
-        return contractRepository.findAll()
-                .stream()
-                .map(contractMapper::toDto)
-                .toList();
+    public Page<ContractResponse> getAllContracts(Pageable pageable, FilterContractRequest filter) {
+        return contractRepository.findAllByFilter(
+                        filter.status(),
+                        filter.idUser(),
+                        filter.idCar(),
+                        filter.brand(),
+                        filter.bodyType(),
+                        filter.carClass(),
+                        pageable
+                )
+                .map(this::activateIfDue)
+                .map(contractMapper::toDto);
     }
 
     @Override
     public ContractResponse getContractById(Long contractId) {
-        return contractMapper.toDto(contractRepository
-                .findById(contractId)
-                .orElseThrow(() -> new ValidationException("Контракт не найден")));
+
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new ValidationException("Контракт не найден"));
+
+        setActive(contract);
+
+
+        return contractMapper.toDto(contract);
 
     }
+    // todo планировщик, чтобы раз в N минут (например, каждые 5 минут) находить контракты, у которых dataStart <= NOW и статус = CONFIRMED, и активировать их.
+
+
+
+//    @Override
+//    public void confirmContract(Long contractId) {
+//        Contract contract = contractRepository.findById(contractId)
+//                .orElseThrow(() -> new RuntimeException("Contract not found"));
+//
+//
+//        if (!"PENDING".equals(contract.getState().getName())) {
+//            throw new RuntimeException("Cannot confirm this contract");
+//        }
+//
+//        RentalState confirmed = rentalStateRepository.findByName("ACTIVE")
+//                .orElseThrow();
+//        contract.setState(confirmed);
+//        contractRepository.save(contract);
+//    }
 
     @Override
     public void confirmContract(Long contractId) {
         Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new RuntimeException("Contract not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Контракт не найден"));
 
+        ensureState(contract, "PENDING");
 
-        if (!"PENDING".equals(contract.getState().getName())) {
-            throw new RuntimeException("Cannot confirm this contract");
-        }
-
-        RentalState confirmed = rentalStateRepository.findByName("CONFIRMED")
-                .orElseThrow();
-        contract.setState(confirmed);
+        contract.setState(getStateByName("CONFIRMED"));
         contractRepository.save(contract);
     }
 

@@ -9,7 +9,7 @@ public record UpdateDocumentRequest(
         String series,
 
         String number,
-
+//todo фильтр по формату??? чтобы я мог так делать: 13.01.2006
         @PastOrPresent(message = "Дата выдачи не может быть в будущем")
         LocalDate dateOfIssue,
 

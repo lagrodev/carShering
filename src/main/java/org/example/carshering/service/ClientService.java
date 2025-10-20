@@ -1,25 +1,24 @@
 package org.example.carshering.service;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import org.example.carshering.dto.request.ChangePasswordRequest;
-import org.example.carshering.dto.request.RegistrationRequest;
+import org.example.carshering.dto.request.FilterUserRequest;
 import org.example.carshering.dto.request.RegistrationRequest;
 import org.example.carshering.dto.request.UpdateProfileRequest;
+import org.example.carshering.dto.response.AllUserResponse;
 import org.example.carshering.dto.response.UserResponse;
 import org.example.carshering.entity.Client;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ClientService {
+    AllUserResponse findAllUser(Long userId);
     UserResponse findUser(Long userId);
-    void banUser(Long userId);
+    AllUserResponse banUser(Long userId);
 
     void deleteUser(Long userId);
 
-    void unbanUser(Long userId);
+    AllUserResponse unbanUser(Long userId);
     UserResponse createUser(@Valid RegistrationRequest createUserRequest);
     Client getEntity(Long userId);
 
@@ -27,9 +26,7 @@ public interface ClientService {
 
     void updateProfile(Long userId, UpdateProfileRequest request);
 
-    List<UserResponse> getAllUsers();
+    AllUserResponse updateRole(Long userId, String roleName);
 
-    void updateRole(Long userId, String roleName);
-
-    List<UserResponse> filterUsers(Boolean banned, String roleName, String sortBy, String sortOrder);
+    Page<AllUserResponse> filterUsers(FilterUserRequest filter, Pageable pageable);
 }

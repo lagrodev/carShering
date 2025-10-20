@@ -2,24 +2,25 @@ package org.example.carshering.service.impl;
 
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.dto.request.CreateCarModelRequest;
+import org.example.carshering.dto.request.CarFilterRequest;
 import org.example.carshering.dto.request.CreateCarRequest;
 import org.example.carshering.dto.request.UpdateCarRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
-import org.example.carshering.dto.response.CarModelResponse;
 import org.example.carshering.entity.Car;
 import org.example.carshering.entity.CarModel;
 import org.example.carshering.entity.CarState;
 import org.example.carshering.mapper.CarMapper;
-import org.example.carshering.mapper.ModelMapper;
 import org.example.carshering.repository.CarModelRepository;
 import org.example.carshering.repository.CarRepository;
 import org.example.carshering.repository.CarStateRepository;
 import org.example.carshering.service.CarService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -39,12 +40,7 @@ public class CarServiceImpl implements CarService {
 
     }
 
-    @Override
-    public List<CarListItemResponse> getAllCars() {
-        return carRepository.findAll().stream()
-                .map(carMapper::toListItemDto)
-                .toList();
-    }
+
 
     @Override
     public Car getEntity(Long carId) {
@@ -66,15 +62,48 @@ public class CarServiceImpl implements CarService {
 
     }
 
-
     @Override
-    public List<CarListItemResponse> getAllValidCars() {
-        return carRepository.findValidCars().stream()
-                .map(carMapper::toListItemDto)
-                .toList();
+    public Page<CarListItemResponse> getAllValidCars(Pageable pageable, CarFilterRequest filter) {
+        validateSortProperties(pageable.getSort());
+        return carRepository.findByFilter(
+                true,
+                filter.brand(),
+                filter.model(),
+                filter.minYear(),
+                filter.maxYear(),
+                filter.bodyType(),
+                filter.carClass(),
+                pageable
+        ).map(carMapper::toListItemDto);
     }
 
 
+    @Override
+    public Page<CarListItemResponse> getAllCars(Pageable pageable, CarFilterRequest filter) {
+        validateSortProperties(pageable.getSort());
+        return carRepository.findByFilter(
+                false,
+                filter.brand(),
+                filter.model(),
+                filter.minYear(),
+                filter.maxYear(),
+                filter.bodyType(),
+                filter.carClass(),
+                pageable
+        ).map(carMapper::toListItemDto);
+    }
+
+    private void validateSortProperties(Sort sort) {
+        for (Sort.Order order : sort) {
+            if (!ALLOWED_SORT_PROPERTIES.contains(order.getProperty())) {
+                throw new IllegalArgumentException("Недопустимое поле сортировки: " + order.getProperty());
+            }
+        }
+    }
+    private static final Set<String> ALLOWED_SORT_PROPERTIES = Set.of(
+            "id", "gosNumber", "yearOfIssue", "rent",
+            "model.brand", "model.model", "model.bodyType", "model.carClass"
+    );
 
 
 
@@ -104,8 +133,15 @@ public class CarServiceImpl implements CarService {
 
 
     @Override
-    public CarDetailResponse updateCar(UpdateCarRequest request) {
-        return null;
+    public CarDetailResponse updateCar(Long carId, UpdateCarRequest request) {
+
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new RuntimeException("Car not found"));
+
+
+        carMapper.updateCar(car, request);
+
+        return carMapper.toDetailDto(carRepository.save(car));
     }
 
     @Override
@@ -118,6 +154,11 @@ public class CarServiceImpl implements CarService {
 
         car.setState(state);
         carRepository.save(car);
+    }
+
+    @Override
+    public void deleteCar(Long carId) {
+        updateCarState(carId, "UNAVAILABLE");
     }
 
 }

@@ -35,11 +35,12 @@ public class Client {
 //           @Index(name = "uk_client_login_active", columnList = "login", where = "is_deleted = false"),
 //           @Index(name = "uk_client_email_active", columnList = "email", where = "is_deleted = false")
 //       }
-    @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean deleted = false;
 
     @Column(nullable = false)
     private String password;
+
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean deleted = false;
 
     @Column(name = "is_banned", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean banned =  false;

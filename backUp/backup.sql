@@ -1618,7 +1618,6 @@ COPY car_rental.rental_state (id, name) FROM stdin;
 3	CANCELLED
 4	PENDING
 2	BOOKED
-5	CONFIRMED
 \.
 
 

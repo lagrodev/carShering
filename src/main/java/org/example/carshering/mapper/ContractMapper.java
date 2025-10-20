@@ -19,6 +19,8 @@ public interface ContractMapper {
     @Mapping(source = "car.model.bodyType", target = "bodyType")
     @Mapping(source = "car.model.carClass", target = "carClass")
     @Mapping(source = "car.yearOfIssue", target = "yearOfIssue")
+    @Mapping(source = "car.gosNumber", target = "gosNumber")
+    @Mapping(source = "car.vin", target = "vin")
     @Mapping(source = "client.firstName", target = "firstName")
     @Mapping(source = "dataStart", target = "startDate")
     @Mapping(source = "dataEnd", target = "endDate")
