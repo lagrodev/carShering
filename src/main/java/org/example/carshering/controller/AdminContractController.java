@@ -59,4 +59,10 @@ public class AdminContractController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/contracts/{id}/confirm-cancellation")
+    public ResponseEntity<Void> confirmCancellation(@PathVariable Long id) {
+        contractService.confirmCancellationByAdmin(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

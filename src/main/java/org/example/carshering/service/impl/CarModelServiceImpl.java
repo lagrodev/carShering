@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -88,5 +89,26 @@ public class CarModelServiceImpl implements CarModelService {
 
         return modelMapper.toDto(carModelRepository.save(model));
     }
+
+    @Override
+    public List<String> findAllBrands() {
+        return carModelRepository.findDistinctBrands();
+    }
+
+    @Override
+    public List<String> findAllModels() {
+        return carModelRepository.findDistinctModels();
+    }
+
+    @Override
+    public List<String> findAllClasses() {
+        return carModelRepository.findDistinctClasses();
+    }
+
+    @Override
+    public List<String> findAllBodyTypes() {
+        return carModelRepository.findDistinctBodyTypes();
+    }
+
 
 }

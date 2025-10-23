@@ -13,6 +13,7 @@ import java.util.List;
 @Table(name = "car_model", schema = "car_rental")
 @NoArgsConstructor
 @AllArgsConstructor
+// todo отделить брэнд и модель, а то это тупо, мб кар класс тоже отдельно??? хз пока, но скорее всего, да
 public class CarModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

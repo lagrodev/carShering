@@ -37,7 +37,7 @@ public class Document {
     @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean deleted = false;
 
-    @OneToOne
-    @JoinColumn(name = "client_id", nullable = false, unique = true)
+    @ManyToOne
+    @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 }

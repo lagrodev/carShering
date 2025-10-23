@@ -37,7 +37,7 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     )
     Optional<Contract> findByIdAndUserId(@Param("contractId") Long contractId, @Param("userId") Long userId);
 
-    List<Contract> findByClientId(Long userId);
+    Page<Contract> findByClientId(Long userId, Pageable pageable);
 
     @Query("""
     SELECT c FROM Contract c

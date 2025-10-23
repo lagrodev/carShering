@@ -34,7 +34,6 @@ public class UserController {
         return documentService.findDocument(userId);
     }
 
-
     @PatchMapping("/{userId}")
     public ResponseEntity<?> updateUser(
             @PathVariable Long userId,
@@ -43,9 +42,6 @@ public class UserController {
         this.clientService.updateProfile(userId, request);
         return ResponseEntity.noContent().build();
     }
-
-
-
 
     @PostMapping("/{userId}/document")
     public ResponseEntity<?> createDocument(
@@ -65,6 +61,4 @@ public class UserController {
 
         return ResponseEntity.created(location).body(document);
     }
-
-
 }

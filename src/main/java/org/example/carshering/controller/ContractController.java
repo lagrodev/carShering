@@ -3,10 +3,13 @@ package org.example.carshering.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.request.CreateContractRequest;
+import org.example.carshering.dto.request.UpdateContractRequest;
 import org.example.carshering.dto.response.ContractResponse;
 import org.example.carshering.dto.response.DocumentResponse;
 import org.example.carshering.security.ClientDetails;
 import org.example.carshering.service.ContractService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -38,9 +41,12 @@ public class ContractController {
     }
 
     @GetMapping
-    public List<ContractResponse> getAllContracts(Authentication auth) {
+    public Page<ContractResponse> getAllContracts(
+            Authentication auth,
+            Pageable pageable
+    ) {
         Long userId = getCurrentUserId(auth);
-        return contractService.getAllContracts(userId);
+        return contractService.getAllClientContracts(pageable, userId);
     }
 
     @GetMapping("/{contractId}")
@@ -62,6 +68,17 @@ public class ContractController {
         return ResponseEntity.noContent().build();
     } // todo логику отмены
     // todo изменение контракта
+
+    @PatchMapping("/{contractId}")
+    public ResponseEntity<?> updateContract(
+            @PathVariable Long contractId,
+            @Valid @RequestBody UpdateContractRequest request,
+            Authentication auth
+    ){
+        Long userId = getCurrentUserId(auth);
+        ContractResponse response = contractService.updateContract(userId, contractId, request);
+        return ResponseEntity.ok(response);
+    }
 
 
     private Long getCurrentUserId(Authentication auth) {

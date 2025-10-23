@@ -22,13 +22,13 @@ public class Client {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String login;
 
-    @Column(nullable = true, unique = true)
+    @Column(nullable = true)
     private String phone;
 
-    @Column(nullable = false, unique = true, name = "email" )
+    @Column(nullable = false, name = "email" )
     private String email;
 //todo сделать, чтобы email и т.п. не были unique через
 // indexes = {
@@ -52,6 +52,4 @@ public class Client {
     @OneToMany(mappedBy = "client")
     private List<Contract> contracts = new ArrayList<>();
 
-    @OneToOne(mappedBy = "client")
-    private Document document;
 }

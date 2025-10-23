@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/cars")
 @RestController()
@@ -46,14 +49,8 @@ public class AdminCarController {
             @RequestParam(value = "car_class", required = false) String carClass,
             @PageableDefault(size = 20, sort = "brand") Pageable pageable
     ) {
-        var filter = new CarFilterRequest(
-                brand,
-                model,
-                minYear,
-                maxYear,
-                bodyType,
-                carClass
-        );
+
+        var filter = CarController.createFilter(brand, model, minYear, maxYear, bodyType, carClass);
         return carService.getAllCars(pageable, filter);
     }
 

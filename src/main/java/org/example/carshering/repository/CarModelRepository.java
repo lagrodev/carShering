@@ -36,6 +36,16 @@ public interface CarModelRepository extends JpaRepository<CarModel, Long> {
             @Param("carClass") String carClass,
             Pageable pageable
     );
+    @Query("SELECT DISTINCT m.brand FROM CarModel m WHERE m.deleted = false AND m.brand IS NOT NULL AND m.brand != ''")
+    List<String> findDistinctBrands();
 
+    @Query("SELECT DISTINCT m.model FROM CarModel m WHERE m.deleted = false AND m.model IS NOT NULL AND m.model != ''")
+    List<String> findDistinctModels();
+
+    @Query("SELECT DISTINCT m.carClass FROM CarModel m WHERE m.deleted = false AND m.carClass IS NOT NULL AND m.carClass != ''")
+    List<String> findDistinctClasses();
+
+    @Query("SELECT DISTINCT m.bodyType FROM CarModel m WHERE m.deleted = false AND m.bodyType IS NOT NULL AND m.bodyType != ''")
+    List<String> findDistinctBodyTypes();
 
 }

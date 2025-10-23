@@ -30,45 +30,59 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
-        String username = null;
         String jwtToken = null;
+        String username = null;
+
+        // 1. Сначала пробуем взять токен из заголовка (для Postman и т.п.)
+        String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwtToken = authHeader.substring(7);
+        }
+
+        // 2. Если в заголовке нет — ищем в cookie
+        if (jwtToken == null) {
+            jakarta.servlet.http.Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (jakarta.servlet.http.Cookie cookie : cookies) {
+                    if ("access_token".equals(cookie.getName())) {
+                        jwtToken = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (jwtToken != null) {
             try {
-
                 username = jwtTokenUtils.getUsernameFromToken(jwtToken);
-
-
                 ClientDetails userDetails = (ClientDetails) clientDetailsService.loadUserByUsername(username);
 
                 if (!userDetails.isAccountNonLocked()) {
                     log.warn("Blocked user {} tried to access", username);
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.getWriter().write("Account not found");
+                    response.getWriter().write("Account locked");
                     return;
                 }
 
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                    List<SimpleGrantedAuthority> authorities = jwtTokenUtils.getAuthoritiesFromToken(jwtToken);
+                    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            authorities
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(token);
+                }
+
             } catch (ExpiredJwtException e) {
-                log.debug("Время токена вышло");
+                log.debug("JWT token expired");
             } catch (SignatureException e) {
-                log.debug("Подпись неправильная");
+                log.debug("Invalid JWT signature");
             } catch (Exception e) {
-                log.debug("Невалидный токен");
+                log.debug("Invalid JWT token");
             }
-
         }
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            List<SimpleGrantedAuthority> authorities = jwtTokenUtils.getAuthoritiesFromToken(jwtToken);
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                    clientDetailsService.loadUserByUsername(username),
-                    null,
-                    authorities
-            );
 
-            SecurityContextHolder.getContext().setAuthentication(token);
-
-        }
         filterChain.doFilter(request, response);
     }
 }

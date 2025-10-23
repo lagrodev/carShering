@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -63,35 +64,49 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public Page<CarListItemResponse> getAllValidCars(Pageable pageable, CarFilterRequest filter) {
-        validateSortProperties(pageable.getSort());
-        return carRepository.findByFilter(
-                true,
-                filter.brand(),
-                filter.model(),
-                filter.minYear(),
-                filter.maxYear(),
-                filter.bodyType(),
-                filter.carClass(),
-                pageable
-        ).map(carMapper::toListItemDto);
-    }
-
-
-    @Override
     public Page<CarListItemResponse> getAllCars(Pageable pageable, CarFilterRequest filter) {
         validateSortProperties(pageable.getSort());
+
+        List<String> brands = isEmpty(filter.brands()) ? null : filter.brands();
+        List<String> models = isEmpty(filter.models()) ? null : filter.models();
+        List<String> carClasses = isEmpty(filter.carClasses()) ? null : filter.carClasses();
+
         return carRepository.findByFilter(
                 false,
-                filter.brand(),
-                filter.model(),
+                brands,
+                models,
                 filter.minYear(),
                 filter.maxYear(),
                 filter.bodyType(),
-                filter.carClass(),
+                carClasses,
                 pageable
         ).map(carMapper::toListItemDto);
     }
+
+    @Override
+    public Page<CarListItemResponse> getAllValidCars(Pageable pageable, CarFilterRequest filter) {
+        validateSortProperties(pageable.getSort());
+
+        List<String> brands = isEmpty(filter.brands()) ? null : filter.brands();
+        List<String> models = isEmpty(filter.models()) ? null : filter.models();
+        List<String> carClasses = isEmpty(filter.carClasses()) ? null : filter.carClasses();
+
+        return carRepository.findByFilter(
+                true,
+                brands,
+                models,
+                filter.minYear(),
+                filter.maxYear(),
+                filter.bodyType(),
+                carClasses,
+                pageable
+        ).map(carMapper::toListItemDto);
+    }
+
+    private boolean isEmpty(List<?> list) {
+        return list == null || list.isEmpty();
+    }
+
 
     private void validateSortProperties(Sort sort) {
         for (Sort.Order order : sort) {

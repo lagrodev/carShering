@@ -7,6 +7,8 @@ import org.example.carshering.dto.response.CarModelResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface CarModelService {
 
     void deleteModel(Long modelId);
@@ -23,4 +25,12 @@ public interface CarModelService {
     CarModelResponse getModelById(Long modelId);
 
     CarModelResponse updateModel(Long modelId, UpdateCarModelRequest request);
+
+    List<String> findAllClasses();
+
+    List<String> findAllBodyTypes();
+
+    List<String> findAllModels();
+
+    List<String> findAllBrands();
 }

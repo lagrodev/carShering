@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -21,9 +22,24 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("api/car")
 public class CarController {
-// todo фильтр по модели
+    // todo фильтр по модели
     private final CarService carService;
     private final CarModelService carModelService;
+
+    static CarFilterRequest createFilter(@RequestParam(value = "brand", required = false) String brand, @RequestParam(value = "model", required = false) String model, @RequestParam(value = "minYear", required = false) Integer minYear, @RequestParam(value = "maxYear", required = false) Integer maxYear, @RequestParam(value = "body_type", required = false) String bodyType, @RequestParam(value = "car_class", required = false) String carClass) {
+        List<String> brands = brand != null ? Arrays.asList(brand.split(",")) : List.of();
+        List<String> models = model != null ? Arrays.asList(model.split(",")) : List.of();
+        List<String> carClasses = carClass != null ? Arrays.asList(carClass.split(",")) : List.of();
+
+        return new CarFilterRequest(
+                brands,
+                models,
+                minYear,
+                maxYear,
+                bodyType,
+                carClasses
+        );
+    }
 
     @GetMapping("/catalogue")
     public Page<CarListItemResponse> getCatalogue(
@@ -33,16 +49,11 @@ public class CarController {
             @RequestParam(value = "maxYear", required = false) Integer maxYear,
             @RequestParam(value = "body_type", required = false) String bodyType,
             @RequestParam(value = "car_class", required = false) String carClass,
-            @PageableDefault(size = 20, sort = "brand") Pageable pageable
+            @PageableDefault(size = 20, sort = "model.brand") Pageable pageable
     ) {
-        var filter = new CarFilterRequest(
-                brand,
-                model,
-                minYear,
-                maxYear,
-                bodyType,
-                carClass
-        );
+
+
+        var filter = createFilter(brand, model, minYear, maxYear, bodyType, carClass);
         return carService.getAllValidCars(pageable, filter);
     }
 
@@ -71,6 +82,25 @@ public class CarController {
         );
     }
 
+    @GetMapping("/filters/brands")
+    public List<String> getBrands() {
+        return carModelService.findAllBrands();
+    }
+
+    @GetMapping("/filters/models")
+    public List<String> getModels() {
+        return carModelService.findAllModels();
+    }
+
+    @GetMapping("/filters/classes")
+    public List<String> getClasses() {
+        return carModelService.findAllClasses();
+    }
+
+    @GetMapping("/filters/body-types")
+    public List<String> getBodyTypes() {
+        return carModelService.findAllBodyTypes();
+    }
 
 
 }

@@ -7,7 +7,7 @@ spring:
 
     jpa:
         hibernate:
-            ddl-auto: update
+            ddl-auto: validate
         show-sql: true
         properties:
             hibernate:
@@ -24,11 +24,18 @@ spring:
         database-type: postgresql
     data:
       web:
+        cors:
+          allowed-origins: "http://localhost:5176"
+          allowed-methods: "*"
+          allowed-headers: "*"
+          allow-credentials: true
+
         pageable:
           default-page-size: 20
           max-page-size: 100
 server:
     port: 8082
+    address: 0.0.0.0
 jwt:
     secret: 30i450583jdefk#23545ddG&Eshr3%aer567tlaeFS*Dj{ko3490yU8Yrik
     lifetime: 30m

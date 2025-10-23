@@ -1,18 +1,17 @@
 package org.example.carshering.mapper;
 
 import org.example.carshering.dto.request.CreateContractRequest;
+import org.example.carshering.dto.request.UpdateContractRequest;
 import org.example.carshering.dto.response.ContractResponse;
 import org.example.carshering.entity.Contract;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
+import org.mapstruct.*;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface ContractMapper {
+public abstract class ContractMapper {
 
 
 
-    Contract toEntity(CreateContractRequest request);
+    public abstract Contract toEntity(CreateContractRequest request);
 
     @Mapping(source = "car.model.brand", target = "brand")
     @Mapping(source = "car.model.model", target = "model")
@@ -24,6 +23,10 @@ public interface ContractMapper {
     @Mapping(source = "client.firstName", target = "firstName")
     @Mapping(source = "dataStart", target = "startDate")
     @Mapping(source = "dataEnd", target = "endDate")
-    ContractResponse toDto(Contract contract);
+    public abstract ContractResponse toDto(Contract contract);
 
-}
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    public abstract void updateContractFromRequest(
+            UpdateContractRequest request,
+            @MappingTarget Contract contract
+    );}
