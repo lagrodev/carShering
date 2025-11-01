@@ -2,6 +2,7 @@ package org.example.carshering.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,23 +14,27 @@ import java.util.List;
 @Table(name = "car_model", schema = "car_rental")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 // todo отделить брэнд и модель, а то это тупо, мб кар класс тоже отдельно??? хз пока, но скорее всего, да
 public class CarModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idModel;
 
-    @Column(nullable = false)
-    private String brand;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id", nullable = false)
+    private Brand brand;
 
-    @Column(nullable = false)
-    private String model;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "model_id", nullable = false)
+    private Model model;
 
     @Column(name = "body_type")
     private String bodyType;
 
-    @Column(name = "car_class")
-    private String carClass;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "car_class_id")
+    private CarClass carClass;
 
     @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean deleted = false;
@@ -37,6 +42,5 @@ public class CarModel {
 
     @OneToMany(mappedBy = "model")
     private List<Car> cars = new ArrayList<>();;
-
 
 }

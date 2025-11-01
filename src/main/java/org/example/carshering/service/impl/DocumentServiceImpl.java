@@ -2,8 +2,8 @@ package org.example.carshering.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.dto.request.CreateDocumentRequest;
-import org.example.carshering.dto.request.UpdateDocumentRequest;
+import org.example.carshering.dto.request.create.CreateDocumentRequest;
+import org.example.carshering.dto.request.update.UpdateDocumentRequest;
 import org.example.carshering.dto.response.DocumentResponse;
 import org.example.carshering.entity.Client;
 import org.example.carshering.entity.Document;
@@ -53,10 +53,9 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentResponse findDocument(Long userId) {
-        Document doc = documentRepository.findByClientIdAndDeletedFalse(userId)
-                .orElseThrow(() -> new RuntimeException("Document not found for user " + clientService.getEntity(userId).getFirstName()));
-
-        return documentMapper.toDto(doc);
+        return documentRepository.findByClientIdAndDeletedFalse(userId)
+                .map(documentMapper::toDto)
+                .orElse(null);
     }
 
     @Transactional

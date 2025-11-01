@@ -6,5 +6,6 @@ public record CarListItemResponse(
         String carClass,     // думаю, по нему делать фильтр... в голове пиздатая идея, но пиздец, по идеи, сложно @_@
         String model,
         Integer yearOfIssue,
-        Double rent
+        Double rent,
+        String status
 ) {}

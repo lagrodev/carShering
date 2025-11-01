@@ -1,14 +1,11 @@
 package org.example.carshering.service;
 
-import jakarta.validation.Valid;
-import org.example.carshering.dto.request.CreateContractRequest;
+import org.example.carshering.dto.request.create.CreateContractRequest;
 import org.example.carshering.dto.request.FilterContractRequest;
-import org.example.carshering.dto.request.UpdateContractRequest;
+import org.example.carshering.dto.request.update.UpdateContractRequest;
 import org.example.carshering.dto.response.ContractResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 public interface ContractService {
 

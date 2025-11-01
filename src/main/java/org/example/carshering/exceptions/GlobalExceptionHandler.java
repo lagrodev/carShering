@@ -1,5 +1,6 @@
 package org.example.carshering.exceptions;
 
+import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -12,6 +13,13 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleLocked(ValidationException ex) {
+        ErrorResponse error = new ErrorResponse("ValidationException", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleUserExists(UserAlreadyExistsException ex) {
@@ -45,4 +53,6 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse("ACCOUNT_LOCKED", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
+
+
 }

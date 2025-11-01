@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,4 +47,5 @@ public class Car {
     @OneToMany(mappedBy = "car")
     private List<Contract> contracts = new ArrayList<>();;
 
+    // TODO: @CreateDate @UpdateDate
 }

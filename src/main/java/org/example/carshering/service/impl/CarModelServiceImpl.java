@@ -2,13 +2,26 @@ package org.example.carshering.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.dto.request.CreateCarModelRequest;
+import org.example.carshering.dto.request.create.CreateCarModelName;
+import org.example.carshering.dto.request.create.CreateCarModelRequest;
 import org.example.carshering.dto.request.FilterCarModelRequest;
-import org.example.carshering.dto.request.UpdateCarModelRequest;
+import org.example.carshering.dto.request.create.CreateCarModelsBrand;
+import org.example.carshering.dto.request.update.UpdateCarModelRequest;
+import org.example.carshering.dto.response.BrandModelResponse;
 import org.example.carshering.dto.response.CarModelResponse;
+import org.example.carshering.dto.response.ModelNameResponse;
+import org.example.carshering.entity.Brand;
+import org.example.carshering.entity.CarClass;
 import org.example.carshering.entity.CarModel;
+import org.example.carshering.entity.Model;
+import org.example.carshering.mapper.BrandMapper;
+import org.example.carshering.mapper.CarClassMapper;
 import org.example.carshering.mapper.ModelMapper;
+import org.example.carshering.mapper.ModelNameMapper;
+import org.example.carshering.repository.BrandRepository;
+import org.example.carshering.repository.CarClassRepository;
 import org.example.carshering.repository.CarModelRepository;
+import org.example.carshering.repository.ModelNameRepository;
 import org.example.carshering.service.CarModelService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,13 +41,19 @@ public class CarModelServiceImpl implements CarModelService {
     );
     private final ModelMapper modelMapper;
     private final CarModelRepository carModelRepository;
+    private final BrandMapper brandMapper;
+    private final BrandRepository carBrandRepository;
+    private final ModelNameMapper modelNameMapper;
+    private final CarClassMapper carClassMapper;
+    private final ModelNameRepository modelNameRepository;
+    private final CarClassRepository carClassRepository;
 
     @Override
     @Transactional
     public void deleteModel(Long modelId) {
         CarModel model = carModelRepository.findByIdAndDeletedFalse(modelId)
                 .orElseThrow(() -> new RuntimeException("Модель не найдена"));
-
+        // todo пройтись по амшинам и удалить их если у меня model удалена
         model.setDeleted(true);
         carModelRepository.save(model);
     }
@@ -81,7 +100,8 @@ public class CarModelServiceImpl implements CarModelService {
 
     @Override
     public CarModelResponse updateModel(Long modelId, UpdateCarModelRequest request) {
-        CarModel model = carModelRepository.findByIdAndDeletedFalse(modelId)
+
+        CarModel model = carModelRepository.findById(modelId)
                 .orElseThrow(() -> new EntityNotFoundException("Model not found"));
 
 
@@ -90,21 +110,54 @@ public class CarModelServiceImpl implements CarModelService {
         return modelMapper.toDto(carModelRepository.save(model));
     }
 
+
+
     @Override
-    public List<String> findAllBrands() {
-        return carModelRepository.findDistinctBrands();
+    public BrandModelResponse createBrands(CreateCarModelsBrand request) {
+
+        Brand saved = carBrandRepository.save(brandMapper.toEntity(request));
+
+        return brandMapper.toDto(saved);
+
     }
 
     @Override
+    public ModelNameResponse createModelName(CreateCarModelName request) {
+        Model saved = modelNameRepository.save(modelNameMapper.toEntity(request));
+
+        return modelNameMapper.toDto(saved);
+    }
+
+    @Override
+    public ModelNameResponse createCarClass(CreateCarModelName request) {
+
+        CarClass saved = carClassRepository.save(carClassMapper.toEntity(request));
+
+        return carClassMapper.toDto(saved);
+    }
+
+
+    @Override
     public List<String> findAllModels() {
-        return carModelRepository.findDistinctModels();
+        return modelNameRepository.findAll()
+                .stream()
+                .map(Model::getName)
+                .toList();
     }
 
     @Override
     public List<String> findAllClasses() {
-        return carModelRepository.findDistinctClasses();
+        return carClassRepository.findAll()
+                .stream()
+                .map(CarClass::getName)
+                .toList();
     }
-
+    @Override
+    public List<String> findAllBrands() {
+        return carBrandRepository.findAll().stream()
+                .map(Brand::getName)
+                .toList();
+    }
     @Override
     public List<String> findAllBodyTypes() {
         return carModelRepository.findDistinctBodyTypes();

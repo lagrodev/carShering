@@ -15,11 +15,12 @@ public record ContractResponse(
         @NotNull String bodyType,
         @NotNull String carClass,
         @NotNull Integer yearOfIssue,
-        @NotNull String firstName,
+        @NotNull String lastName,
         @Future @NotNull LocalDate startDate,
         @Future @NotNull @After("startDate") LocalDate endDate,
         @NotBlank String vin,
-        @NotBlank String gosNumber
+        @NotBlank String gosNumber,
+        @NotNull String state
 
 ) {
 }

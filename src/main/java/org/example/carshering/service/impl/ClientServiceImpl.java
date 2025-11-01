@@ -5,8 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.request.ChangePasswordRequest;
 import org.example.carshering.dto.request.FilterUserRequest;
 import org.example.carshering.dto.request.RegistrationRequest;
-import org.example.carshering.dto.request.UpdateProfileRequest;
+import org.example.carshering.dto.request.update.UpdateProfileRequest;
 import org.example.carshering.dto.response.AllUserResponse;
+import org.example.carshering.dto.response.ShortUserResponse;
 import org.example.carshering.dto.response.UserResponse;
 import org.example.carshering.entity.Client;
 import org.example.carshering.entity.Role;
@@ -14,7 +15,6 @@ import org.example.carshering.exceptions.PasswordException;
 import org.example.carshering.exceptions.UserAlreadyExistsException;
 import org.example.carshering.mapper.ClientMapper;
 import org.example.carshering.repository.ClientRepository;
-import org.example.carshering.repository.UserRepositoryCustom;
 import org.example.carshering.service.ClientService;
 import org.example.carshering.service.RoleService;
 import org.springframework.data.domain.Page;
@@ -43,7 +43,8 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public UserResponse findUser(Long userId) {
-        return clientMapper.toDto(getEntity(userId));
+        return clientMapper.toDto(clientRepository.findById(userId)
+                .orElse(null));
     }
 
 
@@ -87,7 +88,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Page<AllUserResponse> filterUsers(FilterUserRequest filter, Pageable pageable) {
+    public Page<ShortUserResponse> filterUsers(FilterUserRequest filter, Pageable pageable) {
 
         var availableBySort = Set.of("id", "email", "login");
 
@@ -101,7 +102,8 @@ public class ClientServiceImpl implements ClientService {
 
 
 
-        return clientRepository.findByFilter(filter.banned(), filter.roleName(), pageable).map(clientMapper::toDtoForAdmin);
+        return clientRepository.findByFilter(filter.banned(), filter.roleName(), pageable)
+                .map(clientMapper::toShortDtoForAdmin);
     }
 
     @Override
@@ -116,7 +118,7 @@ public class ClientServiceImpl implements ClientService {
         Client client = clientMapper.toEntity(request);
         client.setPassword(passwordEncoder.encode(client.getPassword()));
 
-        client.setRole(roleService.getRoleByName("USER"));
+        client.setRole(roleService.getRoleByName("CLIENT"));
 
         return clientMapper.toDto(clientRepository.save(client));
     }
@@ -145,9 +147,15 @@ public class ClientServiceImpl implements ClientService {
 
         if (request.firstName() != null) client.setFirstName(request.firstName());
         if (request.lastName() != null) client.setLastName(request.lastName());
-        if (request.phone() != null) client.setPhone(request.phone());
+        if (request.phone() != null) {
+            if (!clientRepository.existsByPhoneAndIdNot(request.phone(), userId)){
+                client.setPhone(request.phone());
+            } else throw new ValidationException("Данный телефон закреплен за другим аккаунтом");
+        }
+
 
         clientRepository.save(client);
+
     }
 
 

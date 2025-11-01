@@ -9,6 +9,7 @@ public record CarFilterRequest(
         Integer minYear,
         Integer maxYear,
         String bodyType,
-        List<String> carClasses
+        List<String> carClasses,
+        List<String> carState
 ) {
 }

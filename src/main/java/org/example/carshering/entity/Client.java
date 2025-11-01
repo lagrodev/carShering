@@ -8,9 +8,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "client", schema = "car_rental")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "contracts")
 public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

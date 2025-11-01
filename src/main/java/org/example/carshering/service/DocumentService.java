@@ -1,12 +1,9 @@
 package org.example.carshering.service;
 
 import jakarta.validation.Valid;
-import org.example.carshering.dto.request.CreateDocumentRequest;
-import org.example.carshering.dto.request.RegistrationRequest;
-import org.example.carshering.dto.request.UpdateDocumentRequest;
+import org.example.carshering.dto.request.create.CreateDocumentRequest;
+import org.example.carshering.dto.request.update.UpdateDocumentRequest;
 import org.example.carshering.dto.response.DocumentResponse;
-import org.example.carshering.dto.response.UserResponse;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

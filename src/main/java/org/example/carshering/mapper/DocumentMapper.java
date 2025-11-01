@@ -1,7 +1,7 @@
 package org.example.carshering.mapper;
 
-import org.example.carshering.dto.request.CreateDocumentRequest;
-import org.example.carshering.dto.request.UpdateDocumentRequest;
+import org.example.carshering.dto.request.create.CreateDocumentRequest;
+import org.example.carshering.dto.request.update.UpdateDocumentRequest;
 import org.example.carshering.dto.response.DocumentResponse;
 import org.example.carshering.entity.Document;
 import org.example.carshering.entity.DocumentType;

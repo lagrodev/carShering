@@ -1,7 +1,7 @@
 package org.example.carshering.mapper;
 
-import org.example.carshering.dto.request.CreateCarRequest;
-import org.example.carshering.dto.request.UpdateCarRequest;
+import org.example.carshering.dto.request.create.CreateCarRequest;
+import org.example.carshering.dto.request.update.UpdateCarRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
 import org.example.carshering.entity.Car;
@@ -11,38 +11,43 @@ import org.mapstruct.*;
 import org.mapstruct.MappingConstants.ComponentModel;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 @Mapper(componentModel = ComponentModel.SPRING)
 public abstract class CarMapper {
-
+    //todo убрать @Autowired - он ненадежный. + убрать CarModelRepository в принципе из маппера
     @Autowired
     protected CarModelRepository carModelRepository;
 
-    @Mapping(source = "model.brand", target = "brand")
-    @Mapping(source = "model.model", target = "model")
+
+    @Mapping(source = "model.brand.name", target = "brand")
+    @Mapping(source = "model.model.name", target = "model")
     @Mapping(source = "model.bodyType", target = "bodyType")
-    @Mapping(source = "model.carClass", target = "carClass")
+    @Mapping(source = "model.idModel", target = "modelId")
+    @Mapping(source = "model.carClass.name", target = "carClass")
     @Mapping(source = "state.status", target = "status")
     public abstract CarDetailResponse toDetailDto(Car car);
 
-    @Mapping(source = "model.brand", target = "brand")
-    @Mapping(source = "model.carClass", target = "carClass")
-    @Mapping(source = "model.model", target = "model")
+    @Mapping(source = "model.brand.name", target = "brand")
+    @Mapping(source = "model.model.name", target = "model")
+    @Mapping(source = "model.carClass.name", target = "carClass")
+    @Mapping(source = "state.status", target = "status")
     public abstract CarListItemResponse toListItemDto(Car car);
 
-    @Mapping(target = "model", source = "model")
+
+    @Mapping(target = "model", source = "modelId")
     @Mapping(target = "state", ignore = true)
-    public abstract Car toEntity(CreateCarRequest createCarRequest, CarModel model);
+    public abstract Car toEntity(CreateCarRequest request);
+
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "model", ignore = true)
     public abstract void updateCar(@MappingTarget Car car, UpdateCarRequest request);
 
-    protected CarModel carModelIdToCarModel(Long carModelId) {
-        if (carModelId == null) {
+
+    protected CarModel carModelIdToCarModel(Long modelId) {
+        if (modelId == null) {
             return null;
         }
-        return carModelRepository.findById(carModelId)
-                .orElseThrow(() -> new IllegalArgumentException("CarModel not found: " + carModelId));
+        return carModelRepository.findById(modelId)
+                .orElseThrow(() -> new IllegalArgumentException("CarModel not found with id: " + modelId));
     }
-
 }

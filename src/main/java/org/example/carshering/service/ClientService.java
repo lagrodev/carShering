@@ -4,8 +4,9 @@ import jakarta.validation.Valid;
 import org.example.carshering.dto.request.ChangePasswordRequest;
 import org.example.carshering.dto.request.FilterUserRequest;
 import org.example.carshering.dto.request.RegistrationRequest;
-import org.example.carshering.dto.request.UpdateProfileRequest;
+import org.example.carshering.dto.request.update.UpdateProfileRequest;
 import org.example.carshering.dto.response.AllUserResponse;
+import org.example.carshering.dto.response.ShortUserResponse;
 import org.example.carshering.dto.response.UserResponse;
 import org.example.carshering.entity.Client;
 import org.springframework.data.domain.Page;
@@ -28,5 +29,5 @@ public interface ClientService {
 
     AllUserResponse updateRole(Long userId, String roleName);
 
-    Page<AllUserResponse> filterUsers(FilterUserRequest filter, Pageable pageable);
+    Page<ShortUserResponse> filterUsers(FilterUserRequest filter, Pageable pageable);
 }

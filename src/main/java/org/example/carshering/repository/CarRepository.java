@@ -17,23 +17,26 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     @Query("""
     SELECT c FROM Car c
-    JOIN c.model m
-    WHERE (:onlyAvailable = false OR c.state.status = 'AVAILABLE')
-      AND (:brands IS NULL OR m.brand IN :brands)
-      AND (:models IS NULL OR m.model IN :models)
+    JOIN c.model cm
+    JOIN cm.brand b
+    JOIN cm.model m
+    LEFT JOIN cm.carClass cc
+    WHERE (:carStates IS NULL OR c.state.status IN :carStates)
+      AND (:brands IS NULL OR b.name IN :brands)
+      AND (:models IS NULL OR m.name IN :models)
       AND (:minYear IS NULL OR c.yearOfIssue >= :minYear)
       AND (:maxYear IS NULL OR c.yearOfIssue <= :maxYear)
-      AND (:bodyType IS NULL OR m.bodyType = :bodyType)
-      AND (:carClasses IS NULL OR m.carClass IN :carClasses)
+      AND (:bodyType IS NULL OR cm.bodyType = :bodyType)
+      AND (:carClasses IS NULL OR cc.name IN :carClasses)
     """)
     Page<Car> findByFilter(
-            @Param("onlyAvailable") boolean onlyAvailable,
             @Param("brands") List<String> brands,
             @Param("models") List<String> models,
             @Param("minYear") Integer minYear,
             @Param("maxYear") Integer maxYear,
             @Param("bodyType") String bodyType,
             @Param("carClasses") List<String> carClasses,
+            @Param("carStates") List<String> carStates,
             Pageable pageable
     );
 

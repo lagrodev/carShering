@@ -55,14 +55,18 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        // TODO: https://habr.com/ru/companies/otus/articles/557798/
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // Публичные эндпоинты
                         .requestMatchers("/api/car/**").permitAll()
+                        .requestMatchers("/api/filters/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/registration").permitAll()
+                        .requestMatchers("/api/logout").permitAll()
+                        .requestMatchers("/api/profile/me").permitAll()
 
                         // Админка — только для ADMIN
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "MANAGER")

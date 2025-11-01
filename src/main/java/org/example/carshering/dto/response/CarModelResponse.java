@@ -1,7 +1,9 @@
 package org.example.carshering.dto.response;
 
 public record CarModelResponse(
-        String brand,
+
+        Long modelId
+        ,String brand,
 
         String model,
 

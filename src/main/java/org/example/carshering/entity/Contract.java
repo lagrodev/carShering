@@ -7,9 +7,11 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "contract", schema = "car_rental")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "client")
 public class Contract {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

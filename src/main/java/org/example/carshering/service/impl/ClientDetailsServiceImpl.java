@@ -24,9 +24,13 @@ public class ClientDetailsServiceImpl implements ClientDetailsService {
     @Transactional
     public ClientDetails loadUserByUsername(String username) {
 
+        System.out.println("loadUserByUsername");
+
         Client client = clientRepository.getClientByLogin(username)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         String.format("Пользователь '%s' не найден", username)));
+
+        System.out.println("client" + client);
 
         Collection<? extends GrantedAuthority> authorities =
                 List.of(new SimpleGrantedAuthority("ROLE_" + client.getRole().getName()));
