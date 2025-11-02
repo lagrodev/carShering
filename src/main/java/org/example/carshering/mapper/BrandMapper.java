@@ -11,7 +11,6 @@ import org.example.carshering.entity.CarModel;
 import org.example.carshering.entity.Model;
 import org.example.carshering.repository.BrandRepository;
 import org.example.carshering.repository.CarClassRepository;
-import org.example.carshering.repository.ModelRepository;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 

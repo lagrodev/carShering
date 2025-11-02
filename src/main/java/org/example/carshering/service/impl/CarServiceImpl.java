@@ -131,7 +131,7 @@ public class CarServiceImpl implements CarService {
 
         Car car = carMapper.toEntity(request);
 
-        CarState state = stateRepository.findByStatus("AVAILABLE")
+        CarState state = stateRepository.findByStatusIgnoreCase("AVAILABLE")
                 .orElseThrow(() -> new RuntimeException("Car state not found"));
 
         car.setState(state);
@@ -146,6 +146,13 @@ public class CarServiceImpl implements CarService {
 
         Car car = carRepository.findById(carId)
                 .orElseThrow(() -> new RuntimeException("Car not found"));
+
+        if (carRepository.existsByGosNumber(request.gosNumber())) {
+            throw new RuntimeException("Gos number already exists");
+        }
+        if (carRepository.existsByVin(request.vin())) {
+            throw new RuntimeException("VIN already exists");
+        }
 
 
         carMapper.updateCar(car, request);
@@ -169,7 +176,7 @@ public class CarServiceImpl implements CarService {
         Car car = carRepository.findById(carId)
                 .orElseThrow(() -> new RuntimeException("Car not found"));
 
-        CarState state = stateRepository.findByStatus(CarStateName)
+        CarState state = stateRepository.findByStatusIgnoreCase(CarStateName)
                 .orElseThrow(() -> new RuntimeException("State not found"));
 
         car.setState(state);

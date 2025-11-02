@@ -12,22 +12,17 @@ import java.util.List;
 import java.util.Optional;
 
 
-// todo пагинацию добавить
-// todo сделать поиск по подстроке
+
 @Repository
 public interface CarModelRepository extends JpaRepository<CarModel, Long> {
-    List<CarModel> findAllByDeletedFalse();
 
-
-    @Query("SELECT c FROM CarModel c WHERE c.idModel = :id AND c.deleted = false")
-    Optional<CarModel> findByIdAndDeletedFalse(@Param("id") Long id);
 
     @Query("""
     SELECT m FROM CarModel m
     WHERE (:includeDeleted IS TRUE OR m.deleted = false)
-      AND (:brand IS NULL OR LOWER(m.brand.name) LIKE LOWER(CONCAT('%', CAST(:brand AS text), '%')))
-      AND (:bodyType IS NULL OR LOWER(m.bodyType) LIKE LOWER(CONCAT('%', CAST(:bodyType AS text), '%')))
-      AND (:carClass IS NULL OR LOWER(m.carClass.name) LIKE LOWER(CONCAT('%', CAST(:carClass AS text), '%')))
+      AND ((:brand IS NULL OR :brand = '') OR LOWER(m.brand.name) LIKE LOWER(CONCAT('%', :brand, '%')))
+      AND ((:bodyType IS NULL OR :bodyType = '') OR LOWER(m.bodyType) LIKE LOWER(CONCAT('%', :bodyType, '%')))
+      AND ((:carClass IS NULL OR :carClass = '') OR LOWER(m.carClass.name) LIKE LOWER(CONCAT('%', :carClass, '%')))
     """)
     Page<CarModel> findModelsByFilter(
             @Param("includeDeleted") boolean includeDeleted,
@@ -36,16 +31,12 @@ public interface CarModelRepository extends JpaRepository<CarModel, Long> {
             @Param("carClass") String carClass,
             Pageable pageable
     );
-    @Query("SELECT DISTINCT m.brand.name FROM CarModel m WHERE m.deleted = false AND m.brand.name IS NOT NULL AND m.brand.name != ''")
-    List<String> findDistinctBrands();
 
-    @Query("SELECT DISTINCT m.model.name FROM CarModel m WHERE m.deleted = false AND m.model.name IS NOT NULL AND m.model.name != ''")
-    List<String> findDistinctModels();
-
-    @Query("SELECT DISTINCT m.carClass.name FROM CarModel m WHERE m.deleted = false AND m.carClass.name IS NOT NULL AND m.carClass.name != ''")
-    List<String> findDistinctClasses();
 
     @Query("SELECT DISTINCT m.bodyType FROM CarModel m WHERE m.deleted = false AND m.bodyType IS NOT NULL AND m.bodyType != ''")
     List<String> findDistinctBodyTypes();
+
+    @Query("SELECT c FROM CarModel c WHERE c.idModel = :id AND c.deleted = false")
+    Optional<CarModel> findByIdAndDeletedFalse(@Param("id") Long id);
 
 }

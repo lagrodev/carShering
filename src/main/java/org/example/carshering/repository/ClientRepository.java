@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
 
-    @Query(value = "Select count(c) > 0 from car_rental.client c where c.login = :login", nativeQuery = true)
+    @Query(value = "Select count(c) > 0 from Client c where c.login = :login")
     boolean existByLogin(@Param("login") String login);
 
     boolean existsByLoginAndDeletedFalse(String login);
@@ -45,8 +45,7 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
 
     @Query("""
-SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Client c WHERE c.phone = :phone and c.deleted = false and c.id != :id
-""")
-
+            SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Client c WHERE c.phone = :phone and c.deleted = false and c.id != :id
+            """)
     boolean existsByPhoneAndIdNot(String phone, Long id);
 }

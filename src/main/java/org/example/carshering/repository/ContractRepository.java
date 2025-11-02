@@ -46,9 +46,9 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     WHERE (:status IS NULL OR c.state.name = :status)
       AND (:idUser IS NULL OR c.client.id = :idUser)
       AND (:idCar IS NULL OR c.car.id = :idCar)
-      AND (:brand IS NULL OR model.brand = :brand)
+      AND (:brand IS NULL OR model.brand.name = :brand)
       AND (:bodyType IS NULL OR model.bodyType = :bodyType)
-      AND (:carClass IS NULL OR model.carClass = :carClass)
+      AND (:carClass IS NULL OR model.carClass.name = :carClass)
     """)
     Page<Contract> findAllByFilter(
             @Param("status") String status,

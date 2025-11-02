@@ -5,7 +5,7 @@ import org.example.carshering.dto.response.CarModelResponse;
 import org.example.carshering.entity.*;
 import org.example.carshering.repository.BrandRepository;
 import org.example.carshering.repository.CarClassRepository;
-import org.example.carshering.repository.ModelRepository;
+import org.example.carshering.repository.ModelNameRepository;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,7 +15,7 @@ public abstract class ModelMapper {
     protected BrandRepository brandRepository;
 
     @Autowired
-    protected ModelRepository modelRepository;
+    protected ModelNameRepository modelRepository;
 
     @Autowired
     protected CarClassRepository carClassRepository;
@@ -34,17 +34,17 @@ public abstract class ModelMapper {
     public abstract void updateCarFromDto(UpdateCarModelRequest carDto, @MappingTarget CarModel model);
 
     protected Brand mapBrand(String name) {
-        return brandRepository.findByName(name)
+        return brandRepository.findByNameIgnoreCase(name)
                 .orElseThrow(() -> new IllegalArgumentException("Brand not found: " + name));
     }
 
     protected Model mapModel(String name) {
-        return modelRepository.findByName(name)
+        return modelRepository.findByNameIgnoreCase(name)
                 .orElseThrow(() -> new IllegalArgumentException("Model not found: " + name));
     }
 
     protected CarClass mapCarClass(String name) {
-        return carClassRepository.findByName(name)
+        return carClassRepository.findByNameIgnoreCase(name)
                 .orElseThrow(() -> new IllegalArgumentException("CarClass not found: " + name));
     }
 }

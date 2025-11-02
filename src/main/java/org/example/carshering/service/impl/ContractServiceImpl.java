@@ -43,7 +43,7 @@ public class ContractServiceImpl implements ContractService {
     private final RentalDomainService rentalDomainService;
 
     private RentalState getStateByName(String name) {
-        return rentalStateRepository.findByName(name)
+        return rentalStateRepository.findByNameIgnoreCase(name)
                 .orElseThrow(() -> new ValidationException("Состояние " + name + " не найдено"));
     }
 
@@ -282,37 +282,3 @@ public class ContractServiceImpl implements ContractService {
 
 
 }
-//    @Override
-//    public void cancelContractByAdmin(Long contractId) {
-//        Contract contract = contractRepository.findById(contractId)
-//                .orElseThrow(() -> new EntityNotFoundException("Контракт не найден"));
-//
-//        RentalState cancelled = rentalStateRepository.findByName("CANCELLED")
-//                .orElseThrow(() -> new ValidationException("Состояние CANCELLED не найдено"));
-//
-//        RentalState closed = rentalStateRepository.findByName("CLOSED")
-//                .orElseThrow(() -> new ValidationException("Состояние CLOSED не найдено"));
-//
-//        if (!contract.getState().equals(closed)) {
-//            contract.setState(cancelled);
-//            contractRepository.save(contract);
-//        } else {
-//            throw new IllegalStateException("Отмена доступна только для контрактов в статусе PENDING или CONFIRMED");
-//        }
-//
-//    }
-//    @Override
-//    public void confirmContract(Long contractId) {
-//        Contract contract = contractRepository.findById(contractId)
-//                .orElseThrow(() -> new RuntimeException("Contract not found"));
-//
-//
-//        if (!"PENDING".equals(contract.getState().getName())) {
-//            throw new RuntimeException("Cannot confirm this contract");
-//        }
-//
-//        RentalState confirmed = rentalStateRepository.findByName("ACTIVE")
-//                .orElseThrow();
-//        contract.setState(confirmed);
-//        contractRepository.save(contract);
-//    }

@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
+    // todo возможно тогда эти методы нужны
     boolean existsByClientId(Long clientId);
     Optional<Document> findByClientId(Long clientId);
 
@@ -19,6 +20,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     )
     List<Document> findByVerifiedIsFalse();
 
+    // todo возможность вернуть удаленные документы для админа??
     Optional<Document> findByClientIdAndDeletedFalse(Long clientId);
     boolean existsByClientIdAndDeletedFalse(Long clientId);
 }

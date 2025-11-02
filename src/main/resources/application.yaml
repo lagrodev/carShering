@@ -5,6 +5,10 @@ spring:
         password: postgres
         driver-class-name: org.postgresql.Driver
 
+    logging:
+        level:
+            org.flywaydb: DEBUG
+
     jpa:
         hibernate:
             ddl-auto: validate
@@ -13,10 +17,6 @@ spring:
             hibernate:
               default_schema: car_rental
               format_sql: true
-
-    logging:
-        level:
-            org.flywaydb: DEBUG
 
     flyway:
         enabled: true
