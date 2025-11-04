@@ -1,26 +1,29 @@
 package org.example.carshering.service.impl;
 
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.request.CarFilterRequest;
 import org.example.carshering.dto.request.create.CreateCarRequest;
 import org.example.carshering.dto.request.update.UpdateCarRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
-import org.example.carshering.dto.response.CarStateResponse;
 import org.example.carshering.entity.Car;
 import org.example.carshering.entity.CarModel;
 import org.example.carshering.entity.CarState;
+import org.example.carshering.exceptions.custom.AlreadyExistsException;
+import org.example.carshering.exceptions.custom.CarNotFoundException;
+import org.example.carshering.exceptions.custom.InvalidQueryParameterException;
+import org.example.carshering.exceptions.custom.StateException;
 import org.example.carshering.mapper.CarMapper;
-import org.example.carshering.mapper.CarStateMapper;
-import org.example.carshering.repository.CarModelRepository;
 import org.example.carshering.repository.CarRepository;
 import org.example.carshering.repository.CarStateRepository;
+import org.example.carshering.service.CarModelService;
 import org.example.carshering.service.CarService;
+import org.example.carshering.service.CarStateService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -29,45 +32,142 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class CarServiceImpl implements CarService {
 
+    private static final Set<String> ALLOWED_SORT_PROPERTIES = Set.of(
+            "id",
+            "gosNumber",
+            "yearOfIssue",
+            "rent",
+            "model.bodyType",
+            "model.brand.name",
+            "model.model.name",
+            "model.carClass.name"
+    );
+
+    private static final String CAR_STATE_AVAILABLE = "AVAILABLE";
+    private static final String CAR_STATE_UNAVAILABLE = "UNAVAILABLE";
+
     private final CarRepository carRepository;
     private final CarMapper carMapper;
-    private final CarModelRepository carModelRepository;
+    private final CarModelService carModelService;
+    private final CarStateService carStateService;
 
-    private final CarStateRepository stateRepository;
+
 
     @Override
-    public CarDetailResponse findCar(Long carId) {
-        Car car = this.carRepository.findById(carId)
-                .orElseThrow(() -> new RuntimeException("Car not found"));
-        return carMapper.toDetailDto(car);
+    @Transactional
+    public CarDetailResponse createCar(CreateCarRequest request) {
 
+        if (carRepository.existsByVin(request.vin())) {
+            throw new AlreadyExistsException("VIN already exists");
+        }
+
+        if (carRepository.existsByGosNumber(request.gosNumber())) {
+            throw new AlreadyExistsException("Gos number already exists");
+        }
+
+        Car car = carMapper.toEntity(request);
+
+        CarState state = carStateService.getStateByName(CAR_STATE_AVAILABLE);
+
+        car.setState(state);
+
+        return carMapper.toDetailDto(carRepository.save(car));
     }
 
 
+    @Override
+    @Transactional
+    public CarDetailResponse updateCar(Long carId, UpdateCarRequest request) {
+
+        Car car = getCarOrThrow(carId);
+
+        if (!car.getGosNumber().equals(request.gosNumber()) && carRepository.existsByGosNumber(request.gosNumber())) {
+            throw new AlreadyExistsException("Gos number already exists");
+        }
+        if (!car.getVin().equals(request.vin()) && carRepository.existsByVin(request.vin())) {
+            throw new AlreadyExistsException("VIN already exists");
+        }
+
+
+        carMapper.updateCar(car, request);
+
+
+        CarModel newModel = carModelService.getCarModelById(request.modelId());
+
+
+        car.setModel(newModel);
+
+        return carMapper.toDetailDto(carRepository.save(car));
+    }
+
+
+    @Override
+    public CarDetailResponse getCarById(Long carId) {
+        var car = getCarOrThrow(carId);
+
+        return carMapper.toDetailDto(car);
+    }
 
     @Override
     public Car getEntity(Long carId) {
-        return carRepository.findById(carId)
-                .orElseThrow(() -> new ValidationException("Автомобиль не найден"));
+        return getCarOrThrow(carId);
+    }
+
+    @Override
+    public CarDetailResponse getValidCarById(Long carId) {
+        Car car = getCarOrThrow(carId);
+
+        if (!CAR_STATE_AVAILABLE.equalsIgnoreCase(car.getState().getStatus())) {
+            throw new StateException("Car not available");
+        }
+
+        return carMapper.toDetailDto(car);
     }
 
 
     @Override
-    public CarDetailResponse findValidCar(Long carId) {
-        Car car = this.carRepository.findById(carId)
-                .orElseThrow(() -> new RuntimeException("Car not found"));
+    @Transactional
+    public void updateCarState(Long carId, String carStateName) {
+        Car car = getCarOrThrow(carId);
 
-        if (!car.getState().getStatus().equals("AVAILABLE")) {
-            throw new ValidationException("Автомобиль не найден");
+        CarState state = carStateService.getStateByName(carStateName);
+
+        CarModel model = car.getModel();
+        if (model.isDeleted() && !CAR_STATE_UNAVAILABLE.equals(state.getStatus())) {
+            model.setDeleted(false);
         }
 
-        return carMapper.toDetailDto(car);
-
+        car.setState(state);
+        carRepository.save(car);
     }
 
 
+    @Override
+    @Transactional
+    public void deleteCar(Long carId) {
+        updateCarState(carId, CAR_STATE_UNAVAILABLE);
+    }
+
+    private Car getCarOrThrow(Long carId) {
+        return carRepository.findById(carId)
+                .orElseThrow(() -> new CarNotFoundException("Car not found"));
+    }
+
+    private boolean isEmpty(List<?> list) {
+        return list == null || list.isEmpty();
+    }
+
+    private void validateSortProperties(Sort sort) {
+        for (Sort.Order order : sort) {
+            if (!ALLOWED_SORT_PROPERTIES.contains(order.getProperty())) {
+                throw new InvalidQueryParameterException(order.getProperty());
+            }
+        }
+    }
 
 
+    // todo объединить с методом в CarModelServiceImpl - подумать над этим
+    // todo сделать дополнительно фильтр по датам, используя ContractService - находить  машины, которые не забронированы и не арендованы в указанный период
     @Override
     public Page<CarListItemResponse> getAllCars(Pageable pageable, CarFilterRequest filter) {
         validateSortProperties(pageable.getSort());
@@ -89,115 +189,5 @@ public class CarServiceImpl implements CarService {
         ).map(carMapper::toListItemDto);
     }
 
-
-
-    private boolean isEmpty(List<?> list) {
-        return list == null || list.isEmpty();
-    }
-
-
-    private void validateSortProperties(Sort sort) {
-        for (Sort.Order order : sort) {
-            if (!ALLOWED_SORT_PROPERTIES.contains(order.getProperty())) {
-                throw new IllegalArgumentException("Недопустимое поле сортировки: " + order.getProperty());
-            }
-        }
-    }
-    private static final Set<String> ALLOWED_SORT_PROPERTIES = Set.of(
-            "id",
-            "gosNumber",
-            "yearOfIssue",
-            "rent",
-            "model.bodyType",
-            "model.brand.name",
-            "model.model.name",         
-            "model.carClass.name"
-    );
-
-
-
-    @Override
-    public CarDetailResponse createCar(CreateCarRequest request) {
-        // todo
-        CarModel model = carModelRepository.findById(request.modelId())
-                .orElseThrow(() -> new RuntimeException("Car model not found"));
-
-        if (carRepository.existsByGosNumber(request.gosNumber())) {
-            throw new RuntimeException("Gos number already exists");
-        }
-        if (carRepository.existsByVin(request.vin())) {
-            throw new RuntimeException("VIN already exists");
-        }
-
-        Car car = carMapper.toEntity(request);
-
-        CarState state = stateRepository.findByStatusIgnoreCase("AVAILABLE")
-                .orElseThrow(() -> new RuntimeException("Car state not found"));
-
-        car.setState(state);
-
-        return carMapper.toDetailDto(carRepository.save(car));
-    }
-
-
-
-    @Override
-    public CarDetailResponse updateCar(Long carId, UpdateCarRequest request) {
-
-        Car car = carRepository.findById(carId)
-                .orElseThrow(() -> new RuntimeException("Car not found"));
-
-        if (carRepository.existsByGosNumber(request.gosNumber())) {
-            throw new RuntimeException("Gos number already exists");
-        }
-        if (carRepository.existsByVin(request.vin())) {
-            throw new RuntimeException("VIN already exists");
-        }
-
-
-        carMapper.updateCar(car, request);
-
-        System.out.println("model id в апдейте: " + request.modelId());
-
-        CarModel newModel = carModelRepository.findById(request.modelId())
-                .orElseThrow(() -> new RuntimeException("CarModel with id " + request.modelId() + " not found"));
-
-        System.out.println("new model: " + newModel.getModel().getName());
-
-        car.setModel(newModel);
-
-        CarDetailResponse carDetailResponse =  carMapper.toDetailDto(carRepository.save(car));
-        System.out.println(carDetailResponse + " обновлен успешно");
-        return carDetailResponse;
-    }
-
-    @Override
-    public void updateCarState(Long carId, String CarStateName) {
-        Car car = carRepository.findById(carId)
-                .orElseThrow(() -> new RuntimeException("Car not found"));
-
-        CarState state = stateRepository.findByStatusIgnoreCase(CarStateName)
-                .orElseThrow(() -> new RuntimeException("State not found"));
-
-        car.setState(state);
-        carRepository.save(car);
-    }
-
-    @Override
-    public void deleteCar(Long carId) {
-        System.out.println("удаление успешно");
-        updateCarState(carId, "UNAVAILABLE");
-    }
-
-
-    private final CarStateMapper stateMapper;
-
-    @Override
-    public List<CarStateResponse> getAllState() {
-        return stateRepository.findAll().
-                stream()
-                .map(stateMapper::toDto)
-                .toList();
-    }
 
 }

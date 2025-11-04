@@ -3,5 +3,6 @@ package org.example.carshering.dto.request;
 public record FilterCarModelRequest(
         String brand,
         String bodyType,
-        String carClass
+        String carClass,
+        boolean deleted
 ) {}

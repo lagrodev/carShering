@@ -7,6 +7,7 @@ import org.example.carshering.repository.RoleRepository;
 import org.example.carshering.service.RoleService;
 import org.springframework.stereotype.Service;
 
+import org.example.carshering.exceptions.custom.RoleNotFoundException;
 import java.util.Optional;
 
 @Service
@@ -22,6 +23,6 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role getRoleByName(String name) {
         return roleRepository.findByNameIgnoreCase(name)
-                .orElseThrow(() -> new EntityNotFoundException("Role not found with name: " + name));
+                .orElseThrow(() -> new RoleNotFoundException("Role not found with name: " + name));
     }
 }

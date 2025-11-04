@@ -29,6 +29,9 @@
 	<properties>
 		<java.version>21</java.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
+
+        <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
+        <jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -186,6 +189,78 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.plugin.version}</version>
+                <configuration>
+                    <useModulePath>false</useModulePath>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <!--            TODO: maybe fix this and create tests for Main-->
+                            </excludes>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <!--            TODO: maybe fix this and create tests for Main-->
+                            </excludes>
+                            <rules>
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.60</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>CLASS</counter>
+                                            <value>MISSEDCOUNT</value>
+                                            <maximum>0</maximum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+
+                        </configuration>
+                    </execution>
+                </executions>
+
+            </plugin>
 		</plugins>
 	</build>
 

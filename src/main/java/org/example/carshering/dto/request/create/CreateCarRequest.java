@@ -2,7 +2,9 @@ package org.example.carshering.dto.request.create;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
+@Builder
 public record CreateCarRequest(
         @NotNull Long modelId,
         @NotNull Integer yearOfIssue,

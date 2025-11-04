@@ -1,9 +1,11 @@
 package org.example.carshering.dto.request.create;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
 import java.time.LocalDate;
 
+@Builder
 public record CreateDocumentRequest(
         @NotNull Long documentTypeId,
         @NotNull String series,

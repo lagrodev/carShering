@@ -48,4 +48,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
             SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Client c WHERE c.phone = :phone and c.deleted = false and c.id != :id
             """)
     boolean existsByPhoneAndIdNot(String phone, Long id);
+
+    Optional<Client> findByEmailAndDeletedFalse(String email);
 }

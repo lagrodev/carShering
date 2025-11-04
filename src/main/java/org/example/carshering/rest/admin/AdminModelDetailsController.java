@@ -9,6 +9,9 @@ import org.example.carshering.dto.request.update.UpdateCarModelRequest;
 import org.example.carshering.dto.response.BrandModelResponse;
 import org.example.carshering.dto.response.CarModelResponse;
 import org.example.carshering.dto.response.ModelNameResponse;
+import org.example.carshering.service.CarBrandService;
+import org.example.carshering.service.CarClassService;
+import org.example.carshering.service.CarModelNameService;
 import org.example.carshering.service.CarModelService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +40,7 @@ public class AdminModelDetailsController {
             @RequestParam(value = "car_class", required = false) String carClass,
             @PageableDefault(size = 20, sort = "brand.name") Pageable pageable
     ) {
-        var filter = new FilterCarModelRequest(brand, bodyType, carClass);
+        var filter = new FilterCarModelRequest(brand, bodyType, carClass, false);
 
         return carModelService.getAllModelsIncludingDeleted(
                 filter,
@@ -49,13 +52,13 @@ public class AdminModelDetailsController {
         return carModelService.getModelById(modelId);
     }
 
-
+    private final CarBrandService carBrandService;
 
     @PostMapping("/filters/brands")
     public ResponseEntity<?> createBrands(
             @RequestBody CreateCarModelsBrand updateCarModelsBrand
     ) {
-        BrandModelResponse brandModelResponse = carModelService.createBrands(updateCarModelsBrand);
+        BrandModelResponse brandModelResponse = carBrandService.createBrands(updateCarModelsBrand);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(brandModelResponse);
     }
@@ -64,11 +67,11 @@ public class AdminModelDetailsController {
     public ResponseEntity<?> createModels(
             @RequestBody CreateCarModelName updateCarModelsModel
     ) {
-        ModelNameResponse brandModelResponse = carModelService.createModelName(updateCarModelsModel);
+        ModelNameResponse brandModelResponse = carModelNameService.createModelName(updateCarModelsModel);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(brandModelResponse);
     }
-
+private final CarModelNameService carModelNameService;
 
 
 
@@ -76,32 +79,32 @@ public class AdminModelDetailsController {
     public ResponseEntity<?> createClasses(
             @RequestBody CreateCarModelName updateCarModelsModel
     ) {
-        ModelNameResponse brandModelResponse = carModelService.createCarClass(updateCarModelsModel);
+        ModelNameResponse brandModelResponse = carClassService.createCarClass(updateCarModelsModel);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(brandModelResponse);
     }
-
+    private final CarClassService carClassService;
 
 
 
     @GetMapping("/filters/brands")
     public List<String> getBrands(
     ) {
-        return carModelService.findAllBrands();
+        return carBrandService.findAllBrands();
     }
 
 
     @GetMapping("/filters/models")
     public List<String> getModels(
     ) {
-        return carModelService.findAllModels();
+        return carModelNameService.findAllModels();
     }
 
 
     @GetMapping("/filters/classes")
     public List<String> getClasses(
     ) {
-        return carModelService.findAllClasses();
+        return carClassService.findAllClasses();
     }
 
 

@@ -1,5 +1,8 @@
 package org.example.carshering.dto.response;
 
+import lombok.Builder;
+
+@Builder
 public record CarDetailResponse(
         Long id,
         Long modelId,

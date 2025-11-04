@@ -3,55 +3,70 @@ package org.example.carshering.exceptions;
 import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j // Logger для логирования ошибок
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
 
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorResponse> handleLocked(ValidationException ex) {
-        ErrorResponse error = new ErrorResponse("ValidationException", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    @ExceptionHandler(ApplicationException.class)
+    public ResponseEntity<AppError> handleApplicationException(ApplicationException ex) {
+        AppError body = new AppError(
+                ex.getClass().getSimpleName(),
+                ex.getMessage(),
+                ex.getStatus().value()
+        );
+        return ResponseEntity.status(ex.getStatus()).body(body);
     }
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUserExists(UserAlreadyExistsException ex) {
-        ErrorResponse error = new ErrorResponse("VALIDATION_ERROR", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
-    }
 
-    @ExceptionHandler(PasswordException.class)
-    public ResponseEntity<ErrorResponse> passwordError(PasswordException ex) {
-        ErrorResponse error = new ErrorResponse("VALIDATION_ERROR", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-    }
+
+
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<AppError> handleValidation(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .map(err -> err.getField() + ": " + err.getDefaultMessage())
                 .collect(Collectors.joining("; "));
-        ErrorResponse error = new ErrorResponse("VALIDATION_ERROR", message);
+        AppError error = new AppError("VALIDATION_ERROR", message, HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.badRequest().body(error);
     }
 
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> notFound(RuntimeException ex) {
-        ErrorResponse error = new ErrorResponse("Not_Found_ERROR", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<AppError> handleLocked(ValidationException ex) {
+        AppError error = new AppError("ValidationException", ex.getMessage(), HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.badRequest().body(error);
     }
+
     @ExceptionHandler(LockedException.class)
-    public ResponseEntity<ErrorResponse> handleLocked(LockedException ex) {
-        ErrorResponse error = new ErrorResponse("ACCOUNT_LOCKED", ex.getMessage());
+    public ResponseEntity<AppError> handleLockedException(LockedException ex) {
+        AppError error = new AppError("ACCOUNT_LOCKED", ex.getMessage(), HttpStatus.FORBIDDEN.value());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<AppError> handleUnexpectedException(Exception ex) {
+        log.error("Unexpected internal server error occurred", ex);
+        AppError error = new AppError(
+                "INTERNAL_SERVER_ERROR",
+                "An unexpected error occurred",
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
+        );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
 

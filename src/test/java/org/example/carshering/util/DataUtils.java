@@ -1,8 +1,12 @@
 package org.example.carshering.util;
 
+import org.example.carshering.dto.request.create.CreateCarRequest;
+import org.example.carshering.dto.request.create.CreateDocumentRequest;
+import org.example.carshering.dto.request.update.UpdateCarRequest;
+import org.example.carshering.dto.request.update.UpdateDocumentRequest;
+import org.example.carshering.dto.response.CarDetailResponse;
+import org.example.carshering.dto.response.DocumentResponse;
 import org.example.carshering.entity.*;
-import org.example.carshering.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 
 import java.time.LocalDate;
@@ -10,188 +14,122 @@ import java.time.LocalDate;
 @TestConfiguration
 public class DataUtils {
 
-    private final ClientRepository clientRepository;
+    public Car getJohnDoeTransient(CarState state, CarModel model) {
 
-
-    private final CarRepository carRepository;
-
-
-    private final RentalStateRepository rentalStateRepository;
-
-
-    private final ContractRepository contractRepository;
-    private final CarStateRepository carStateRepository;
-    private final CarModelRepository carModelRepository;
-    private final CarClassRepository carClassRepository;
-    private final BrandRepository brandRepository;
-    private final ModelNameRepository modelNameRepository;
-
-    @Autowired
-    public DataUtils(ClientRepository clientRepository, CarRepository carRepository, RentalStateRepository rentalStateRepository, ContractRepository contractRepository, CarStateRepository carStateRepository,
-                     CarModelRepository carModelRepository,
-                     CarClassRepository carClassRepository,
-                     BrandRepository brandRepository,
-                     ModelNameRepository modelNameRepository) {
-        this.clientRepository = clientRepository;
-        this.carRepository = carRepository;
-        this.rentalStateRepository = rentalStateRepository;
-        this.contractRepository = contractRepository;
-        this.carStateRepository = carStateRepository;
-        this.carModelRepository = carModelRepository;
-        this.carClassRepository = carClassRepository;
-        this.brandRepository = brandRepository;
-        this.modelNameRepository = modelNameRepository;
+        return Car.builder()
+                .state(state)
+                .model(model)
+                .yearOfIssue(2020)
+                .rent(10.)
+                .vin("JOHNDOE")
+                .gosNumber("1123")
+                .build();
     }
 
-    private Model createAndSaveModel() {
-        return modelNameRepository.findByNameIgnoreCase("nameModel")
-                .orElseGet(() -> modelNameRepository.save(Model.builder().name("nameModel").build()));
+    public Car getFrankJonesTransient(CarState state, CarModel model) {
+        return Car.builder()
+                .state(state)
+                .model(model)
+                .yearOfIssue(2020)
+                .rent(10.)
+                .vin("FRANKJONES")
+                .gosNumber("1124")
+                .build();
     }
 
-    private Brand createAndSaveBrand() {
-        return brandRepository.findByNameIgnoreCase("brand")
-                .orElseGet(() -> brandRepository.save(Brand.builder().name("brand").build()));
+    public Car getMikeSmithTransient(CarState state, CarModel model) {
+        return Car.builder()
+                .state(state)
+                .model(model)
+                .yearOfIssue(2020)
+                .rent(10.)
+                .vin("MIKESMITH")
+                .gosNumber("1125")
+                .build();
     }
 
-    private CarClass createAndSaveCarClass() {
-        return carClassRepository.findByNameIgnoreCase("carClass")
-                .orElseGet(() -> carClassRepository.save(CarClass.builder().name("carClass").build()));
+
+    public static CarState getCarStateNEWSTATEPersisted(String status) {
+        return CarState.builder().status(status).build();
     }
 
-    private CarState createAndSaveCarState() {
-        return carStateRepository.findByStatusIgnoreCase("NEWSTATE")
-                .orElseGet(() -> carStateRepository.save(CarState.builder().status("NEWSTATE").build()));
+    public static DocumentType getDocumentTypePersisted(String status) {
+        return DocumentType.builder().name(status).build();
     }
 
-    public CarModel createAndSaveCarModel() {
-        return carModelRepository.save(CarModel.builder()
-                .brand(createAndSaveBrand())
-                .model(createAndSaveModel())
+
+
+    public CarModel getCarModelSEDAN(Brand brand, Model model, CarClass carClass) {
+        return CarModel.builder()
+                .brand(brand)
+                .model(model)
                 .bodyType("SEDAN")
-                .carClass(createAndSaveCarClass())
+                .carClass(carClass)
                 .deleted(false)
-                .build());
-    }
-
-
-    public Car getJohnDoeTransient() {
-        CarState state = createAndSaveCarState();
-        CarModel model = createAndSaveCarModel();
-
-        return Car.builder()
-                .state(state)
-                .model(model)
-                .yearOfIssue(2020)
-                .rent(10.)
-                .vin("JOHNDOE")
-                .gosNumber("1123")
-                .build();
-    }
-
-    public Car getFrankJonesTransient() {
-        CarState state = createAndSaveCarState();
-        CarModel model = createAndSaveCarModel();
-
-        return Car.builder()
-                .state(state)
-                .model(model)
-                .yearOfIssue(2020)
-                .rent(10.)
-                .vin("FRANKJONES")
-                .gosNumber("1124")
-                .build();
-    }
-
-    public Car getMikeSmithTransient() {
-        CarState state = createAndSaveCarState();
-        CarModel model = createAndSaveCarModel();
-
-        return Car.builder()
-                .state(state)
-                .model(model)
-                .yearOfIssue(2020)
-                .rent(10.)
-                .vin("MIKESMITH")
-                .gosNumber("1125")
-                .build();
-    }
-
-    public Car getMikeSmithPersisted() {
-        CarState state = createAndSaveCarState();
-        CarModel model = createAndSaveCarModel();
-
-        return Car.builder()
-                .id(1L)
-                .state(state)
-                .model(model)
-                .yearOfIssue(2020)
-                .rent(10.)
-                .vin("MIKESMITH")
-                .gosNumber("1123")
-                .build();
-    }
-
-    public Car getJohnDoePersisted() {
-        CarState state = createAndSaveCarState();
-        CarModel model = createAndSaveCarModel();
-
-        return Car.builder()
-                .id(1L)
-                .state(state)
-                .model(model)
-                .yearOfIssue(2020)
-                .rent(10.)
-                .vin("JOHNDOE")
-                .gosNumber("1124")
-                .build();
-    }
-
-    public Car getFrankJonesPersisted() {
-        CarState state = createAndSaveCarState();
-        CarModel model = createAndSaveCarModel();
-
-        return Car.builder()
-                .id(1L)
-                .state(state)
-                .model(model)
-                .yearOfIssue(2020)
-                .rent(10.)
-                .vin("FRANKJONES")
-                .gosNumber("1125")
                 .build();
     }
 
 
-
-    // <!-- Add more utility methods as needed --!>
-    // <!-- new methods --!>
-    private CarModel createAndSaveCarModel(String brandName, String modelName, String bodyType, String carClassName) {
-        Brand brand = brandRepository.findByNameIgnoreCase(brandName)
-                .orElseGet(() -> brandRepository.save(Brand.builder().name(brandName).build()));
-        Model model = modelNameRepository.findByNameIgnoreCase(modelName)
-                .orElseGet(() -> modelNameRepository.save(Model.builder().name(modelName).build()));
-        CarClass carClass = carClassRepository.findByNameIgnoreCase(carClassName)
-                .orElseGet(() -> carClassRepository.save(CarClass.builder().name(carClassName).build()));
-
-        return carModelRepository.save(CarModel.builder()
+    public CarModel getCarModelBody(Brand brand, Model model, CarClass carClass, String bodyType) {
+        return CarModel.builder()
                 .brand(brand)
                 .model(model)
                 .bodyType(bodyType)
                 .carClass(carClass)
                 .deleted(false)
-                .build());
+                .build();
     }
 
-    private CarState createAndSaveCarState(String status) {
-        return carStateRepository.findByStatusIgnoreCase(status)
-                .orElseGet(() -> carStateRepository.save(CarState.builder().status(status).build()));
+
+
+    public Car getJohnDoePersisted(CarState state, CarModel model) {
+        return Car.builder()
+                .id(1L)
+                .state(state)
+                .model(model)
+                .yearOfIssue(2020)
+                .rent(10.)
+                .vin("JOHNDOE")
+                .gosNumber("1123")
+                .build();
     }
 
-    public Car getCarWithSpecificAttributes(String vin, String gosNumber, int year, String brand, String model,
-                                            String bodyType, String carClass, String state) {
-        CarState carState = createAndSaveCarState(state);
-        CarModel carModel = createAndSaveCarModel(brand, model, bodyType, carClass);
 
+
+
+    public Car getMikeSmithPersisted(CarState state, CarModel model) {
+
+
+        return Car.builder()
+                .id(1L)
+                .state(state)
+                .model(model)
+                .yearOfIssue(2020)
+                .rent(10.)
+                .vin("MIKESMITH")
+                .gosNumber("1123")
+                .build();
+    }
+
+
+    public Car getFrankJonesPersisted(CarState state, CarModel model) {
+
+
+        return Car.builder()
+                .id(1L)
+                .state(state)
+                .model(model)
+                .yearOfIssue(2020)
+                .rent(10.)
+                .vin("JOHNDOE")
+                .gosNumber("1125")
+                .build();
+    }
+
+
+
+    public Car getCarWithSpecificAttributes(
+            String vin, String gosNumber, int year, CarState carState, CarModel carModel) {
         return Car.builder()
                 .state(carState)
                 .model(carModel)
@@ -202,11 +140,9 @@ public class DataUtils {
                 .build();
     }
 
-    public Car getOldCarTransient() {
-        CarState state = createAndSaveCarState();
-        CarModel model = createAndSaveCarModel();
+    public Car getOldCarTransient(CarState state, CarModel model) {
+
         model.setBodyType("HATCHBACK");
-        carModelRepository.save(model);
 
         return Car.builder()
                 .state(state)
@@ -218,11 +154,10 @@ public class DataUtils {
                 .build();
     }
 
-    public Car getFutureCarTransient() {
-        CarState state = createAndSaveCarState();
-        CarModel model = createAndSaveCarModel();
+    public Car getFutureCarTransient(CarState state, CarModel model) {
+
         model.setBodyType("COUPE");
-        carModelRepository.save(model);
+
 
         return Car.builder()
                 .state(state)
@@ -241,6 +176,13 @@ public class DataUtils {
                 .build();
     }
 
+    public Brand getBrandTransient(String brandName) {
+        return Brand.builder()
+                .name(brandName)
+                .build();
+    }
+
+
     public Brand getBrandPersisted() {
         return Brand.builder()
                 .id(1L)
@@ -254,6 +196,14 @@ public class DataUtils {
                 .name("TransientCarClass")
                 .build();
     }
+
+    public CarClass getCarClassTransient(String className) {
+        return CarClass.builder()
+                .name(className)
+                .build();
+    }
+
+
 
     public CarClass getCarClassPersisted() {
         return CarClass.builder()
@@ -270,6 +220,13 @@ public class DataUtils {
                 .build();
     }
 
+    public CarState getCarStateTransient(String stateName) {
+        return CarState.builder()
+                .status(stateName)
+                .build();
+    }
+
+
     public CarState getCarStatePersisted() {
         return CarState.builder()
                 .id(1L)
@@ -278,13 +235,20 @@ public class DataUtils {
     }
 
 
-
     // <!-- model name methods --!>
     public Model getModelNameTransient() {
         return Model.builder()
                 .name("TransientModelName")
                 .build();
     }
+
+    public Model getModelNameTransient(String modelName) {
+        return Model.builder()
+                .name(modelName)
+                .build();
+    }
+
+
     public Model getModelNamePersisted() {
         return Model.builder()
                 .id(1L)
@@ -336,38 +300,210 @@ public class DataUtils {
 
     public Client createUniqueClient(String prefix) {
         long unique = System.nanoTime();
-        return clientRepository.save(Client.builder()
+        return Client.builder()
                 .firstName("First")
                 .lastName("Last")
                 .login(prefix + "_login_" + unique)
                 .password("pwd")
-                .email(prefix + "_mail_" + unique + "@example.com")
+                .email(prefix + "_mail@example.com")
                 .phone(String.valueOf(100 + unique))
                 .deleted(false)
                 .banned(false)
-                .build());
+                .build();
     }
 
     // ---- RENTAL STATE ----
-    public RentalState getOrCreateRentalState(String name) {
-        return rentalStateRepository.findByNameIgnoreCase(name)
-                .orElseGet(() -> rentalStateRepository.save(RentalState.builder().name(name).build()));
+    public RentalState getRentalState(String name) {
+        return RentalState
+                .builder()
+                .name(name)
+                .build();
     }
 
     // ---- CONTRACT ----
-    public Contract createContract(Client client, Car car, String stateName,
+    public Contract createContract(Client client, Car car, RentalState stateName,
                                    LocalDate start, LocalDate end) {
-        RentalState state = getOrCreateRentalState(stateName);
-        return contractRepository.save(Contract.builder()
+
+        return Contract.builder()
                 .client(client)
                 .car(car)
-                .state(state)
+                .state(stateName)
                 .dataStart(start)
                 .dataEnd(end)
                 .totalCost(100.0)
                 .comment("cmt")
-                .build());
+                .build();
     }
 
 
+    public static CarDetailResponse carDetailResponsePersisted(){
+        return CarDetailResponse.builder()
+                .id(1L)
+                .vin("JOHNDOE")
+                .gosNumber("1123")
+                .status("AVAILABLE")
+                .build();
+    }
+
+
+    public CreateCarRequest createCarRequestTransient() {
+        return CreateCarRequest.builder()
+                .modelId(1L)
+                .yearOfIssue(2020)
+                .gosNumber("1123")
+                .vin("JOHNDOE")
+                .rent(10.0)
+                .build();
+    }
+
+    public UpdateCarRequest updateCarRequestTransient() {
+        return UpdateCarRequest.builder()
+                .modelId(1L)
+                .yearOfIssue(2020)
+                .gosNumber("1123")
+                .vin("JOHNDOE")
+                .rent(10.0)
+                .build();
+    }
+
+    public UpdateCarRequest updateCarRequestNeverUsedTransient() {
+        return UpdateCarRequest.builder()
+                .modelId(1L)
+                .yearOfIssue(2020)
+                .gosNumber("2025")
+                .vin("ZOV2025")
+                .rent(10.0)
+                .build();
+    }
+    public Car  getNeverUsedTransient(CarState state, CarModel model) {
+        return Car.builder()
+                .id(1L)
+                .state(state)
+                .model(model)
+                .yearOfIssue(2020)
+                .rent(10.)
+                .vin("ZOV2025")
+                .gosNumber("2025")
+                .build();
+    }
+
+
+    public UpdateCarRequest updateCarRequest() {
+        return UpdateCarRequest.builder()
+                .modelId(1L)
+                .yearOfIssue(2020)
+                .gosNumber("1123")
+                .vin("JOHNDOE")
+                .rent(10.0)
+                .build();
+    }
+
+    public Client createAndSaveClient(String login, String email, boolean banned) {
+        Client client = Client.builder()
+                .firstName("First")
+                .lastName("Last")
+                .login(login)
+                .password("pwd")
+                .email(email)
+                .banned(banned)
+                .build();
+        return client;
+    }
+
+    public Document createAndSaveDocument(Client client, DocumentType docType, String series, String number) {
+        Document doc = Document.builder()
+                .documentType(docType)
+                .series(series)
+                .number(number)
+                .dateOfIssue(LocalDate.now())
+                .issuingAuthority("Authority")
+                .client(client)
+                .verified(false)
+                .deleted(false)
+                .build();
+        return doc;
+    }
+
+    public Client createAndSaveClient(String login, String email) {
+        Client client = Client.builder()
+                .firstName("First")
+                .lastName("Last")
+                .login(login)
+                .password("pwd")
+                .email(email)
+                .build();
+        return client;
+    }
+
+    public DocumentType createAndSaveDocumentType(String name) {
+        DocumentType dt = DocumentType.builder().name(name).build();
+        return dt;
+    }
+
+    public CreateDocumentRequest createDocumentRequestTransient(String series, String number, String issuingAuthority) {
+        return CreateDocumentRequest.builder()
+                .documentTypeId(1L)
+                .series(series)
+                .number(number)
+                .dateOfIssue(LocalDate.now())
+                .issuingAuthority(issuingAuthority)
+                .build();
+    }
+
+
+    public Document createDocumentTransient( Client client ,DocumentType documentType, String series, String number, String issuingAuthority, boolean vera) {
+        return Document.builder()
+                .documentType(documentType)
+                .series(series)
+                .number(number)
+                .dateOfIssue(LocalDate.now())
+                .verified(vera)
+                .client(client)
+                .issuingAuthority(issuingAuthority)
+                .build();
+    }
+
+    public Document createDocumentTransient( String series, String number, String issuingAuthority, boolean vera) {
+        return Document.builder()
+                .series(series)
+                .number(number)
+                .dateOfIssue(LocalDate.now())
+                .verified(vera)
+                .issuingAuthority(issuingAuthority)
+                .build();
+    }
+
+    public Document createDocumentPersisted( Client client ,DocumentType documentType, String series, String number, String issuingAuthority, boolean vera) {
+        return Document.builder()
+                .id(1L)
+                .documentType(documentType)
+                .series(series)
+                .number(number)
+                .dateOfIssue(LocalDate.now())
+                .verified(vera)
+                .client(client)
+                .issuingAuthority(issuingAuthority)
+                .build();
+    }
+
+    public static DocumentResponse documentResponsePersisted(String documentType, String series, String number, String issuingAuthority, boolean vera) {
+        return DocumentResponse.builder()
+                .id(1L)
+                .series(series)
+                .issuingAuthority(issuingAuthority)
+                .documentType(documentType)
+                .number(number)
+                .verified(vera)
+
+                .build();
+    }
+
+    public UpdateDocumentRequest createUpdateDocumentRequest(String series, String number, String auto) {
+        return UpdateDocumentRequest.builder()
+                .series(series)
+                .number(number)
+                .issuingAuthority(auto)
+                .dateOfIssue(LocalDate.now())
+                .build();
+    }
 }

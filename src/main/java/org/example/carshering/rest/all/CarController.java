@@ -3,12 +3,9 @@ package org.example.carshering.rest.all;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.dto.request.CarFilterRequest;
-import org.example.carshering.dto.request.FilterCarModelRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
-import org.example.carshering.dto.response.CarModelResponse;
-import org.example.carshering.service.CarModelService;
-import org.example.carshering.service.CarService;
+import org.example.carshering.service.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -25,6 +22,9 @@ public class CarController {
     // todo фильтр по модели
     private final CarService carService;
     private final CarModelService carModelService;
+    private final CarBrandService carBrandService;
+    private final CarModelNameService carModelNameService;
+    private final CarClassService carClassService;
 
     public static CarFilterRequest createFilter(@RequestParam(value = "brand", required = false) String brand,
                                                 @RequestParam(value = "model", required = false) String model,
@@ -66,24 +66,22 @@ public class CarController {
 
     @GetMapping("/{carId}")
     public CarDetailResponse findValidCar(@PathVariable Long carId) {
-        return carService.findValidCar(carId);
+        return carService.getValidCarById(carId);
     }
-
-
 
     @GetMapping("/filters/brands")
     public List<String> getBrands() {
-        return carModelService.findAllBrands();
+        return carBrandService.findAllBrands();
     }
 
     @GetMapping("/filters/models")
     public List<String> getModels() {
-        return carModelService.findAllModels();
+        return carModelNameService.findAllModels();
     }
 
     @GetMapping("/filters/classes")
     public List<String> getClasses() {
-        return carModelService.findAllClasses();
+        return carClassService.findAllClasses();
     }
 
     @GetMapping("/filters/body-types")

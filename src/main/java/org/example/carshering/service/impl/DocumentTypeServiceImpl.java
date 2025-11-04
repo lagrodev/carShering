@@ -4,6 +4,7 @@ import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.response.DocumentTypeResponse;
 import org.example.carshering.entity.DocumentType;
+import org.example.carshering.exceptions.custom.DocumentTypeException;
 import org.example.carshering.repository.DocumentTypeRepository;
 import org.example.carshering.service.DocumentTypeService;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,6 @@ public class DocumentTypeServiceImpl implements DocumentTypeService {
     @Override
     public DocumentType getById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ValidationException("Тип документа не найден"));
+                .orElseThrow(() -> new DocumentTypeException("Document type not found"));
     }
 }

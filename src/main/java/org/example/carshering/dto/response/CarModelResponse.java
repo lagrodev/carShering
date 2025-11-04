@@ -9,6 +9,7 @@ public record CarModelResponse(
 
         String bodyType,
 
-        String carClass
+        String carClass,
+        boolean isDeleted
 ) {
 }

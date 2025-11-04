@@ -6,6 +6,7 @@ import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
 import org.example.carshering.entity.Car;
 import org.example.carshering.entity.CarModel;
+import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.repository.CarModelRepository;
 import org.mapstruct.*;
 import org.mapstruct.MappingConstants.ComponentModel;
@@ -47,7 +48,8 @@ public abstract class CarMapper {
         if (modelId == null) {
             return null;
         }
+
         return carModelRepository.findById(modelId)
-                .orElseThrow(() -> new IllegalArgumentException("CarModel not found with id: " + modelId));
+                .orElseThrow(() -> new NotFoundException("CarModel not found with id: " + modelId));
     }
 }

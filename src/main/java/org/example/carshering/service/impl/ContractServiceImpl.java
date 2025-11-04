@@ -1,18 +1,17 @@
 package org.example.carshering.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.dto.request.create.CreateContractRequest;
 import org.example.carshering.dto.request.FilterContractRequest;
+import org.example.carshering.dto.request.create.CreateContractRequest;
 import org.example.carshering.dto.request.update.UpdateContractRequest;
 import org.example.carshering.dto.response.ContractResponse;
 import org.example.carshering.entity.Car;
 import org.example.carshering.entity.Client;
 import org.example.carshering.entity.Contract;
 import org.example.carshering.entity.RentalState;
+import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.ContractMapper;
-import org.example.carshering.mapper.DocumentMapper;
 import org.example.carshering.repository.ContractRepository;
 import org.example.carshering.repository.RentalStateRepository;
 import org.example.carshering.service.CarService;
@@ -27,16 +26,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class ContractServiceImpl implements ContractService {
+    private static final Set<String> ACTIVE_STATES = Set.of("ACTIVE", "PENDING", "CANCELLATION REQUESTED", "CONFIRMED");
     private final ContractRepository contractRepository;
-
     private final RentalStateRepository rentalStateRepository;
     private final ContractMapper contractMapper;
-    private final DocumentMapper documentMapper;
-
     private final ClientService clientService;
     private final CarService carService;
     private final DocumentService documentService;
@@ -44,37 +43,45 @@ public class ContractServiceImpl implements ContractService {
 
     private RentalState getStateByName(String name) {
         return rentalStateRepository.findByNameIgnoreCase(name)
-                .orElseThrow(() -> new ValidationException("Состояние " + name + " не найдено"));
+                .orElseThrow(() -> new NotFoundException("State " + name + " not found"));
     }
 
     private void ensureState(Contract contract, String expectedState) {
         if (!expectedState.equals(contract.getState().getName())) {
-            throw new IllegalStateException("Ожидался статус " + expectedState + ", но текущий: " + contract.getState().getName());
+            throw new InvalidContractStateException("Status expected " + expectedState + "but current: "
+                    + contract.getState().getName());
         }
     }
+
+
 
     @Override
     @Transactional
     public ContractResponse createContract(Long userId, CreateContractRequest request) {
         if (!request.dataEnd().isAfter(request.dataStart())) {
-            throw new ValidationException("Дата окончания должна быть позже даты начала");
+            throw new InvalidContractDateRangeException("The end date must be later than the start date");
         }
+
+        if (request.dataStart().isBefore(LocalDate.now())) {
+            throw new ValidationException("Start date cannot be in the past");
+        }
+
 
         Client client = clientService.getEntity(userId);
 
 
         if (!documentService.hasDocument(userId)) {
-            throw new ValidationException("У клиента должен быть загружен документ");
-        } // todo проверку документа, в теории сделать, чтобы у человека могло быть несколько документов (права + паспорт, мб. Хотя, прав буд-то достаточно)
+            throw new MissingClientDocumentException("The client must have a document uploaded");
+        }
 
         if (!documentService.findDocument(userId).verified()) {
-            throw new ValidationException("Документ не подтвержден, дождитесь проверки или прикрепите соответствующий документ");
+            throw new UnverifiedClientDocumentException("The document is not verified. Please wait for verification or attach the relevant document");
         }
 
         Car car = carService.getEntity(request.carId());
 
         if (!rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId())) {
-            throw new ValidationException("Автомобиль недоступен на выбранные даты");
+            throw new CarUnavailableOnDatesException("The car is not available on the selected dates");
         }
 
         Contract contract = contractMapper.toEntity(request);
@@ -86,23 +93,25 @@ public class ContractServiceImpl implements ContractService {
         return contractMapper.toDto(contractRepository.save(contract));
     }
 
-
     @Override
+    @Transactional
     public void cancelContract(Long userId, Long contractId) {
         Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new ValidationException("Контракт не найден"));
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         if (!contract.getClient().getId().equals(userId)) {
-            throw new ValidationException("Вы не можете отменить чужой контракт");
+            throw new UnauthorizedContractAccessException("You can't terminate someone else's contract");
         }
 
         cancelContract(contract, false);
     }
 
+    // FIXME: сделать что-то типо подписи для админской отмены контракта, чтобы не любой админ мог отменять контракты
     @Override
+    @Transactional
     public void cancelContractByAdmin(Long contractId) {
         Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new EntityNotFoundException("Контракт не найден"));
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         cancelContract(contract, true);
         // админская отмена
@@ -112,76 +121,25 @@ public class ContractServiceImpl implements ContractService {
     @Transactional
     public void confirmCancellationByAdmin(Long contractId) {
         Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new EntityNotFoundException("Контракт не найден"));
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         if (!"CANCELLATION_REQUESTED".equals(contract.getState().getName())) {
-            throw new IllegalStateException("Контракт не находится на стадии запроса на отмену");
+            throw new InvalidContractCancellationStateException("The contract is not at the cancellation request stage");
         }
 
         contract.setState(getStateByName("CANCELLED"));
         contractRepository.save(contract);
     }
-    // todo аккуратно
-    @Transactional
-    protected void cancelContract(Contract contract, boolean isAdmin) {
-        String currentState = contract.getState().getName();
-
-        if ("CANCELLED".equals(currentState)) {
-            return;
-        }
-
-        if (isAdmin) {
-            // Админ может отменить любой запрос на отмену или подтвердить отмену
-            if ("CANCELLATION_REQUESTED".equals(currentState) ||
-                    "PENDING".equals(currentState) ||
-                    "CONFIRMED".equals(currentState)) {
-                contract.setState(getStateByName("CANCELLED"));
-            } else if ("CLOSED".equals(currentState)) {
-                throw new IllegalStateException("Нельзя отменить завершённый контракт");
-            } else {
-                throw new IllegalStateException("Невозможно отменить контракт в статусе: " + currentState);
-            }
-        } else {
-            // Пользователь: только PENDING или CONFIRMED -> запрос на отмену
-            if ("PENDING".equals(currentState) || "CONFIRMED".equals(currentState)) {
-                // todo тут чет сложно надо момент с датой продумать Если сервер в UTC, а пользователь в Москве — возможны ошибки в расчёте daysUntilStart.
-                long daysUntilStart = ChronoUnit.DAYS.between(LocalDate.now(), contract.getDataStart());
-                if (daysUntilStart > 5) {
-                    // Отмена без подтверждения
-                    contract.setState(getStateByName("CANCELLED"));
-                } else {
-                    // Требуется подтверждение
-                    contract.setState(getStateByName("CANCELLATION_REQUESTED"));
-                }
-            }
-        }
-
-        contractRepository.save(contract);
-    }
 
 
-    private void setActive(Contract contract) {
-        if ("CONFIRMED".equals(contract.getState().getName()) &&
-                !contract.getDataStart().isAfter(LocalDate.now())) {
-            contract.setState(getStateByName("ACTIVE"));
-            contractRepository.save(contract);
-        }
-    }
 
-    private ContractResponse activateIfDueForDto(Contract contract) {
-        ContractResponse dto = contractMapper.toDto(contract);
-        if ("CONFIRMED".equals(contract.getState().getName()) &&
-                !contract.getDataStart().isAfter(LocalDate.now())) {
-            // В DTO временно меняем статус на ACTIVE (но не сохраняем в БД!)
-            // Или лучше — добавь поле "effectiveStatus" в ContractResponse
-        }
-        return dto;
-    }
+
+
 
     @Override
     public ContractResponse findContract(Long contractId, Long userId) {
         Contract contract = contractRepository.findByIdAndUserId(contractId, userId)
-                .orElseThrow(() -> new ValidationException("Контракт не найден"));
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
         setActive(contract);
 
         return contractMapper.toDto(contract);
@@ -211,7 +169,7 @@ public class ContractServiceImpl implements ContractService {
     public ContractResponse getContractById(Long contractId) {
 
         Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new ValidationException("Контракт не найден"));
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         setActive(contract);
 
@@ -222,12 +180,11 @@ public class ContractServiceImpl implements ContractService {
 
     }
 
-
     @Override
     @Transactional
     public void confirmContract(Long contractId) {
         Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new EntityNotFoundException("Контракт не найден"));
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         ensureState(contract, "PENDING");
 
@@ -235,42 +192,116 @@ public class ContractServiceImpl implements ContractService {
         contractRepository.save(contract);
     }
 
+
+
+    @Override
+    public void checkAndAllActiveContractsByClient(Client client) {
+        List<Contract> activeContracts = contractRepository.findAllByClientAndActiveStates(client, ACTIVE_STATES);
+        if (!activeContracts.isEmpty()) {
+            Contract c = activeContracts.getFirst();
+            throw new BusinessConflictException("Active contract exists: ID " + c.getId() + ", state: " + c.getState().getName());
+        }
+
+    }
+
+
+
+
+    private ContractResponse activateIfDueForDto(Contract contract) {
+
+        RentalState now = contract.getState();
+
+
+        if ("CONFIRMED".equals(contract.getState().getName()) &&
+                !contract.getDataStart().isAfter(LocalDate.now())) {
+            // В DTO временно меняем статус на ACTIVE (но не сохраняем в БД!)
+
+
+            contract.setState(getStateByName( "ACTIVE"));
+
+        }
+        ContractResponse dto = contractMapper.toDto(contract);
+        contract.setState(now); // возвращаем обратно
+        return dto;
+    }
+    // FIXME: продумать логику отмены контракта
+    // FIXME: аккуратно
+    @Transactional
+    protected void cancelContract(Contract contract, boolean isAdmin) {
+        String currentState = contract.getState().getName();
+
+        if ("CANCELLED".equals(currentState)) {
+            return;
+        }
+
+        if (isAdmin) {
+            // Админ может отменить любой запрос на отмену или подтвердить отмену
+            if ("CANCELLATION_REQUESTED".equals(currentState) ||
+                    "PENDING".equals(currentState) ||
+                    "CONFIRMED".equals(currentState)) {
+                contract.setState(getStateByName("CANCELLED"));
+            } else {
+                throw new CannotCancelCompletedContractException("It is not possible to cancel a contract that has the following state:" + currentState);
+            }
+        } else {
+            // Пользователь: только PENDING или CONFIRMED -> запрос на отмену
+            if ("PENDING".equals(currentState) || "CONFIRMED".equals(currentState)) {
+                // todo тут чет сложно надо момент с датой продумать Если сервер в UTC, а пользователь в Москве — возможны ошибки в расчёте daysUntilStart.
+                long daysUntilStart = ChronoUnit.DAYS.between(LocalDate.now(), contract.getDataStart());
+                if (daysUntilStart > 5) {
+                    // Отмена без подтверждения
+                    contract.setState(getStateByName("CANCELLED"));
+                } else {
+                    // Требуется подтверждение
+                    contract.setState(getStateByName("CANCELLATION_REQUESTED"));
+                }
+            }
+            else throw new CannotCancelCompletedContractException("It is not possible to cancel a contract that has the following state:" + currentState);
+
+        }
+
+        contractRepository.save(contract);
+    }
+
+    @Transactional
+    void setActive(Contract contract) {
+        if ("CONFIRMED".equals(contract.getState().getName()) &&
+                !contract.getDataStart().isAfter(LocalDate.now())) {
+            contract.setState(getStateByName("ACTIVE"));
+            contractRepository.save(contract);
+        }
+    }
+
     @Override
     @Transactional
     public ContractResponse updateContract(Long userId, Long contractId, UpdateContractRequest request) {
-        // 1. Проверка: дата окончания > начала
         if (!request.dataEnd().isAfter(request.dataStart())) {
-            throw new ValidationException("Дата окончания должна быть позже даты начала");
+            throw new InvalidContractDateRangeException("The end date must be later than the start date");
         }
 
-        // 2. Загрузка контракта
         Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new EntityNotFoundException("Контракт не найден"));
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        // 3. Проверка владельца
         if (!contract.getClient().getId().equals(userId)) {
-            throw new ValidationException("Вы не можете изменить чужой контракт");
+            throw new UnauthorizedContractAccessException("You can't terminate someone else's contract");
         }
 
-        // 4. Проверка статуса: только PENDING или CONFIRMED
         String currentState = contract.getState().getName();
         if (!"PENDING".equals(currentState) && !"CONFIRMED".equals(currentState)) {
-            throw new IllegalStateException("Изменение доступно только для контрактов в статусе PENDING или CONFIRMED");
+            throw new CannotCancelCompletedContractException("The change is only available for contracts in the status PENDING or CONFIRMED");
         }
 
-        // 5. Проверка доступности авто на новых датах
         if (!rentalDomainService.isCarAvailable(
                 request.dataStart(),
                 request.dataEnd(),
                 contract.getCar().getId()
         )) {
-            throw new ValidationException("Автомобиль недоступен на выбранные даты");
+            throw new CarUnavailableOnDatesException("The car is not available on the selected dates");
         }
 
-        // 6. Обновление
         contractMapper.updateContractFromRequest(request, contract);
 
-        // 7. Пересчёт стоимости
+
         contract.setTotalCost(rentalDomainService.calculateCost(
                 contract.getCar(),
                 contract.getDataStart(),

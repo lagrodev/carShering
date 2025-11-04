@@ -4,6 +4,7 @@ import org.example.carshering.dto.request.create.CreateContractRequest;
 import org.example.carshering.dto.request.FilterContractRequest;
 import org.example.carshering.dto.request.update.UpdateContractRequest;
 import org.example.carshering.dto.response.ContractResponse;
+import org.example.carshering.entity.Client;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,4 +29,6 @@ public interface ContractService {
     void confirmContract(Long contractId);
 
     ContractResponse updateContract(Long userId, Long contractId, UpdateContractRequest request);
+
+    void checkAndAllActiveContractsByClient(Client client);
 }

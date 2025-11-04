@@ -43,4 +43,6 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     boolean existsByGosNumber(@NotBlank String s);
 
     boolean existsByVin(@NotBlank String vin);
+
+
 }

@@ -1,5 +1,6 @@
 package org.example.carshering.rest.admin;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.request.create.CreateCarRequest;
 import org.example.carshering.dto.request.update.UpdateCarRequest;
@@ -10,6 +11,7 @@ import org.example.carshering.dto.response.CarStateResponse;
 import org.example.carshering.entity.CarState;
 import org.example.carshering.rest.all.CarController;
 import org.example.carshering.service.CarService;
+import org.example.carshering.service.CarStateService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -25,16 +27,17 @@ import java.util.List;
 public class AdminCarController {
 
     private final CarService carService;
+    private final CarStateService carStateService;
 
     @GetMapping("/{carId}")
     public CarDetailResponse getCar(@PathVariable Long carId) {
-        return carService.findCar(carId);
+        return carService.getCarById(carId);
     }
 
     @PatchMapping("/{carId}")
     public ResponseEntity<CarDetailResponse> updateCar(
             @PathVariable Long carId,
-            @RequestBody UpdateCarRequest request
+            @RequestBody @Valid UpdateCarRequest request
     ) {
         CarDetailResponse car = carService.updateCar(carId, request);
         return ResponseEntity.status(HttpStatus.OK).body(car);
@@ -74,9 +77,9 @@ public class AdminCarController {
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/state")
-    public List<CarStateResponse> AllCarState(
+    public List<CarStateResponse> AllCarStates(
     ) {
-        return carService.getAllState();
+        return carStateService.getAllStates();
     }
     //todo делете кар
     @DeleteMapping

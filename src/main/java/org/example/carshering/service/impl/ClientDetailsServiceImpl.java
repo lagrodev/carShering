@@ -20,6 +20,7 @@ public class ClientDetailsServiceImpl implements ClientDetailsService {
 
     private final ClientRepository clientRepository;
 
+    // todo добавить кэширование?? (если будет медленно работать)
     @Override
     @Transactional
     public ClientDetails loadUserByUsername(String username) {

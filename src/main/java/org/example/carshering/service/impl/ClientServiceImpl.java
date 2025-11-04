@@ -11,16 +11,20 @@ import org.example.carshering.dto.response.ShortUserResponse;
 import org.example.carshering.dto.response.UserResponse;
 import org.example.carshering.entity.Client;
 import org.example.carshering.entity.Role;
-import org.example.carshering.exceptions.PasswordException;
-import org.example.carshering.exceptions.UserAlreadyExistsException;
+import org.example.carshering.exceptions.custom.AlreadyExistsException;
+import org.example.carshering.exceptions.custom.BusinessConflictException;
+import org.example.carshering.exceptions.custom.NotFoundException;
+import org.example.carshering.exceptions.custom.PasswordException;
 import org.example.carshering.mapper.ClientMapper;
 import org.example.carshering.repository.ClientRepository;
 import org.example.carshering.service.ClientService;
+import org.example.carshering.service.ContractService;
 import org.example.carshering.service.RoleService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -29,12 +33,12 @@ import java.util.Set;
 public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository clientRepository;
-//    private final UserRepositoryCustom userRepositoryCustom;
-    private final ClientMapper clientMapper;
 
+    private final ClientMapper clientMapper;
 
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
+    private final ContractService contractService;
 
     @Override
     public AllUserResponse findAllUser(Long userId) {
@@ -47,7 +51,6 @@ public class ClientServiceImpl implements ClientService {
                 .orElse(null));
     }
 
-
     @Override
     public AllUserResponse banUser(Long userId) {
         Client client = getEntity(userId);
@@ -57,12 +60,19 @@ public class ClientServiceImpl implements ClientService {
 
     }
 
+    // todo отменить все активные бронирования и аренды при удалении пользователя... готово по идеи
     @Override
     public void deleteUser(Long userId) {
         Client client = clientRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        try {
+            contractService.checkAndAllActiveContractsByClient(client);
+        } catch (BusinessConflictException e) {
+            throw new BusinessConflictException("It is not possible to delete an account while it exists " + e.getMessage());
+        }
+
         client.setDeleted(true);
-        client.setBanned(true);
         clientRepository.save(client);
     }
 
@@ -77,15 +87,19 @@ public class ClientServiceImpl implements ClientService {
 
 
     @Override
+    @Transactional
     public AllUserResponse updateRole(Long userId, String roleName) {
         Role role = roleService.getRoleByName(roleName);
-        clientRepository.findById(userId).ifPresent(client -> {
-            client.setRole(role);
-            clientRepository.save(client);
-        });
-        return clientMapper.toDtoForAdmin(getEntity(userId));
+        Client client = clientRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Client not found with id " + userId));
 
+        client.setRole(role);
+        clientRepository.save(client);
+
+        return clientMapper.toDtoForAdmin(client);
     }
+
+
 
     @Override
     public Page<ShortUserResponse> filterUsers(FilterUserRequest filter, Pageable pageable) {
@@ -101,18 +115,18 @@ public class ClientServiceImpl implements ClientService {
         }
 
 
-
         return clientRepository.findByFilter(filter.banned(), filter.roleName(), pageable)
                 .map(clientMapper::toShortDtoForAdmin);
     }
 
+
     @Override
     public UserResponse createUser(RegistrationRequest request) {
         if (clientRepository.existsByLoginAndDeletedFalse(request.login())) {
-            throw new UserAlreadyExistsException("Login уже используется");
+            throw new AlreadyExistsException("Login уже используется");
         }
         if (clientRepository.existsByEmailAndDeletedFalse(request.email())) {
-            throw new UserAlreadyExistsException("Email уже зарегистрирован");
+            throw new AlreadyExistsException("Email уже зарегистрирован");
         }
 
         Client client = clientMapper.toEntity(request);
@@ -148,7 +162,7 @@ public class ClientServiceImpl implements ClientService {
         if (request.firstName() != null) client.setFirstName(request.firstName());
         if (request.lastName() != null) client.setLastName(request.lastName());
         if (request.phone() != null) {
-            if (!clientRepository.existsByPhoneAndIdNot(request.phone(), userId)){
+            if (!clientRepository.existsByPhoneAndIdNot(request.phone(), userId)) {
                 client.setPhone(request.phone());
             } else throw new ValidationException("Данный телефон закреплен за другим аккаунтом");
         }
@@ -157,8 +171,6 @@ public class ClientServiceImpl implements ClientService {
         clientRepository.save(client);
 
     }
-
-
 
 
 }

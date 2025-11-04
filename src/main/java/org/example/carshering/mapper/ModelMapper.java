@@ -27,6 +27,7 @@ public abstract class ModelMapper {
     @Mapping(source = "bodyType", target = "bodyType")
     @Mapping(source = "idModel", target = "modelId")
     @Mapping(source = "carClass.name", target = "carClass")
+    @Mapping(source = "deleted", target = "isDeleted")
     public abstract CarModelResponse toDto(CarModel entity);
 
 

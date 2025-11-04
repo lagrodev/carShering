@@ -6,5 +6,4 @@ import org.junit.platform.suite.api.Suite;
 
 @Suite
 @SelectPackages("org.example.carshering.repository")
-public class TestRepositoryAll {
-}
+public class TestRepositoryAll {}
