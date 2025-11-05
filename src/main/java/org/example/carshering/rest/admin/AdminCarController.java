@@ -8,7 +8,6 @@ import org.example.carshering.dto.request.update.UpdateCarStateRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
 import org.example.carshering.dto.response.CarStateResponse;
-import org.example.carshering.entity.CarState;
 import org.example.carshering.rest.all.CarController;
 import org.example.carshering.service.CarService;
 import org.example.carshering.service.CarStateService;
@@ -76,11 +75,13 @@ public class AdminCarController {
         carService.updateCarState(carId, request.stateName());
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/state")
     public List<CarStateResponse> AllCarStates(
     ) {
         return carStateService.getAllStates();
     }
+
     //todo делете кар
     @DeleteMapping
     public ResponseEntity<?> deleteCar(
@@ -89,8 +90,6 @@ public class AdminCarController {
         carService.deleteCar(carId);
         return ResponseEntity.noContent().build();
     }
-
-
 
 
 }

@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.service.ClientDetailsService;
 import org.example.carshering.service.impl.ClientDetailsServiceImpl;
 import org.example.carshering.utils.JwtTokenUtils;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
