@@ -45,9 +45,6 @@ public class CarRepositoryTest extends AbstractRepositoryTest {
     private CarStateRepository carStateRepository;
 
 
-    @Autowired
-    private DataUtils dataUtils;
-
     @BeforeEach
     void setUp() {
         carRepository.deleteAll();
@@ -57,6 +54,9 @@ public class CarRepositoryTest extends AbstractRepositoryTest {
         modelNameRepository.deleteAll();
         brandRepository.deleteAll();
     }
+
+    @Autowired
+    private DataUtils dataUtils;
 
 
     private List<?> getCarStateAndCarModelAndSaveAllDependencies() {

@@ -26,7 +26,7 @@ public interface ContractService {
 
     ContractResponse getContractById(Long contractId);
 
-    void confirmContract(Long contractId);
+    ContractResponse confirmContract(Long contractId);
 
     ContractResponse updateContract(Long userId, Long contractId, UpdateContractRequest request);
 

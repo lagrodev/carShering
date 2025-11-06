@@ -10,14 +10,13 @@ import org.example.carshering.dto.response.ShortUserResponse;
 import org.example.carshering.dto.response.UserResponse;
 import org.example.carshering.entity.Client;
 import org.example.carshering.entity.Role;
-import org.example.carshering.exceptions.custom.AlreadyExistsException;
-import org.example.carshering.exceptions.custom.BusinessConflictException;
-import org.example.carshering.exceptions.custom.NotFoundException;
-import org.example.carshering.exceptions.custom.PasswordException;
+import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.ClientMapper;
 import org.example.carshering.repository.ClientRepository;
 import org.example.carshering.service.ContractService;
 import org.example.carshering.service.RoleService;
+import org.example.carshering.service.domain.ContractServiceHelper;
+import org.example.carshering.service.domain.RoleServiceHelper;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,10 +50,10 @@ public class ClientServiceImplTests {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private RoleService roleService;
+    private RoleServiceHelper roleService;
 
     @Mock
-    private ContractService contractService;
+    private ContractServiceHelper contractService;
 
     @InjectMocks
     private ClientServiceImpl serviceUnderTest;
@@ -320,7 +319,7 @@ public class ClientServiceImplTests {
 
         // when + then
         assertThrows(
-                ValidationException.class,
+                NotFoundException.class,
                 () -> serviceUnderTest.findAllUser(10L)
         );
 
@@ -652,7 +651,7 @@ public class ClientServiceImplTests {
 
         // when + then
         assertThrows(
-                IllegalArgumentException.class,
+                InvalidQueryParameterException.class,
                 () -> serviceUnderTest.filterUsers(filter, pageable)
         );
 
@@ -687,8 +686,10 @@ public class ClientServiceImplTests {
 
         // when + then
         assertThrows(
-                ValidationException.class,
-                () -> serviceUnderTest.getEntity(1L)
+                NotFoundException.class,
+                () -> serviceUnderTest.getEntity(1L),
+
+                "Client not found"
         );
 
         verify(clientRepository).findById(1L);
@@ -754,7 +755,7 @@ public class ClientServiceImplTests {
 
         // when + then
         assertThrows(
-                ValidationException.class,
+                NotFoundException.class,
                 () -> serviceUnderTest.changePassword(1L, request)
         );
 
@@ -780,7 +781,8 @@ public class ClientServiceImplTests {
         // when + then
         assertThrows(
                 PasswordException.class,
-                () -> serviceUnderTest.changePassword(1L, request)
+                () -> serviceUnderTest.changePassword(1L, request),
+                "Incorrect password"
         );
 
         verify(clientRepository).findById(1L);
@@ -853,7 +855,7 @@ public class ClientServiceImplTests {
 
         // when + then
         assertThrows(
-                ValidationException.class,
+                NotFoundException.class,
                 () -> serviceUnderTest.updateProfile(1L, request)
         );
 
@@ -877,7 +879,7 @@ public class ClientServiceImplTests {
 
         // when + then
         assertThrows(
-                ValidationException.class,
+                AlreadyExistsException.class,
                 () -> serviceUnderTest.updateProfile(1L, request)
         );
 
@@ -918,7 +920,7 @@ public class ClientServiceImplTests {
 
         // when + then
         assertThrows(
-                ValidationException.class,
+                NotFoundException.class,
                 () -> serviceUnderTest.banUser(1L)
         );
 
@@ -977,7 +979,7 @@ public class ClientServiceImplTests {
 
         // when + then
         assertThrows(
-                ValidationException.class,
+                NotFoundException.class,
                 () -> serviceUnderTest.unbanUser(1L)
         );
 

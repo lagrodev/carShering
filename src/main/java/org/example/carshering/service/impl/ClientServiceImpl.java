@@ -11,15 +11,14 @@ import org.example.carshering.dto.response.ShortUserResponse;
 import org.example.carshering.dto.response.UserResponse;
 import org.example.carshering.entity.Client;
 import org.example.carshering.entity.Role;
-import org.example.carshering.exceptions.custom.AlreadyExistsException;
-import org.example.carshering.exceptions.custom.BusinessConflictException;
-import org.example.carshering.exceptions.custom.NotFoundException;
-import org.example.carshering.exceptions.custom.PasswordException;
+import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.ClientMapper;
 import org.example.carshering.repository.ClientRepository;
 import org.example.carshering.service.ClientService;
 import org.example.carshering.service.ContractService;
 import org.example.carshering.service.RoleService;
+import org.example.carshering.service.domain.ContractServiceHelper;
+import org.example.carshering.service.domain.RoleServiceHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,13 +31,15 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ClientServiceImpl implements ClientService {
 
-    private final ClientRepository clientRepository;
+
 
     private final ClientMapper clientMapper;
 
     private final PasswordEncoder passwordEncoder;
-    private final RoleService roleService;
-    private final ContractService contractService;
+
+    private final RoleServiceHelper roleService;
+    private final ContractServiceHelper contractService;
+    private final ClientRepository clientRepository;
 
     @Override
     public AllUserResponse findAllUser(Long userId) {
@@ -104,13 +105,13 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public Page<ShortUserResponse> filterUsers(FilterUserRequest filter, Pageable pageable) {
 
-        var availableBySort = Set.of("id", "email", "login");
+        var availableBySort = Set.of("id", "email", "login", "banned", "role.name");
 
         var sort = pageable.getSort();
 
         for (var order : sort) {
             if (!availableBySort.contains(order.getProperty())) {
-                throw new IllegalArgumentException("Недопустимое поле сортировки: " + order.getProperty());
+                throw new InvalidQueryParameterException(order.getProperty());
             }
         }
 
@@ -123,10 +124,10 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public UserResponse createUser(RegistrationRequest request) {
         if (clientRepository.existsByLoginAndDeletedFalse(request.login())) {
-            throw new AlreadyExistsException("Login уже используется");
+            throw new AlreadyExistsException("Login already in use");
         }
         if (clientRepository.existsByEmailAndDeletedFalse(request.email())) {
-            throw new AlreadyExistsException("Email уже зарегистрирован");
+            throw new AlreadyExistsException("Email already in use");
         }
 
         Client client = clientMapper.toEntity(request);
@@ -140,7 +141,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public Client getEntity(Long userId) {
         return clientRepository.findById(userId)
-                .orElseThrow(() -> new ValidationException("Пользователь не найден"));
+                .orElseThrow(() -> new NotFoundException("Client not found"));
     }
 
     @Override
@@ -148,7 +149,7 @@ public class ClientServiceImpl implements ClientService {
         Client client = getEntity(userId);
 
         if (!passwordEncoder.matches(request.oldPassword(), client.getPassword())) {
-            throw new PasswordException("Неверный старый пароль");
+            throw new PasswordException("Incorrect password");
         }
 
         client.setPassword(passwordEncoder.encode(request.newPassword()));
@@ -164,7 +165,7 @@ public class ClientServiceImpl implements ClientService {
         if (request.phone() != null) {
             if (!clientRepository.existsByPhoneAndIdNot(request.phone(), userId)) {
                 client.setPhone(request.phone());
-            } else throw new ValidationException("Данный телефон закреплен за другим аккаунтом");
+            } else throw new AlreadyExistsException("This phone is assigned to another account");
         }
 
 

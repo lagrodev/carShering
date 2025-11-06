@@ -6,11 +6,13 @@ import org.example.carshering.dto.request.update.UpdateCarModelRequest;
 import org.example.carshering.dto.response.CarModelResponse;
 import org.example.carshering.entity.Car;
 import org.example.carshering.entity.CarModel;
+import org.example.carshering.exceptions.custom.AlreadyExistsException;
 import org.example.carshering.exceptions.custom.EntityNotFoundException;
 import org.example.carshering.exceptions.custom.InvalidQueryParameterException;
 import org.example.carshering.mapper.ModelMapper;
 import org.example.carshering.repository.CarModelRepository;
 import org.example.carshering.service.CarService;
+import org.example.carshering.service.domain.CarServiceHelperService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,11 +27,11 @@ import org.springframework.data.domain.Sort;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -43,7 +45,7 @@ public class CarModelServiceImplTests {
     private CarModelRepository carModelRepository;
 
     @Mock
-    private CarService carService;
+    private CarServiceHelperService carService;
 
     @InjectMocks
     private CarModelServiceImpl serviceUnderTest;
@@ -56,11 +58,17 @@ public class CarModelServiceImplTests {
         CarModel entity = new CarModel();
         CarModel saved = new CarModel();
         CarModelResponse response = new CarModelResponse(1L, "BMW", "X5", "SUV", "E", false);
+        given(request.bodyType()).willReturn("SUV");
+        given(request.brand()).willReturn("BMW");
+        given(request.carClass()).willReturn("E");
+        given(request.model()).willReturn("X5");
 
         given(modelMapper.toEntity(request)).willReturn(entity);
         given(carModelRepository.save(entity)).willReturn(saved);
         given(modelMapper.toDto(saved)).willReturn(response);
-
+        given(carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
+                eq("SUV"), eq("BMW"), eq("E"), eq("X5"))
+        ).willReturn(Optional.empty());
         // when
         CarModelResponse actual = serviceUnderTest.createModel(request);
 
@@ -69,6 +77,30 @@ public class CarModelServiceImplTests {
         verify(carModelRepository).save(entity);
         verify(modelMapper).toDto(saved);
     }
+
+
+    @Test
+    @DisplayName("Test create model saves already exists model and returns exists exception")
+    public void givenCreateModelRequestAlreadyExists_whenSave_thenExistsException() {
+        // given
+        CreateCarModelRequest request = mock(CreateCarModelRequest.class);
+        given(request.bodyType()).willReturn("SUV");
+        given(request.brand()).willReturn("BMW");
+        given(request.carClass()).willReturn("E");
+        given(request.model()).willReturn("X5");
+
+        CarModel existing = new CarModel();
+        given(carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
+                eq("SUV"), eq("BMW"), eq("E"), eq("X5"))
+        ).willReturn(Optional.of(existing));
+
+        // when + then
+        assertThrows(AlreadyExistsException.class, () -> serviceUnderTest.createModel(request));
+
+        verify(carModelRepository, never()).save(any());
+        verify(modelMapper, never()).toDto(any());
+    }
+
 
     @Test
     @DisplayName("Test get model by id returns correct dto")
@@ -105,8 +137,10 @@ public class CarModelServiceImplTests {
         // given
         CarModel model = new CarModel();
         model.setIdModel(1L);
-        Car car1 = new Car(); car1.setId(10L);
-        Car car2 = new Car(); car2.setId(11L);
+        Car car1 = new Car();
+        car1.setId(10L);
+        Car car2 = new Car();
+        car2.setId(11L);
         model.setCars(List.of(car1, car2));
         model.setDeleted(false);
 
@@ -137,7 +171,7 @@ public class CarModelServiceImplTests {
     @DisplayName("Test getAllModelsIncludingDeleted filters and maps correctly")
     public void givenFilterRequest_whenGetAllModelsIncludingDeleted_thenReturnsPageOfResponses() {
         // given
-        FilterCarModelRequest request = new FilterCarModelRequest( "BMW", "SUV", "E", false);
+        FilterCarModelRequest request = new FilterCarModelRequest("BMW", "SUV", "E", false);
         Pageable pageable = mock(Pageable.class);
         Sort sort = Sort.by("brand");
         given(pageable.getSort()).willReturn(sort);

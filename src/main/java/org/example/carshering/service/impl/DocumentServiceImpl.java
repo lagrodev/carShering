@@ -16,6 +16,10 @@ import org.example.carshering.repository.DocumentRepository;
 import org.example.carshering.service.ClientService;
 import org.example.carshering.service.DocumentService;
 import org.example.carshering.service.DocumentTypeService;
+import org.example.carshering.service.domain.ClientServiceHelper;
+import org.example.carshering.service.domain.DocumentTypeServiceHelper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,10 +29,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
 
-    private final DocumentRepository documentRepository;
-    private final DocumentTypeService documentTypeService;
+    private final DocumentTypeServiceHelper documentTypeService;
     private final DocumentMapper documentMapper;
-    private final ClientService clientService;
+    private final DocumentRepository documentRepository;
+
+    private final ClientServiceHelper clientService;
 
     @Override
     @Transactional
@@ -128,15 +133,15 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public List<DocumentResponse> getAllDocuments(boolean onlyUnverified) {
-        List<Document> documents = onlyUnverified
-                ? documentRepository.findByVerifiedIsFalse()
-                : documentRepository.findAll();
+    public Page<DocumentResponse> getAllDocuments(boolean onlyUnverified, Pageable pageable) {
+        Page<Document> documents = onlyUnverified
+                ? documentRepository.findByVerifiedIsFalse(pageable)
+                : documentRepository.findAll(pageable);
 
         return documents
-                .stream()
+
                 .map(documentMapper::toDto)
-                .toList();
+                ;
     }
 
     @Override

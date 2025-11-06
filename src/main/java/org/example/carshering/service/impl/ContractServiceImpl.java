@@ -18,6 +18,9 @@ import org.example.carshering.service.CarService;
 import org.example.carshering.service.ClientService;
 import org.example.carshering.service.ContractService;
 import org.example.carshering.service.DocumentService;
+import org.example.carshering.service.domain.CarServiceHelperService;
+import org.example.carshering.service.domain.ClientServiceHelper;
+import org.example.carshering.service.domain.DocumentServiceHelper;
 import org.example.carshering.service.domain.RentalDomainService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,9 +39,9 @@ public class ContractServiceImpl implements ContractService {
     private final ContractRepository contractRepository;
     private final RentalStateRepository rentalStateRepository;
     private final ContractMapper contractMapper;
-    private final ClientService clientService;
-    private final CarService carService;
-    private final DocumentService documentService;
+    private final ClientServiceHelper clientService;
+    private final CarServiceHelperService carService;
+    private final DocumentServiceHelper documentService;
     private final RentalDomainService rentalDomainService;
 
     private RentalState getStateByName(String name) {
@@ -182,7 +185,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public void confirmContract(Long contractId) {
+    public ContractResponse confirmContract(Long contractId) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
@@ -190,6 +193,7 @@ public class ContractServiceImpl implements ContractService {
 
         contract.setState(getStateByName("CONFIRMED"));
         contractRepository.save(contract);
+        return contractMapper.toDto(contract);
     }
 
 

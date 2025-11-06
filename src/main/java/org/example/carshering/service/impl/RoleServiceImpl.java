@@ -25,4 +25,5 @@ public class RoleServiceImpl implements RoleService {
         return roleRepository.findByNameIgnoreCase(name)
                 .orElseThrow(() -> new RoleNotFoundException("Role not found with name: " + name));
     }
+
 }

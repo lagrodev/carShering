@@ -6,19 +6,18 @@ import org.example.carshering.dto.request.create.CreateCarRequest;
 import org.example.carshering.dto.request.update.UpdateCarRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
+import org.example.carshering.dto.response.CarStateResponse;
 import org.example.carshering.entity.Car;
 import org.example.carshering.entity.CarModel;
 import org.example.carshering.entity.CarState;
-import org.example.carshering.exceptions.custom.AlreadyExistsException;
-import org.example.carshering.exceptions.custom.CarNotFoundException;
-import org.example.carshering.exceptions.custom.InvalidQueryParameterException;
-import org.example.carshering.exceptions.custom.StateException;
+import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.CarMapper;
 import org.example.carshering.repository.CarRepository;
-import org.example.carshering.repository.CarStateRepository;
 import org.example.carshering.service.CarModelService;
 import org.example.carshering.service.CarService;
 import org.example.carshering.service.CarStateService;
+import org.example.carshering.service.domain.CarModelHelperService;
+import org.example.carshering.service.domain.CarStateServiceHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -40,7 +39,10 @@ public class CarServiceImpl implements CarService {
             "model.bodyType",
             "model.brand.name",
             "model.model.name",
-            "model.carClass.name"
+            "model.carClass.name",
+            "car_class",
+            "brand",
+            "model"
     );
 
     private static final String CAR_STATE_AVAILABLE = "AVAILABLE";
@@ -48,8 +50,8 @@ public class CarServiceImpl implements CarService {
 
     private final CarRepository carRepository;
     private final CarMapper carMapper;
-    private final CarModelService carModelService;
-    private final CarStateService carStateService;
+    private final CarModelHelperService carModelService;
+    private final CarStateServiceHelper carStateService;
 
 
 
@@ -88,12 +90,18 @@ public class CarServiceImpl implements CarService {
             throw new AlreadyExistsException("VIN already exists");
         }
 
+        if ((request.vin() != null && request.vin().isBlank()) || (request.gosNumber() != null && request.gosNumber().isBlank())) {
+            throw new InvalidDataException("VIN and Gos number cannot be blank");
+        }
+
 
         carMapper.updateCar(car, request);
 
+        if (request.modelId() == null) {
+            return carMapper.toDetailDto(carRepository.save(car));
+        }
 
         CarModel newModel = carModelService.getCarModelById(request.modelId());
-
 
         car.setModel(newModel);
 
@@ -127,7 +135,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     @Transactional
-    public void updateCarState(Long carId, String carStateName) {
+    public CarStateResponse updateCarState(Long carId, String carStateName) {
         Car car = getCarOrThrow(carId);
 
         CarState state = carStateService.getStateByName(carStateName);
@@ -137,8 +145,13 @@ public class CarServiceImpl implements CarService {
             model.setDeleted(false);
         }
 
+        System.out.println("Updating car state to: " + state.getStatus());
+
+        System.out.println(state.getId());
+
         car.setState(state);
         carRepository.save(car);
+        return new  CarStateResponse(state.getId(), carStateName);
     }
 
 

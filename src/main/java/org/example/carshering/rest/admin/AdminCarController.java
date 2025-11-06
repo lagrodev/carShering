@@ -1,5 +1,11 @@
 package org.example.carshering.rest.admin;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.request.create.CreateCarRequest;
@@ -22,6 +28,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/cars")
+@Tag(name = "Admin Car Management", description = "Endpoints for admin car management")
 @RestController()
 public class AdminCarController {
 
@@ -29,67 +36,218 @@ public class AdminCarController {
     private final CarStateService carStateService;
 
     @GetMapping("/{carId}")
-    public CarDetailResponse getCar(@PathVariable Long carId) {
-        return carService.getCarById(carId);
+    @Operation(
+            summary = "Get Car by ID",
+            description = "Retrieve detailed information about a specific car by its ID"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Car details retrieved successfully",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = CarDetailResponse.class)
+            )
+    )
+    @Tag(name = "get-car-by-id")
+    @Tag(name = "Get Car by ID", description = "Retrieve detailed information about a specific car by its ID")
+    public ResponseEntity<?> getCar(
+            @Parameter(
+                    description = "ID of the car to retrieve",
+                    example = "1"
+            ) @PathVariable Long carId
+    ) {
+        return ResponseEntity.ok(carService.getCarById(carId));
     }
 
+    @Operation(
+            summary = "Update Car",
+            description = "Update the details of an existing car by its ID"
+
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Car updated successfully",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = CarDetailResponse.class)
+            )
+    )
     @PatchMapping("/{carId}")
+    @Tag(name = "update-car")
+    @Tag(name = "Update Car", description = "Update the details of an existing car by its ID")
     public ResponseEntity<CarDetailResponse> updateCar(
-            @PathVariable Long carId,
-            @RequestBody @Valid UpdateCarRequest request
+            @Parameter(
+                    description = "ID of the car to update",
+                    example = "1"
+            ) @PathVariable Long carId,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Updated car details",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = UpdateCarRequest.class)
+                    )
+            ) @RequestBody @Valid UpdateCarRequest request
     ) {
         CarDetailResponse car = carService.updateCar(carId, request);
-        return ResponseEntity.status(HttpStatus.OK).body(car);
+        return ResponseEntity.ok(car);
     }
 
-    @GetMapping
-    public Page<CarListItemResponse> getCars(
-            @RequestParam(value = "brand", required = false) String brand,
-            @RequestParam(value = "model", required = false) String model,
-            @RequestParam(value = "minYear", required = false) Integer minYear,
-            @RequestParam(value = "maxYear", required = false) Integer maxYear,
-            @RequestParam(value = "body_type", required = false) String bodyType,
-            @RequestParam(value = "car_class", required = false) String carClass,
-            @RequestParam(value = "car_state", required = false) String carState,
-            @PageableDefault(size = 20, sort = "model.brand.name") Pageable pageable
-    ) {
 
-        var filter = CarController.createFilter(brand, model, minYear, maxYear, bodyType, carClass, carState);
-        return carService.getAllCars(pageable, filter);
-    }
-
+    @Operation(
+            summary = "Create Car",
+            description = "Create a new car with the provided details"
+    )
+    @ApiResponse(
+            responseCode = "201",
+            description = "Car created successfully",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = CarDetailResponse.class)
+            )
+    )
     @PostMapping
+    @Tag(name = "create-car")
+    @Tag(name = "Create Car", description = "Create a new car with the provided details")
     public ResponseEntity<CarDetailResponse> createCar(
-            @RequestBody CreateCarRequest request
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Details of the car to create",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = CreateCarRequest.class)
+                    )
+            ) @RequestBody @Valid CreateCarRequest request
     ) {
         CarDetailResponse car = carService.createCar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(car);
     }
 
 
-    @PatchMapping("/{carId}/state")
-    public ResponseEntity<?> updateCarState( // это же для мягкого удаления, так, а тут надо убрать Invalaible
-                                             @PathVariable Long carId,
-                                             @RequestBody UpdateCarStateRequest request
-    ) {
-        carService.updateCarState(carId, request.stateName());
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/state")
-    public List<CarStateResponse> AllCarStates(
-    ) {
-        return carStateService.getAllStates();
-    }
-
-    //todo делете кар
-    @DeleteMapping
+    @Operation(
+            summary = "Delete Car",
+            description = "Delete an existing car by its ID"
+    )
+    @ApiResponse(
+            responseCode = "204",
+            description = "Car deleted successfully"
+    )
+    @Tag(name = "delete-car")
+    @Tag(name = "Delete Car", description = "Delete an existing car by its ID")
+    @DeleteMapping({"/{carId}"})
     public ResponseEntity<?> deleteCar(
-            @PathVariable Long carId
+            @Parameter(
+                    description = "ID of the car to delete",
+                    example = "1"
+            ) @PathVariable Long carId
     ) {
         carService.deleteCar(carId);
         return ResponseEntity.noContent().build();
     }
 
+
+    @Operation(
+            summary = "Update Car State",
+            description = "Update the state of a specific car by its ID"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Car state updated successfully",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = CarStateResponse.class)
+            )
+    )
+    @Tag(name = "update-car-state")
+    @Tag(name = "Update Car State", description = "Update the state of a specific car by its ID")
+    @PatchMapping("/{carId}/state")
+    public ResponseEntity<?> updateCarState( // это же для мягкого удаления, так, а тут надо убрать Invalaible
+                                             @Parameter(
+                                                     description = "ID of the car to update state",
+                                                     example = "1"
+                                             ) @PathVariable Long carId,
+                                             @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                                                     description = "New state for the car",
+                                                     required = true,
+                                                     content = @Content(
+                                                             schema = @Schema(implementation = UpdateCarStateRequest.class)
+                                                     )
+                                             ) @RequestBody @Valid UpdateCarStateRequest request
+    ) {
+        CarStateResponse carStateResponse = carService.updateCarState(carId, request.stateName());
+        return ResponseEntity.status(HttpStatus.OK).body(carStateResponse);
+    }
+
+
+    @Operation(
+            summary = "Get Cars",
+            description = "Retrieve a paginated list of cars with optional filtering parameters"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Paginated list of cars retrieved successfully",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = CarListItemResponse.class)
+            )
+    )
+    @Tag(name = "get-cars")
+    @Tag(name = "Get Cars", description = "Retrieve a paginated list of cars with optional filtering parameters")
+    @GetMapping
+    public Page<CarListItemResponse> getCars(
+          @Parameter(
+            description = "Filter by car brand",
+            example = "Toyota"
+          )  @RequestParam(value = "brand", required = false) String brand,
+           @Parameter(
+            description = "Filter by car model",
+            example = "Camry"
+           ) @RequestParam(value = "model", required = false) String model,
+          @Parameter(
+            description = "Minimum manufacturing year",
+            example = "2015"
+          )  @RequestParam(value = "minYear", required = false) Integer minYear,
+         @Parameter(
+            description = "Maximum manufacturing year",
+            example = "2023"
+         )   @RequestParam(value = "maxYear", required = false) Integer maxYear,
+          @Parameter(
+            description = "Filter by body type",
+            example = "Sedan"
+          )  @RequestParam(value = "body_type", required = false) String bodyType,
+          @Parameter(
+            description = "Filter by car class",
+            example = "Economy"
+          )  @RequestParam(value = "car_class", required = false) String carClass,
+          @Parameter(
+            description = "Filter by car state",
+            example = "AVAILABLE"
+          )  @RequestParam(value = "car_state", required = false) String carState,
+           @Parameter(
+            description = "Pagination and sorting information"
+           ) @PageableDefault(size = 20, sort = "model.brand.name") Pageable pageable
+    ) {
+
+        var filter = CarController.createFilter(brand, model, minYear, maxYear, bodyType, carClass, carState);
+        return carService.getAllCars(pageable, filter);
+    }
+
+    @Operation(
+            summary = "Get All Car States",
+            description = "Retrieve a list of all possible car states"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "List of car states retrieved successfully",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = CarStateResponse.class)
+            )
+    )
+    @Tag(name = "get-all-car-states")
+    @Tag(name = "Get All Car States", description = "Retrieve a list of all possible car states")
+    @GetMapping("/state")
+    public List<CarStateResponse> AllCarStates(
+    ) {
+        return carStateService.getAllStates();
+    }
 
 }

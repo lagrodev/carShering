@@ -5,12 +5,15 @@ import org.example.carshering.dto.request.create.CreateCarRequest;
 import org.example.carshering.dto.request.update.UpdateCarRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
+import org.example.carshering.dto.response.CarStateResponse;
 import org.example.carshering.entity.*;
 import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.CarMapper;
 import org.example.carshering.repository.CarRepository;
 import org.example.carshering.service.CarModelService;
 import org.example.carshering.service.CarStateService;
+import org.example.carshering.service.domain.CarModelHelperService;
+import org.example.carshering.service.domain.CarStateServiceHelper;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,11 +46,11 @@ public class CarServiceImplTests {
     private CarMapper carMapper;
 
     @Mock
-    private CarStateService carStateService;
+    private CarStateServiceHelper carStateService;
 
 
     @Mock
-    private CarModelService carModelService;
+    private CarModelHelperService carModelService;
 
     @InjectMocks
     private CarServiceImpl serviceUnderTest;
@@ -66,6 +69,21 @@ public class CarServiceImplTests {
         CarModel carModel = dataUtils.getCarModelSEDAN(brand, modelName, carClass);
 
         CarState carState = dataUtils.getCarStateTransient(state);
+
+        return List.of(carState, carModel);
+    }
+
+
+    private List<?> getCarStateAndCarModelAndSaveAllDependencies(String state, Long idModel) {
+        Brand brand = dataUtils.getBrandTransient();
+
+        CarClass carClass = dataUtils.getCarClassTransient();
+
+        Model modelName = dataUtils.getModelNameTransient();
+
+        CarModel carModel = dataUtils.getCarModelSEDAN(brand, modelName, carClass);
+
+        CarState carState = dataUtils.getCarStatePersisted(state);
 
         return List.of(carState, carModel);
     }
@@ -445,6 +463,317 @@ public class CarServiceImplTests {
     }
 
     @Test
+    @DisplayName("Test update car without modelId skips model update")
+    public void givenUpdateRequestWithoutModelId_whenUpdateCar_thenModelIsNotChangedAndCarIsSaved() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
+        Car savedCar = dataUtils.getJohnDoePersisted(state, model);
+        CarDetailResponse response = DataUtils.carDetailResponsePersisted();
+
+        UpdateCarRequest request = dataUtils.updateCarRequestWithoutModelId();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+        given(carRepository.save(existingCar)).willReturn(savedCar);
+        given(carMapper.toDetailDto(savedCar)).willReturn(response);
+
+        // when
+        CarDetailResponse actual = serviceUnderTest.updateCar(1L, request);
+
+        // then
+        assertThat(actual).isNotNull();
+
+        verify(carMapper).updateCar(existingCar, request);
+        verify(carRepository).findById(1L);
+        verify(carRepository, never()).existsByVin(anyString());
+        verify(carRepository, never()).existsByGosNumber(anyString());
+        verify(carModelService, never()).getCarModelById(anyLong());
+        verify(carRepository).save(existingCar);
+        verify(carMapper).toDetailDto(savedCar);
+    }
+
+    @Test
+    @DisplayName("Test update car with null modelId and changed VIN")
+    public void givenUpdateRequestWithoutModelIdAndChangedVin_whenUpdateCar_thenChecksVinUniquenessAndSaves() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getMikeSmithPersisted(state, model);
+        Car savedCar = dataUtils.getJohnDoePersisted(state, model);
+        CarDetailResponse response = DataUtils.carDetailResponsePersisted();
+
+        UpdateCarRequest request = dataUtils.updateCarRequestWithoutModelId();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+        given(carRepository.existsByVin(request.vin())).willReturn(false);
+        given(carRepository.save(existingCar)).willReturn(savedCar);
+        given(carMapper.toDetailDto(savedCar)).willReturn(response);
+
+        // when
+        CarDetailResponse actual = serviceUnderTest.updateCar(1L, request);
+
+        // then
+        assertThat(actual).isNotNull();
+
+        verify(carMapper).updateCar(existingCar, request);
+        verify(carRepository).findById(1L);
+        verify(carRepository).existsByVin(request.vin());
+        verify(carRepository, never()).existsByGosNumber(anyString());
+        verify(carModelService, never()).getCarModelById(anyLong());
+        verify(carRepository).save(existingCar);
+        verify(carMapper).toDetailDto(savedCar);
+    }
+
+    @Test
+    @DisplayName("Test update car with null modelId and changed GosNomer")
+    public void givenUpdateRequestWithoutModelIdAndChangedGosNomer_whenUpdateCar_thenChecksGosNumberUniquenessAndSaves() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getFrankJonesPersisted(state, model);
+        Car savedCar = dataUtils.getJohnDoePersisted(state, model);
+        CarDetailResponse response = DataUtils.carDetailResponsePersisted();
+
+        UpdateCarRequest request = dataUtils.updateCarRequestWithoutModelId();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+        given(carRepository.existsByGosNumber(request.gosNumber())).willReturn(false);
+        given(carRepository.save(existingCar)).willReturn(savedCar);
+        given(carMapper.toDetailDto(savedCar)).willReturn(response);
+
+        // when
+        CarDetailResponse actual = serviceUnderTest.updateCar(1L, request);
+
+        // then
+        assertThat(actual).isNotNull();
+
+        verify(carMapper).updateCar(existingCar, request);
+        verify(carRepository).findById(1L);
+        verify(carRepository, never()).existsByVin(anyString());
+        verify(carRepository).existsByGosNumber(request.gosNumber());
+        verify(carModelService, never()).getCarModelById(anyLong());
+        verify(carRepository).save(existingCar);
+        verify(carMapper).toDetailDto(savedCar);
+    }
+
+    @Test
+    @DisplayName("Test update car with duplicate VIN and same GosNomer throws exception")
+    public void givenUpdateRequestWithDuplicateVinAndSameGosNomer_whenUpdateCar_thenThrowException() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getMikeSmithPersisted(state, model);
+        UpdateCarRequest request = dataUtils.updateCarRequestTransient();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+        given(carRepository.existsByVin(request.vin())).willReturn(true);
+
+        // when + then
+        assertThrows(
+                AlreadyExistsException.class,
+                () -> serviceUnderTest.updateCar(1L, request)
+        );
+
+        verify(carRepository).findById(1L);
+        verify(carRepository, never()).existsByGosNumber(anyString());
+        verify(carRepository, never()).save(any());
+        verify(carMapper, never()).updateCar(any(), any());
+        verify(carModelService, never()).getCarModelById(any());
+    }
+
+    @Test
+    @DisplayName("Test update car with same VIN and duplicate GosNomer throws exception")
+    public void givenUpdateRequestWithSameVinAndDuplicateGosNomer_whenUpdateCar_thenThrowException() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getFrankJonesPersisted(state, model);
+        UpdateCarRequest request = dataUtils.updateCarRequestTransient();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+        given(carRepository.existsByGosNumber(request.gosNumber())).willReturn(true);
+
+        // when + then
+        assertThrows(
+                AlreadyExistsException.class,
+                () -> serviceUnderTest.updateCar(1L, request)
+        );
+
+        verify(carRepository).findById(1L);
+        verify(carRepository, never()).existsByVin(anyString());
+        verify(carRepository, never()).save(any());
+        verify(carMapper, never()).updateCar(any(), any());
+        verify(carModelService, never()).getCarModelById(any());
+    }
+
+    @Test
+    @DisplayName("Test update car mapper is invoked before save")
+    public void givenValidUpdateRequest_whenUpdateCar_thenMapperIsInvokedBeforeSave() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
+        Car savedCar = dataUtils.getJohnDoePersisted(state, model);
+        CarDetailResponse response = DataUtils.carDetailResponsePersisted();
+
+        UpdateCarRequest request = dataUtils.updateCarRequestTransient();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+        given(carModelService.getCarModelById(request.modelId())).willReturn(model);
+        given(carRepository.save(existingCar)).willReturn(savedCar);
+        given(carMapper.toDetailDto(savedCar)).willReturn(response);
+
+        // when
+        serviceUnderTest.updateCar(1L, request);
+
+        // then
+        verify(carMapper).updateCar(existingCar, request);
+        verify(carRepository).save(existingCar);
+    }
+
+    @Test
+    @DisplayName("Test update car with blank VIN throws exception")
+    public void givenUpdateRequestWithBlankVin_whenUpdateCar_thenThrowException() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
+        UpdateCarRequest request = dataUtils.updateCarRequestWithBlankVin();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+
+        // when + then
+        assertThrows(
+                InvalidDataException.class,
+                () -> serviceUnderTest.updateCar(1L, request)
+        );
+
+        verify(carRepository).findById(1L);
+
+        verify(carRepository, never()).save(any());
+        verify(carMapper, never()).updateCar(any(), any());
+        verify(carModelService, never()).getCarModelById(any());
+    }
+
+    @Test
+    @DisplayName("Test update car with empty VIN throws exception")
+    public void givenUpdateRequestWithEmptyVin_whenUpdateCar_thenThrowException() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
+        UpdateCarRequest request = dataUtils.updateCarRequestWithEmptyVin();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+
+        // when + then
+        assertThrows(
+                InvalidDataException.class,
+                () -> serviceUnderTest.updateCar(1L, request)
+        );
+
+        verify(carRepository).findById(1L);
+
+        verify(carRepository, never()).save(any());
+        verify(carMapper, never()).updateCar(any(), any());
+        verify(carModelService, never()).getCarModelById(any());
+    }
+
+    @Test
+    @DisplayName("Test update car with blank GosNomer throws exception")
+    public void givenUpdateRequestWithBlankGosNomer_whenUpdateCar_thenThrowException() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
+        UpdateCarRequest request = dataUtils.updateCarRequestWithBlankGosNumber();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+
+        // when + then
+        assertThrows(
+                InvalidDataException.class,
+                () -> serviceUnderTest.updateCar(1L, request)
+        );
+
+        verify(carRepository).findById(1L);
+
+        verify(carRepository, never()).save(any());
+        verify(carMapper, never()).updateCar(any(), any());
+        verify(carModelService, never()).getCarModelById(any());
+    }
+
+    @Test
+    @DisplayName("Test update car with empty GosNomer throws exception")
+    public void givenUpdateRequestWithEmptyGosNomer_whenUpdateCar_thenThrowException() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
+        UpdateCarRequest request = dataUtils.updateCarRequestWithEmptyGosNumber();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+
+        // when + then
+        assertThrows(
+                InvalidDataException.class,
+                () -> serviceUnderTest.updateCar(1L, request)
+        );
+
+        verify(carRepository).findById(1L);
+
+        verify(carRepository, never()).save(any());
+        verify(carMapper, never()).updateCar(any(), any());
+        verify(carModelService, never()).getCarModelById(any());
+    }
+
+    @Test
+    @DisplayName("Test update car with blank VIN and blank GosNomer throws exception")
+    public void givenUpdateRequestWithBlankVinAndBlankGosNomer_whenUpdateCar_thenThrowException() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
+        UpdateCarRequest request = dataUtils.updateCarRequestWithBlankVinAndGosNumber();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+
+        // when + then
+        assertThrows(
+                InvalidDataException.class,
+                () -> serviceUnderTest.updateCar(1L, request)
+        );
+
+        verify(carRepository).findById(1L);
+        verify(carRepository, never()).save(any());
+        verify(carMapper, never()).updateCar(any(), any());
+        verify(carModelService, never()).getCarModelById(any());
+    }
+
+    @Test
     @DisplayName("Test get car by id functionality")
     public void givenId_whenGetById_thenCarIsReturned() {
         // given
@@ -604,6 +933,7 @@ public class CarServiceImplTests {
         // given
         var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
         CarState state = (CarState) list.get(0);
+
         CarModel model = (CarModel) list.get(1);
         model.setDeleted(true);
 
@@ -611,17 +941,21 @@ public class CarServiceImplTests {
 
         Car carSpy = spy(existingCar);
 
-        CarState newState = dataUtils.getCarStateTransient("RENTED");
+        CarState newState = dataUtils.getCarStatePersisted("RENTED");
 
         given(carRepository.findById(1L)).willReturn(Optional.of(carSpy));
         given(carStateService.getStateByName("RENTED")).willReturn((newState));
         given(carRepository.save(any(Car.class))).willReturn(carSpy);
 
         // when
-        serviceUnderTest.updateCarState(1L, "RENTED");
+        CarStateResponse carStateResponse = serviceUnderTest.updateCarState(1L, "RENTED");
 
         // then
         verify(carSpy).setState(same(newState));
+
+        assertThat(carStateResponse.id()).isEqualTo(1L);
+        assertThat(carStateResponse.status()).isEqualTo("RENTED");
+
         verify(carRepository).save(carSpy);
     }
 
@@ -677,16 +1011,19 @@ public class CarServiceImplTests {
         Car existingCar = dataUtils.getFrankJonesTransient(oldState, model);
         Car carSpy = spy(existingCar);
 
-        CarState newState = dataUtils.getCarStateTransient("AVAILABLE");
+        CarState newState = dataUtils.getCarStatePersisted("AVAILABLE");
 
         given(carRepository.findById(1L)).willReturn(Optional.of(carSpy));
         given(carStateService.getStateByName("AVAILABLE")).willReturn(newState);
         given(carRepository.save(any(Car.class))).willReturn(carSpy);
 
         // when
-        serviceUnderTest.updateCarState(1L, "AVAILABLE");
+        CarStateResponse carStateResponse = serviceUnderTest.updateCarState(1L, "AVAILABLE");
 
         // then
+        assertThat(carStateResponse.status()).isEqualTo("AVAILABLE");
+        assertThat(carStateResponse.id()).isEqualTo(1L);
+
         verify(carSpy).setState(same(newState));
         verify(carRepository).save(carSpy);
         assertThat(model.isDeleted()).isFalse();
@@ -704,16 +1041,18 @@ public class CarServiceImplTests {
         Car existingCar = dataUtils.getFrankJonesTransient(oldState, model);
         Car carSpy = spy(existingCar);
 
-        CarState newState = dataUtils.getCarStateTransient("UNAVAILABLE");
+        CarState newState = dataUtils.getCarStatePersisted("UNAVAILABLE");
 
         given(carRepository.findById(1L)).willReturn(Optional.of(carSpy));
         given(carStateService.getStateByName("UNAVAILABLE")).willReturn(newState);
         given(carRepository.save(any(Car.class))).willReturn(carSpy);
 
         // when
-        serviceUnderTest.updateCarState(1L, "UNAVAILABLE");
+        CarStateResponse carStateResponse =  serviceUnderTest.updateCarState(1L, "UNAVAILABLE");
 
         // then
+        assertThat(carStateResponse.status()).isEqualTo("UNAVAILABLE");
+        assertThat(carStateResponse.id()).isEqualTo(1L);
         verify(carSpy).setState(same(newState));
         verify(carRepository).save(carSpy);
         assertThat(model.isDeleted()).isTrue();
@@ -730,16 +1069,18 @@ public class CarServiceImplTests {
         Car existingCar = dataUtils.getFrankJonesTransient(oldState, model);
         Car carSpy = spy(existingCar);
 
-        CarState newState = dataUtils.getCarStateTransient("BOOKED");
+        CarState newState = dataUtils.getCarStatePersisted("BOOKED");
 
         given(carRepository.findById(1L)).willReturn(Optional.of(carSpy));
         given(carStateService.getStateByName("BOOKED")).willReturn(newState);
         given(carRepository.save(any(Car.class))).willReturn(carSpy);
 
         // when
-        serviceUnderTest.updateCarState(1L, "BOOKED");
+        CarStateResponse carStateResponse =  serviceUnderTest.updateCarState(1L, "BOOKED");
 
         // then
+        assertThat(carStateResponse.status()).isEqualTo("BOOKED");
+        assertThat(carStateResponse.id()).isEqualTo(1L);
         verify(carSpy).setState(same(newState));
         verify(carRepository).save(carSpy);
         assertThat(model.isDeleted()).isFalse();
@@ -751,7 +1092,9 @@ public class CarServiceImplTests {
         // given
         CarServiceImpl spyService = spy(serviceUnderTest);
 
-        doNothing().when(spyService).updateCarState(1L, "UNAVAILABLE");
+        CarStateResponse response = new CarStateResponse(1L, "UNAVAILABLE");
+
+        doReturn(response).when(spyService).updateCarState(1L, "UNAVAILABLE");
 
         // when
         spyService.deleteCar(1L);

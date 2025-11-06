@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import org.example.carshering.dto.request.create.CreateDocumentRequest;
 import org.example.carshering.dto.request.update.UpdateDocumentRequest;
 import org.example.carshering.dto.response.DocumentResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -18,7 +20,7 @@ public interface DocumentService {
 
     void verifyDocument(Long documentId);
 
-    List<DocumentResponse> getAllDocuments(boolean onlyUnverified);
+    Page<DocumentResponse> getAllDocuments(boolean onlyUnverified, Pageable pageable);
 
     void deleteDocument(Long userId);
 }

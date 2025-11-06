@@ -155,7 +155,7 @@ public class AuthServiceImplTests {
                 () -> serviceUnderTest.createAuthToken(request)
         );
 
-        assertThat(exception.getMessage()).isEqualTo("Неправильный логин или пароль");
+        assertThat(exception.getMessage()).isEqualTo("Incorrect login or password");
 
         ArgumentCaptor<UsernamePasswordAuthenticationToken> captor =
                 ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
@@ -184,7 +184,7 @@ public class AuthServiceImplTests {
                 () -> serviceUnderTest.createAuthToken(request)
         );
 
-        assertThat(exception.getMessage()).isEqualTo("Аккаунт заблокирован");
+        assertThat(exception.getMessage()).isEqualTo("Account has been blocked");
 
         ArgumentCaptor<UsernamePasswordAuthenticationToken> captor =
                 ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);

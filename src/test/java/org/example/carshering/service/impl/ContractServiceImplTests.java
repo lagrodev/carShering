@@ -17,6 +17,9 @@ import org.example.carshering.repository.RentalStateRepository;
 import org.example.carshering.service.CarService;
 import org.example.carshering.service.ClientService;
 import org.example.carshering.service.DocumentService;
+import org.example.carshering.service.domain.CarServiceHelperService;
+import org.example.carshering.service.domain.ClientServiceHelper;
+import org.example.carshering.service.domain.DocumentServiceHelper;
 import org.example.carshering.service.domain.RentalDomainService;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
@@ -55,11 +58,11 @@ public class ContractServiceImplTests {
     @Mock
     private ContractMapper contractMapper;
     @Mock
-    private ClientService clientService;
+    private ClientServiceHelper clientService;
     @Mock
-    private CarService carService;
+    private CarServiceHelperService carService;
     @Mock
-    private DocumentService documentService;
+    private DocumentServiceHelper documentService;
     @Mock
     private RentalDomainService rentalDomainService;
     @InjectMocks
@@ -311,14 +314,35 @@ public class ContractServiceImplTests {
         given(rentalStateRepository.findByNameIgnoreCase("CONFIRMED")).willReturn(Optional.of(confirmedState));
         given(contractRepository.save(contract)).willReturn(contract);
 
+        ContractResponse mappedResponse = new ContractResponse(
+                contract.getId(),
+                contract.getTotalCost(),                              // totalCost
+                contract.getCar().getModel().getBrand().getName(),  // brand
+                contract.getCar().getModel().getModel().getName(),        // model
+                contract.getCar().getModel().getBodyType(),  // bodyType (если enum)
+                contract.getCar().getModel().getCarClass().getName(), // carClass
+                contract.getCar().getYearOfIssue(),                    // yearOfIssue
+                contract.getClient().getLastName(),                    // lastName
+                contract.getDataStart(),                               // startDate
+                contract.getDataEnd(),                                 // endDate
+                contract.getCar().getVin(),                            // vin
+                contract.getCar().getGosNumber(),                      // gosNumber
+                confirmedState.getName()                               // state
+        );
+
+        given(contractMapper.toDto(contract)).willReturn(mappedResponse);
+
         // when
-        serviceUnderTest.confirmContract(contractId);
+        ContractResponse contractResponse = serviceUnderTest.confirmContract(contractId);
 
         // then
+        assertThat(contractResponse).isNotNull();
+        assertThat(contractResponse.state()).isEqualTo("CONFIRMED");
         verify(contractRepository).findById(contractId);
         verify(rentalStateRepository).findByNameIgnoreCase("CONFIRMED");
         verify(contractRepository).save(contract);
     }
+
 
     @Test
     @DisplayName("Test confirm contract with non-pending state throws exception")

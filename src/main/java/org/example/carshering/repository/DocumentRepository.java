@@ -1,6 +1,8 @@
 package org.example.carshering.repository;
 
 import org.example.carshering.entity.Document;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -19,7 +21,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     @Query(
             "SELECT d from Document d WHERE d.verified is false"
     )
-    List<Document> findByVerifiedIsFalse();
+    Page<Document> findByVerifiedIsFalse(Pageable pageable);
 
     // todo возможность вернуть удаленные документы для админа??
     Optional<Document> findByClientIdAndDeletedFalse(Long clientId);

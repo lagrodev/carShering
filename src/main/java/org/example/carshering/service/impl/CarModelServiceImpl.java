@@ -7,12 +7,14 @@ import org.example.carshering.dto.request.update.UpdateCarModelRequest;
 import org.example.carshering.dto.response.CarModelResponse;
 import org.example.carshering.entity.Car;
 import org.example.carshering.entity.CarModel;
+import org.example.carshering.exceptions.custom.AlreadyExistsException;
 import org.example.carshering.exceptions.custom.EntityNotFoundException;
 import org.example.carshering.exceptions.custom.InvalidQueryParameterException;
 import org.example.carshering.mapper.ModelMapper;
 import org.example.carshering.repository.CarModelRepository;
 import org.example.carshering.service.CarModelService;
 import org.example.carshering.service.CarService;
+import org.example.carshering.service.domain.CarServiceHelperService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -27,11 +29,12 @@ import java.util.Set;
 public class CarModelServiceImpl implements CarModelService {
 
     private static final Set<String> ALLOWED_SORT_PROPERTIES = Set.of(
-            "brand", "model", "bodyType", "carClass"
+            "brand.name", "model.name", "bodyType", "carClass.name"
+            , "brand", "model", "carClass"
     );
     private final ModelMapper modelMapper;
     private final CarModelRepository carModelRepository;
-    private final CarService carService;
+    private final CarServiceHelperService carService;
 
     @Override
     @Transactional
@@ -50,6 +53,16 @@ public class CarModelServiceImpl implements CarModelService {
 
     @Override
     public CarModelResponse createModel(CreateCarModelRequest request) {
+
+        if (carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
+                request.bodyType(),
+                request.brand(),
+                request.carClass(),
+                request.model()
+        ).isPresent()) {
+            throw new AlreadyExistsException("Model already exists");
+        }
+
         CarModel saved = carModelRepository.save(modelMapper.toEntity(request));
         return modelMapper.toDto(saved);
     }

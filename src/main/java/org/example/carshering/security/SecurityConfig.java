@@ -71,6 +71,13 @@ public class SecurityConfig {
                         // Админка — только для ADMIN
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "MANAGER")
 
+                        // Swagger — для всех
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
                         // Личный кабинет — для всех авторизованных
                         .anyRequest().authenticated()
                 )

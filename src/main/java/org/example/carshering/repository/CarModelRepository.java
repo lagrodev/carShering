@@ -1,5 +1,6 @@
 package org.example.carshering.repository;
 
+import jakarta.validation.constraints.NotBlank;
 import org.example.carshering.entity.CarModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,4 +40,5 @@ public interface CarModelRepository extends JpaRepository<CarModel, Long> {
     @Query("SELECT c FROM CarModel c WHERE c.idModel = :id AND c.deleted = false")
     Optional<CarModel> findByIdAndDeletedFalse(@Param("id") Long id);
 
+    Optional<CarModel> findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(@NotBlank String s, @NotBlank String brand, @NotBlank String s1, @NotBlank String model);
 }

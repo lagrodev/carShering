@@ -1,5 +1,10 @@
 package org.example.carshering.rest.all;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,23 +26,34 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
+@Tag(name = "Authentication", description = "Endpoints for user authentication and registration")
 @RequestMapping("/api")
 public class AuthController {
     private final AuthService authService;
 
     private final ClientService clientService;
 
-    //@PostMapping("/auth2")
-    public ResponseEntity<?> createAuthToken2(@RequestBody JwtRequest authRequest) {
-        return ResponseEntity.ok(new JwtResponse(authService.createAuthToken(authRequest)));
-    }
-
-
 
     @PostMapping("/auth")
+    @Operation(
+            summary = "Authenticate",
+            description = "Authenticate user and create auth token"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Authentication successful"
+    )
+    @Tag(name = "authenticate")
+    @Tag(name = "Authenticate", description = "Authenticate user and create auth token")
     public ResponseEntity<?> createAuthToken(
-            @RequestBody JwtRequest authRequest,
-//            @Value("${jwt.lifetime}") Duration jwtLifetime,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Authentication credentials",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = JwtRequest.class)
+                    )
+            )
+            @RequestBody @Valid JwtRequest authRequest,
             HttpServletResponse response) {
         String token = authService.createAuthToken(authRequest);
 
@@ -57,7 +73,28 @@ public class AuthController {
 
 
     @PostMapping("/registration")
+    @Operation(
+            summary = "Register",
+            description = "Register a new user in the system"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "User registered successfully",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UserResponse.class)
+            )
+    )
+    @Tag(name = "register")
+    @Tag(name = "Register", description = "Register a new user in the system")
     public ResponseEntity<?> createNewUser(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Registration details",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = RegistrationRequest.class)
+                    )
+            )
             @Valid @RequestBody RegistrationRequest request
     ) {
         //System.out.println(request);
@@ -67,6 +104,16 @@ public class AuthController {
 
 
     @PostMapping("/logout")
+    @Operation(
+            summary = "Logout",
+            description = "Logout user and clear authentication token"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Logged out successfully"
+    )
+    @Tag(name = "logout")
+    @Tag(name = "Logout", description = "Logout user and clear authentication token")
     public ResponseEntity<?> logout(HttpServletResponse response) {
         ResponseCookie clearCookie = ResponseCookie.from("access_token", "")
                 .httpOnly(true)

@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<AppError> handleLocked(ValidationException ex) {
+    public ResponseEntity<AppError> handleValidationException(ValidationException ex) {
         AppError error = new AppError("ValidationException", ex.getMessage(), HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.badRequest().body(error);
     }
@@ -67,6 +68,13 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<AppError> handleTypeMismatch(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex) {
+        String message = String.format("Invalid value for parameter '%s': '%s'", ex.getName(), ex.getValue());
+        AppError error = new AppError("VALIDATION_ERROR", message, HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.badRequest().body(error);
     }
 
 

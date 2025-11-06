@@ -14,6 +14,8 @@ import org.example.carshering.mapper.DocumentMapper;
 import org.example.carshering.repository.DocumentRepository;
 import org.example.carshering.service.ClientService;
 import org.example.carshering.service.DocumentTypeService;
+import org.example.carshering.service.domain.ClientServiceHelper;
+import org.example.carshering.service.domain.DocumentTypeServiceHelper;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -38,11 +44,11 @@ public class DocumentServiceImplTest {
     private DocumentRepository documentRepository;
 
     @Mock
-    private DocumentTypeService documentTypeService;
+    private DocumentTypeServiceHelper documentTypeService;
     @Mock
     private DocumentMapper documentMapper;
     @Mock
-    private ClientService clientService;
+    private ClientServiceHelper clientService;
 
     @InjectMocks
     private DocumentServiceImpl serviceUnderTest;
@@ -934,18 +940,21 @@ public class DocumentServiceImplTest {
         // given
         Document doc1 = dataUtils.createDocumentTransient("1111", "2222", "AUTO", true);
         Document doc2 = dataUtils.createDocumentTransient("3333", "4444", "MVD", false);
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Document> documentPage = new PageImpl<>(java.util.List.of(doc1, doc2), pageable, 2);
 
-        given(documentRepository.findAll()).willReturn(java.util.List.of(doc1, doc2));
+        given(documentRepository.findAll(pageable)).willReturn(documentPage);
         given(documentMapper.toDto(doc1)).willReturn(DataUtils.documentResponsePersisted("AVAILABLE", "1111", "2222", "AUTO", true));
         given(documentMapper.toDto(doc2)).willReturn(DataUtils.documentResponsePersisted("AVAILABLE", "3333", "4444", "MVD", false));
 
         // when
-        var result = serviceUnderTest.getAllDocuments(false);
+        var result = serviceUnderTest.getAllDocuments(false, pageable);
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(2);
-        verify(documentRepository).findAll();
+        assertThat(result.getContent().size()).isEqualTo(2);
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        verify(documentRepository).findAll(pageable);
         verify(documentMapper, times(2)).toDto(any());
     }
 
@@ -953,15 +962,19 @@ public class DocumentServiceImplTest {
     @DisplayName("Test getAllDocuments returns empty list when no documents found")
     public void givenNoDocuments_whenGetAllDocuments_thenReturnEmptyList() {
         // given
-        given(documentRepository.findAll()).willReturn(java.util.List.of());
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Document> emptyPage = new PageImpl<>(java.util.List.of(), pageable, 0);
+
+        given(documentRepository.findAll(pageable)).willReturn(emptyPage);
 
         // when
-        var result = serviceUnderTest.getAllDocuments(false);
+        var result = serviceUnderTest.getAllDocuments(false, pageable);
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(0);
-        verify(documentRepository).findAll();
+        assertThat(result.getContent().size()).isEqualTo(0);
+        assertThat(result.getTotalElements()).isEqualTo(0);
+        verify(documentRepository).findAll(pageable);
         verify(documentMapper, never()).toDto(any());
     }
 
@@ -972,17 +985,21 @@ public class DocumentServiceImplTest {
     public void givenOnlyUnverifiedRequested_whenGetAllDocuments_thenReturnUnverifiedDtos() {
         // given
         Document doc = dataUtils.createDocumentTransient("1111", "2222", "AUTO", false);
-        given(documentRepository.findByVerifiedIsFalse()).willReturn(java.util.List.of(doc));
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Document> documentPage = new PageImpl<>(java.util.List.of(doc), pageable, 1);
+
+        given(documentRepository.findByVerifiedIsFalse(pageable)).willReturn(documentPage);
         given(documentMapper.toDto(doc)).willReturn(DataUtils.documentResponsePersisted("AVAILABLE", "1111", "2222", "AUTO", false));
 
         // when
-        var result = serviceUnderTest.getAllDocuments(true);
+        var result = serviceUnderTest.getAllDocuments(true, pageable);
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(1);
-        assertThat(result.get(0).verified()).isFalse();
-        verify(documentRepository).findByVerifiedIsFalse();
+        assertThat(result.getContent().size()).isEqualTo(1);
+        assertThat(result.getContent().get(0).verified()).isFalse();
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        verify(documentRepository).findByVerifiedIsFalse(pageable);
         verify(documentMapper).toDto(doc);
     }
 

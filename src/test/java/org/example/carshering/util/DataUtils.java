@@ -3,8 +3,11 @@ package org.example.carshering.util;
 import org.example.carshering.dto.request.create.CreateCarRequest;
 import org.example.carshering.dto.request.create.CreateDocumentRequest;
 import org.example.carshering.dto.request.update.UpdateCarRequest;
+import org.example.carshering.dto.request.update.UpdateCarStateRequest;
 import org.example.carshering.dto.request.update.UpdateDocumentRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
+import org.example.carshering.dto.response.CarStateResponse;
+import org.example.carshering.dto.response.ContractResponse;
 import org.example.carshering.dto.response.DocumentResponse;
 import org.example.carshering.entity.*;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -13,6 +16,91 @@ import java.time.LocalDate;
 
 @TestConfiguration
 public class DataUtils {
+
+    public static CarState getCarStateNEWSTATEPersisted(String status) {
+        return CarState.builder().status(status).build();
+    }
+
+    public static DocumentType getDocumentTypePersisted(String status) {
+        return DocumentType.builder().name(status).build();
+    }
+
+    public static CarDetailResponse carDetailResponsePersisted() {
+        return CarDetailResponse.builder()
+                .id(1L)
+                .vin("JOHNDOE")
+                .gosNumber("1123")
+                .status("AVAILABLE")
+                .rent(10.0)
+                .build();
+    }
+
+    public static DocumentResponse documentResponsePersisted(String documentType, String series, String number, String issuingAuthority, boolean vera) {
+        return DocumentResponse.builder()
+                .id(1L)
+                .series(series)
+                .issuingAuthority(issuingAuthority)
+                .documentType(documentType)
+                .number(number)
+                .verified(vera)
+
+                .build();
+    }
+
+    // <!-- contract methods -->
+    public static ContractResponse contractResponsePersisted() {
+        return new ContractResponse(
+                1L,
+                1000.0,
+                "Toyota",
+                "Camry",
+                "SEDAN",
+                "ECONOMY",
+                2020,
+                "Ivanov",
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(10),
+                "VIN123456",
+                "A123BC",
+                "PENDING"
+        );
+    }
+
+    public static ContractResponse contractResponseConfirmed() {
+        return new ContractResponse(
+                1L,
+                1000.0,
+                "Toyota",
+                "Camry",
+                "SEDAN",
+                "ECONOMY",
+                2020,
+                "Ivanov",
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(10),
+                "VIN123456",
+                "A123BC",
+                "CONFIRMED"
+        );
+    }
+
+    public static ContractResponse contractResponseCancelled() {
+        return new ContractResponse(
+                2L,
+                2000.0,
+                "BMW",
+                "X5",
+                "SUV",
+                "PREMIUM",
+                2021,
+                "Petrov",
+                LocalDate.now().plusDays(5),
+                LocalDate.now().plusDays(15),
+                "VIN789012",
+                "B456CD",
+                "CANCELLED"
+        );
+    }
 
     public Car getJohnDoeTransient(CarState state, CarModel model) {
 
@@ -25,6 +113,19 @@ public class DataUtils {
                 .gosNumber("1123")
                 .build();
     }
+
+    public Car getJohnDoeTransient(CarState state, CarModel model, String vin, String gosNumber, int yearOfIssue, Double rent) {
+
+        return Car.builder()
+                .state(state)
+                .model(model)
+                .yearOfIssue(yearOfIssue)
+                .rent(rent)
+                .vin(vin)
+                .gosNumber(gosNumber)
+                .build();
+    }
+
 
     public Car getFrankJonesTransient(CarState state, CarModel model) {
         return Car.builder()
@@ -48,17 +149,6 @@ public class DataUtils {
                 .build();
     }
 
-
-    public static CarState getCarStateNEWSTATEPersisted(String status) {
-        return CarState.builder().status(status).build();
-    }
-
-    public static DocumentType getDocumentTypePersisted(String status) {
-        return DocumentType.builder().name(status).build();
-    }
-
-
-
     public CarModel getCarModelSEDAN(Brand brand, Model model, CarClass carClass) {
         return CarModel.builder()
                 .brand(brand)
@@ -69,7 +159,6 @@ public class DataUtils {
                 .build();
     }
 
-
     public CarModel getCarModelBody(Brand brand, Model model, CarClass carClass, String bodyType) {
         return CarModel.builder()
                 .brand(brand)
@@ -79,8 +168,6 @@ public class DataUtils {
                 .deleted(false)
                 .build();
     }
-
-
 
     public Car getJohnDoePersisted(CarState state, CarModel model) {
         return Car.builder()
@@ -93,9 +180,6 @@ public class DataUtils {
                 .gosNumber("1123")
                 .build();
     }
-
-
-
 
     public Car getMikeSmithPersisted(CarState state, CarModel model) {
 
@@ -111,7 +195,6 @@ public class DataUtils {
                 .build();
     }
 
-
     public Car getFrankJonesPersisted(CarState state, CarModel model) {
 
 
@@ -125,8 +208,6 @@ public class DataUtils {
                 .gosNumber("1125")
                 .build();
     }
-
-
 
     public Car getCarWithSpecificAttributes(
             String vin, String gosNumber, int year, CarState carState, CarModel carModel) {
@@ -176,12 +257,13 @@ public class DataUtils {
                 .build();
     }
 
+    // <!-- car state methods --!>
+
     public Brand getBrandTransient(String brandName) {
         return Brand.builder()
                 .name(brandName)
                 .build();
     }
-
 
     public Brand getBrandPersisted() {
         return Brand.builder()
@@ -189,7 +271,6 @@ public class DataUtils {
                 .name("PersistedBrand")
                 .build();
     }
-
 
     public CarClass getCarClassTransient() {
         return CarClass.builder()
@@ -203,8 +284,6 @@ public class DataUtils {
                 .build();
     }
 
-
-
     public CarClass getCarClassPersisted() {
         return CarClass.builder()
                 .id(1L)
@@ -212,11 +291,28 @@ public class DataUtils {
                 .build();
     }
 
-    // <!-- car state methods --!>
-
     public CarState getCarStateTransient() {
         return CarState.builder()
                 .status("Available")
+                .build();
+    }
+
+    public CarStateResponse getCarStateResponse() {
+        return CarStateResponse.builder()
+                .id(1L)
+                .status("Available")
+                .build();
+    }
+
+    public UpdateCarStateRequest getCarStateRequest() {
+        return UpdateCarStateRequest.builder()
+                .stateName("Available")
+                .build();
+    }
+
+    public UpdateCarStateRequest getCarStateRequest(String stateName) {
+        return UpdateCarStateRequest.builder()
+                .stateName(stateName)
                 .build();
     }
 
@@ -226,7 +322,6 @@ public class DataUtils {
                 .build();
     }
 
-
     public CarState getCarStatePersisted() {
         return CarState.builder()
                 .id(1L)
@@ -234,6 +329,12 @@ public class DataUtils {
                 .build();
     }
 
+    public CarState getCarStatePersisted(String s) {
+        return CarState.builder()
+                .id(1L)
+                .status(s)
+                .build();
+    }
 
     // <!-- model name methods --!>
     public Model getModelNameTransient() {
@@ -247,7 +348,6 @@ public class DataUtils {
                 .name(modelName)
                 .build();
     }
-
 
     public Model getModelNamePersisted() {
         return Model.builder()
@@ -335,17 +435,6 @@ public class DataUtils {
                 .build();
     }
 
-
-    public static CarDetailResponse carDetailResponsePersisted(){
-        return CarDetailResponse.builder()
-                .id(1L)
-                .vin("JOHNDOE")
-                .gosNumber("1123")
-                .status("AVAILABLE")
-                .build();
-    }
-
-
     public CreateCarRequest createCarRequestTransient() {
         return CreateCarRequest.builder()
                 .modelId(1L)
@@ -375,7 +464,8 @@ public class DataUtils {
                 .rent(10.0)
                 .build();
     }
-    public Car  getNeverUsedTransient(CarState state, CarModel model) {
+
+    public Car getNeverUsedTransient(CarState state, CarModel model) {
         return Car.builder()
                 .id(1L)
                 .state(state)
@@ -387,12 +477,79 @@ public class DataUtils {
                 .build();
     }
 
-
     public UpdateCarRequest updateCarRequest() {
         return UpdateCarRequest.builder()
                 .modelId(1L)
                 .yearOfIssue(2020)
                 .gosNumber("1123")
+                .vin("JOHNDOE")
+                .rent(10.0)
+                .build();
+    }
+
+    public UpdateCarRequest updateCarRequestForVin() {
+        return UpdateCarRequest.builder()
+
+                .vin("JOHNDOE")
+                .rent(50.0)
+                .build();
+    }
+
+    public UpdateCarRequest updateCarRequestWithoutModelId() {
+        return UpdateCarRequest.builder()
+                .modelId(null)
+                .yearOfIssue(2021)
+                .gosNumber("1123")
+                .vin("JOHNDOE")
+                .rent(15.0)
+                .build();
+    }
+
+    public UpdateCarRequest updateCarRequestWithBlankVin() {
+        return UpdateCarRequest.builder()
+                .modelId(1L)
+                .yearOfIssue(2020)
+                .gosNumber("1123")
+                .vin("   ")
+                .rent(10.0)
+                .build();
+    }
+
+    public UpdateCarRequest updateCarRequestWithBlankGosNumber() {
+        return UpdateCarRequest.builder()
+                .modelId(1L)
+                .yearOfIssue(2020)
+                .gosNumber("   ")
+                .vin("JOHNDOE")
+                .rent(10.0)
+                .build();
+    }
+
+    public UpdateCarRequest updateCarRequestWithBlankVinAndGosNumber() {
+        return UpdateCarRequest.builder()
+                .modelId(1L)
+                .yearOfIssue(2020)
+                .gosNumber("   ")
+                .vin("   ")
+                .rent(10.0)
+                .build();
+    }
+
+    public UpdateCarRequest updateCarRequestWithEmptyVin() {
+        return UpdateCarRequest.builder()
+                .modelId(1L)
+                .yearOfIssue(2020)
+                .gosNumber("1123")
+                .vin("")
+                .rent(10.0)
+                .build();
+    }
+
+    public UpdateCarRequest updateCarRequestWithEmptyGosNumber() {
+        return UpdateCarRequest.builder()
+                .modelId(1L)
+                .yearOfIssue(2020)
+                .gosNumber("")
                 .vin("JOHNDOE")
                 .rent(10.0)
                 .build();
@@ -435,6 +592,24 @@ public class DataUtils {
         return client;
     }
 
+
+    public Client createAndSaveClient(String firstName, String lastName,
+                                      String   login,String phone ,String email, Role role, String password) {
+        Client client = Client.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .login(login)
+
+                .phone(phone)
+                .email(email)
+                .role(role)
+                .password(password)
+
+                .build();
+        return client;
+    }
+
+
     public DocumentType createAndSaveDocumentType(String name) {
         DocumentType dt = DocumentType.builder().name(name).build();
         return dt;
@@ -450,8 +625,7 @@ public class DataUtils {
                 .build();
     }
 
-
-    public Document createDocumentTransient( Client client ,DocumentType documentType, String series, String number, String issuingAuthority, boolean vera) {
+    public Document createDocumentTransient(Client client, DocumentType documentType, String series, String number, String issuingAuthority, boolean vera) {
         return Document.builder()
                 .documentType(documentType)
                 .series(series)
@@ -463,7 +637,7 @@ public class DataUtils {
                 .build();
     }
 
-    public Document createDocumentTransient( String series, String number, String issuingAuthority, boolean vera) {
+    public Document createDocumentTransient(String series, String number, String issuingAuthority, boolean vera) {
         return Document.builder()
                 .series(series)
                 .number(number)
@@ -473,7 +647,7 @@ public class DataUtils {
                 .build();
     }
 
-    public Document createDocumentPersisted( Client client ,DocumentType documentType, String series, String number, String issuingAuthority, boolean vera) {
+    public Document createDocumentPersisted(Client client, DocumentType documentType, String series, String number, String issuingAuthority, boolean vera) {
         return Document.builder()
                 .id(1L)
                 .documentType(documentType)
@@ -483,18 +657,6 @@ public class DataUtils {
                 .verified(vera)
                 .client(client)
                 .issuingAuthority(issuingAuthority)
-                .build();
-    }
-
-    public static DocumentResponse documentResponsePersisted(String documentType, String series, String number, String issuingAuthority, boolean vera) {
-        return DocumentResponse.builder()
-                .id(1L)
-                .series(series)
-                .issuingAuthority(issuingAuthority)
-                .documentType(documentType)
-                .number(number)
-                .verified(vera)
-
                 .build();
     }
 
@@ -507,3 +669,4 @@ public class DataUtils {
                 .build();
     }
 }
+

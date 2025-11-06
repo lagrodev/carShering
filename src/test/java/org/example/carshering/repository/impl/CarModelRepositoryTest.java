@@ -471,7 +471,33 @@ public class CarModelRepositoryTest extends AbstractRepositoryTest {
                 .extracting(CarModel::getIdModel)
                 .containsExactlyInAnyOrder(a.getIdModel(), b.getIdModel());
     }
+    @Test
+    @DisplayName("findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name returns model when matches exactly")
+    public void givenExistingBodyBrandClassModel_whenFindByBodyTypeAndBrandAndClassAndModel_thenReturned() {
+        // given: создаём и сохраняем модель с конкретными атрибутами
+        var list = getCarWithSpecificAttributes("TESTBRAND", "TESTMODEL", "TESTCLASS", "TESTSTATE", "COUPE");
+        Car car = dataUtils.getCarWithSpecificAttributes("V100", "G100", 2021,
+                (CarState) list.get(0),
+                (CarModel) list.get(1));
+        CarModel savedModel = carModelRepository.save(car.getModel());
 
+        // when: поиск по bodyType, brand.name, carClass.name, model.name
+        var found = carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
+                "COUPE", "TESTBRAND", "TESTCLASS", "TESTMODEL"
+        );
+
+        // then
+        assertThat(found).isNotNull();
+        assertThat(found).isPresent();
+        assertThat(found.orElse(null).getIdModel()).isEqualTo(savedModel.getIdModel());
+
+        // negative: неполное совпадение возвращает пустой Optional
+        var notFound = carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
+                "COUPE", "WRONGBRAND", "TESTCLASS", "TESTMODEL"
+        );
+        assertThat(notFound).isNotNull();
+        assertThat(notFound).isEmpty();
+    }
 
     @Test
     @DisplayName("findModelsByFilter does not trim whitespace from filter values")
@@ -659,5 +685,79 @@ public class CarModelRepositoryTest extends AbstractRepositoryTest {
             assertThat(resultByCarClass).isEmpty();
         }
     }
+
+
+    /**
+     * Тест проверяет устойчивость метода
+     * {@link CarModelRepository#findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(String, String, String, String)}
+     * к попыткам SQL-инъекции через каждый из строковых параметров.
+     *
+     * Подход:
+     * 1) Сохраняем легитимную модель.
+     * 2) Для каждого параметра подаём набор вредоносных строк по очереди, остальные параметры — корректные.
+     * 3) Ожидаем: возвращается Optional.empty() и никаких исключений не возникает.
+     */
+    @Test
+    @DisplayName("findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name is safe against SQL injection attempts")
+    public void findByBodyTypeAndBrandClassModel_sqlInjectionAttempts_returnEmptyOrSafe() {
+        // given: сохраняем корректную модель
+        var deps = getCarWithSpecificAttributes("SAFEBR", "SAFEMODEL", "SAFECLASS", "SSTATE", "VAN");
+        Car car = dataUtils.getCarWithSpecificAttributes("VX", "GX", 2022,
+                (CarState) deps.get(0),
+                (CarModel) deps.get(1));
+        CarModel validModel = carModelRepository.save(car.getModel());
+
+        List<String> injectionAttempts = Arrays.asList(
+                "' OR '1'='1",
+                "'; DROP TABLE brands; --",
+                "admin'--",
+                "\" OR \"\"=\"",
+                "'; SELECT * FROM information_schema.tables; --",
+                "1' UNION SELECT null,null,null--",
+                "'; EXEC xp_cmdshell('ping 127.0.0.1') --",
+                "/*",
+                "*/ UNION SELECT * FROM brands; /*",
+                "\\'; DROP DATABASE; --"
+        );
+
+        // When & Then: проверяем каждый вектор атаки поочерёдно для каждого параметра
+        for (String attempt : injectionAttempts) {
+            // попытка в bodyType
+            var resBody = carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
+                    attempt, "SAFEBR", "SAFECLASS", "SAFEMODEL"
+            );
+            assertThat(resBody).isNotNull();
+            assertThat(resBody).isEmpty();
+
+            // попытка в brand
+            var resBrand = carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
+                    "VAN", attempt, "SAFECLASS", "SAFEMODEL"
+            );
+            assertThat(resBrand).isNotNull();
+            assertThat(resBrand).isEmpty();
+
+            // попытка в carClass
+            var resClass = carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
+                    "VAN", "SAFEBR", attempt, "SAFEMODEL"
+            );
+            assertThat(resClass).isNotNull();
+            assertThat(resClass).isEmpty();
+
+            // попытка в model name
+            var resModel = carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
+                    "VAN", "SAFEBR", "SAFECLASS", attempt
+            );
+            assertThat(resModel).isNotNull();
+            assertThat(resModel).isEmpty();
+
+            // sanity-check: корректный поиск по-прежнему находит модель
+            var ok = carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
+                    "VAN", "SAFEBR", "SAFECLASS", "SAFEMODEL"
+            );
+            assertThat(ok).isPresent();
+            assertThat(ok.orElse(null).getIdModel()).isEqualTo(validModel.getIdModel());
+        }
+    }
+
 
 }

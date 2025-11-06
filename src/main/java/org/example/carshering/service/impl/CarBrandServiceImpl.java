@@ -22,8 +22,11 @@ public class CarBrandServiceImpl implements CarBrandService {
     @Override
     public BrandModelResponse createBrands(CreateCarModelsBrand request) {
 
-        Brand saved = carBrandRepository.save(brandMapper.toEntity(request));
-
+        Brand saved = brandMapper.toEntity(request);
+        System.out.println(saved);
+        System.out.println("--------");
+        saved = carBrandRepository.save(saved);
+        System.out.println(saved);
         return brandMapper.toDto(saved);
 
     }

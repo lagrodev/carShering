@@ -27,9 +27,9 @@ public class AuthServiceImpl implements AuthService {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     authRequest.username(), authRequest.password()));
         } catch (BadCredentialsException e) {
-            throw new BadCredentialsException("Неправильный логин или пароль");
+            throw new BadCredentialsException("Incorrect login or password");
         } catch (LockedException e) {
-            throw new LockedException("Аккаунт заблокирован");
+            throw new LockedException("Account has been blocked");
         }
         ClientDetails userDetails = (ClientDetails) clientDetailsService.loadUserByUsername(authRequest.username());
         return jwtTokenUtils.generateToken(userDetails);

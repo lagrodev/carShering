@@ -12,6 +12,9 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
@@ -152,13 +155,16 @@ public class DocumentRepositoryTest extends AbstractRepositoryTest {
 
         documentRepository.saveAll(List.of(d1, d2, d3));
 
+        Pageable pageable = PageRequest.of(0, 20);
+
         // when
-        List<Document> unverified = documentRepository.findByVerifiedIsFalse();
+        Page<Document> unverified = documentRepository.findByVerifiedIsFalse(pageable);
 
         // then
         assertThat(unverified).isNotNull();
-        assertThat(unverified).hasSize(2);
-        assertThat(unverified).allMatch(doc -> !doc.isVerified());
+        assertThat(unverified.getContent()).hasSize(2);
+        assertThat(unverified.getTotalElements()).isEqualTo(2);
+        assertThat(unverified.getContent()).allMatch(doc -> !doc.isVerified());
     }
 
     @Test
