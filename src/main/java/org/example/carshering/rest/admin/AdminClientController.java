@@ -12,7 +12,7 @@ import org.example.carshering.dto.request.FilterUserRequest;
 import org.example.carshering.dto.request.RoleRequested;
 import org.example.carshering.dto.response.AllUserResponse;
 import org.example.carshering.dto.response.ShortUserResponse;
-import org.example.carshering.service.ClientService;
+import org.example.carshering.service.interfaces.ClientService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;

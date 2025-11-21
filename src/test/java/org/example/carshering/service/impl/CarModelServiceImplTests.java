@@ -11,7 +11,6 @@ import org.example.carshering.exceptions.custom.EntityNotFoundException;
 import org.example.carshering.exceptions.custom.InvalidQueryParameterException;
 import org.example.carshering.mapper.ModelMapper;
 import org.example.carshering.repository.CarModelRepository;
-import org.example.carshering.service.CarService;
 import org.example.carshering.service.domain.CarServiceHelperService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

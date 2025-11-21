@@ -1,6 +1,5 @@
 package org.example.carshering.service.impl;
 
-import jakarta.validation.ValidationException;
 import org.example.carshering.dto.request.ChangePasswordRequest;
 import org.example.carshering.dto.request.FilterUserRequest;
 import org.example.carshering.dto.request.RegistrationRequest;
@@ -13,8 +12,7 @@ import org.example.carshering.entity.Role;
 import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.ClientMapper;
 import org.example.carshering.repository.ClientRepository;
-import org.example.carshering.service.ContractService;
-import org.example.carshering.service.RoleService;
+import org.example.carshering.service.interfaces.EmailService;
 import org.example.carshering.service.domain.ContractServiceHelper;
 import org.example.carshering.service.domain.RoleServiceHelper;
 import org.example.carshering.util.DataUtils;
@@ -45,6 +43,10 @@ public class ClientServiceImplTests {
 
     @Mock
     private ClientMapper clientMapper;
+
+    @Mock
+    private EmailService emailService;
+
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -79,7 +81,7 @@ public class ClientServiceImplTests {
         savedClient.setId(1L);
         savedClient.setRole(role);
 
-        UserResponse response = new UserResponse(1L, "First", "Last", "testuser", "123456", "test@example.com");
+        UserResponse response = new UserResponse(1L, "First", "Last", "testuser", "123456", "test@example.com", false);
 
         given(clientRepository.existsByLoginAndDeletedFalse(request.login())).willReturn(false);
         given(clientRepository.existsByEmailAndDeletedFalse(request.email())).willReturn(false);
@@ -126,7 +128,7 @@ public class ClientServiceImplTests {
         savedClient.setId(5L);
         savedClient.setRole(role);
 
-        UserResponse response = new UserResponse(5L, "F", "L", "rolecheck", "000", "role@example.com");
+        UserResponse response = new UserResponse(5L, "F", "L", "rolecheck", "000", "role@example.com", false);
 
         given(clientRepository.existsByLoginAndDeletedFalse(request.login())).willReturn(false);
         given(clientRepository.existsByEmailAndDeletedFalse(request.email())).willReturn(false);
@@ -169,7 +171,7 @@ public class ClientServiceImplTests {
         savedClient.setPassword("encodedPassword");
         savedClient.setRole(role);
 
-        UserResponse response = new UserResponse(2L, "First", "Last", "encodeduser", "123456", "encode@example.com");
+        UserResponse response = new UserResponse(2L, "First", "Last", "encodeduser", "123456", "encode@example.com", false);
 
         given(clientRepository.existsByLoginAndDeletedFalse(request.login())).willReturn(false);
         given(clientRepository.existsByEmailAndDeletedFalse(request.email())).willReturn(false);
@@ -243,7 +245,7 @@ public class ClientServiceImplTests {
         Client client = dataUtils.createAndSaveClient("testuser", "test@example.com");
         client.setId(1L);
 
-        UserResponse response = new UserResponse(1L, "First", "Last", "testuser", "123456", "test@example.com");
+        UserResponse response = new UserResponse(1L, "First", "Last", "testuser", "123456", "test@example.com", false);
 
         given(clientRepository.findById(1L)).willReturn(Optional.of(client));
         given(clientMapper.toDto(client)).willReturn(response);
@@ -554,8 +556,8 @@ public class ClientServiceImplTests {
         List<Client> clients = List.of(client1, client2);
         Page<Client> clientPage = new PageImpl<>(clients, pageable, clients.size());
 
-        ShortUserResponse response1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", false);
-        ShortUserResponse response2 = new ShortUserResponse(2L, "user2", "user2@example.com", "CLIENT", false);
+        ShortUserResponse response1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", false, false);
+        ShortUserResponse response2 = new ShortUserResponse(2L, "user2", "user2@example.com", "CLIENT", false, false);
 
         given(clientRepository.findByFilter(false, "CLIENT", pageable)).willReturn(clientPage);
         given(clientMapper.toShortDtoForAdmin(client1)).willReturn(response1);

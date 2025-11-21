@@ -13,11 +13,9 @@ import org.example.carshering.entity.CarState;
 import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.CarMapper;
 import org.example.carshering.repository.CarRepository;
-import org.example.carshering.service.CarModelService;
-import org.example.carshering.service.CarService;
-import org.example.carshering.service.CarStateService;
 import org.example.carshering.service.domain.CarModelHelperService;
 import org.example.carshering.service.domain.CarStateServiceHelper;
+import org.example.carshering.service.interfaces.CarService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -54,7 +52,6 @@ public class CarServiceImpl implements CarService {
     private final CarStateServiceHelper carStateService;
 
 
-
     @Override
     @Transactional
     public CarDetailResponse createCar(CreateCarRequest request) {
@@ -67,9 +64,10 @@ public class CarServiceImpl implements CarService {
             throw new AlreadyExistsException("Gos number already exists");
         }
 
+
         Car car = carMapper.toEntity(request);
 
-        CarState state = carStateService.getStateByName(CAR_STATE_AVAILABLE);
+        CarState state = request.stateId() == null ? carStateService.getDefaultState() : carStateService.getStateById(request.stateId());
 
         car.setState(state);
 
@@ -151,7 +149,7 @@ public class CarServiceImpl implements CarService {
 
         car.setState(state);
         carRepository.save(car);
-        return new  CarStateResponse(state.getId(), carStateName);
+        return new CarStateResponse(state.getId(), carStateName);
     }
 
 

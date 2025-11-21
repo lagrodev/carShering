@@ -12,8 +12,6 @@ import org.example.carshering.exceptions.custom.BannedClientAccessException;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.mapper.DocumentMapper;
 import org.example.carshering.repository.DocumentRepository;
-import org.example.carshering.service.ClientService;
-import org.example.carshering.service.DocumentTypeService;
 import org.example.carshering.service.domain.ClientServiceHelper;
 import org.example.carshering.service.domain.DocumentTypeServiceHelper;
 import org.example.carshering.util.DataUtils;

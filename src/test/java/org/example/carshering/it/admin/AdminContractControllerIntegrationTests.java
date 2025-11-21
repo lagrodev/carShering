@@ -42,6 +42,7 @@ public class AdminContractControllerIntegrationTests extends BaseWebIntegrateTes
     private final String apiUrl = "/api/admin/contracts";
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -75,8 +76,15 @@ public class AdminContractControllerIntegrationTests extends BaseWebIntegrateTes
     @Autowired
     private RentalStateRepository rentalStateRepository;
 
+    @Autowired
+    private DocumentRepository documentRepository;
+    @Autowired
+    private DocumentTypeRepository documentTypeRepository;
+
     @BeforeEach
     void resetSequences() {
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.document_id_seq RESTART WITH 1");
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.doctype_id_seq RESTART WITH 1");
         jdbcTemplate.execute("ALTER SEQUENCE car_rental.contract_id_seq RESTART WITH 1");
         jdbcTemplate.execute("ALTER SEQUENCE car_rental.client_id_seq RESTART WITH 1");
         jdbcTemplate.execute("ALTER SEQUENCE car_rental.role_id_seq RESTART WITH 1");
@@ -92,6 +100,8 @@ public class AdminContractControllerIntegrationTests extends BaseWebIntegrateTes
     @BeforeEach
     @Transactional
     public void setup() {
+        documentRepository.deleteAll();
+        documentTypeRepository.deleteAll();
         contractRepository.deleteAll();
         carRepository.deleteAll();
         carStateRepository.deleteAll();

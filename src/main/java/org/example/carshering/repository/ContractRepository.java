@@ -21,6 +21,7 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
             """
                     SELECT c FROM Contract c
                         WHERE c.car.id = :carId
+                            AND (:contractId IS NULL OR c.id <> :contractId)
                             AND c.state.name IN ('BOOKED', 'ACTIVE', 'PENDING')
                             AND c.dataEnd > :startDate
                             AND c.dataStart < :endDate
@@ -29,7 +30,8 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     List<Contract> findOverlappingContracts(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
-            @Param("carId") Long carId);
+            @Param("carId") Long carId,
+            @Param("contractId") Long contractId);
 
     @Query(
             """
@@ -66,4 +68,7 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
             SELECT c FROM Contract c WHERE c.client = :client AND UPPER(c.state.name) IN :activeStates
             """
     )
-    List<Contract> findAllByClientAndActiveStates(@Param("client") Client client, @Param("activeStates") Collection<String> activeStates);}
+    List<Contract> findAllByClientAndActiveStates(@Param("client") Client client, @Param("activeStates") Collection<String> activeStates);
+
+    List<Contract> findAllByStateNameAndDataStartBefore(String confirmed, LocalDate localDate);
+}

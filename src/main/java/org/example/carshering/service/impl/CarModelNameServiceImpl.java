@@ -7,7 +7,7 @@ import org.example.carshering.entity.Model;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.mapper.ModelNameMapper;
 import org.example.carshering.repository.ModelNameRepository;
-import org.example.carshering.service.CarModelNameService;
+import org.example.carshering.service.interfaces.CarModelNameService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

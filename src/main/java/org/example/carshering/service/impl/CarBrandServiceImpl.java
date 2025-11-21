@@ -7,7 +7,7 @@ import org.example.carshering.entity.Brand;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.mapper.BrandMapper;
 import org.example.carshering.repository.BrandRepository;
-import org.example.carshering.service.CarBrandService;
+import org.example.carshering.service.interfaces.CarBrandService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

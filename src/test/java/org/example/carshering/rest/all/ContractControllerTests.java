@@ -9,7 +9,7 @@ import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.exceptions.custom.UnauthorizedContractAccessException;
 import org.example.carshering.rest.BaseWebMvcTest;
 import org.example.carshering.security.ClientDetails;
-import org.example.carshering.service.ContractService;
+import org.example.carshering.service.interfaces.ContractService;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -301,14 +301,14 @@ public class ContractControllerTests extends BaseWebMvcTest {
         when(authentication.getPrincipal()).thenReturn(clientDetails);
         when(clientDetails.getId()).thenReturn(1L);
         doThrow(new NotFoundException("Contract not found"))
-                .when(contractService).cancelContract(eq(contractId), eq(1L));
+                .when(contractService).cancelContract(eq(1L), eq(contractId));
         // when
         ResultActions resultActions = mockMvc.perform(delete(apiUrl + "/{contractId}/cancel", contractId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .principal(authentication));
 
         // then
-        verify(contractService, times(1)).cancelContract(contractId, 1L);
+        verify(contractService, times(1)).cancelContract(1L, contractId);
 
         resultActions
                 .andDo(MockMvcResultHandlers.print())
@@ -328,7 +328,7 @@ public class ContractControllerTests extends BaseWebMvcTest {
         when(authentication.getPrincipal()).thenReturn(clientDetails);
         when(clientDetails.getId()).thenReturn(2L);
         doThrow(new UnauthorizedContractAccessException("Access denied"))
-                .when(contractService).cancelContract(eq(contractId), eq(2L));
+                .when(contractService).cancelContract(eq(2L), eq(contractId));
 
         // when
         ResultActions resultActions = mockMvc.perform(delete(apiUrl + "/{contractId}/cancel", contractId)
@@ -336,7 +336,7 @@ public class ContractControllerTests extends BaseWebMvcTest {
                 .principal(authentication));
 
         // then
-        verify(contractService, times(1)).cancelContract(contractId, 2L);
+        verify(contractService, times(1)).cancelContract(2L, contractId);
 
         resultActions
                 .andDo(MockMvcResultHandlers.print())

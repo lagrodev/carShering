@@ -1,28 +1,23 @@
 package org.example.carshering.security;
 
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.entity.Client;
-import org.example.carshering.service.ClientDetailsService;
+import org.example.carshering.service.interfaces.ClientDetailsService;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -64,6 +59,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/car/**").permitAll()
                         .requestMatchers("/api/filters/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/verify/**").permitAll()
+                        .requestMatchers("/api/reset/**").permitAll()
+                        .requestMatchers("/api/reset").permitAll()
+                        .requestMatchers("/api/reset-password/**").permitAll()
+                        .requestMatchers("/api/reset-password").permitAll()
+                        .requestMatchers("/api/refresh").permitAll()
+                        .requestMatchers("/api/refresh/**").permitAll()
                         .requestMatchers("/api/registration").permitAll()
                         .requestMatchers("/api/logout").permitAll()
                         .requestMatchers("/api/profile/me").permitAll()

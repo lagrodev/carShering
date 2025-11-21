@@ -1,10 +1,9 @@
 package org.example.carshering.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.entity.Role;
 import org.example.carshering.repository.RoleRepository;
-import org.example.carshering.service.RoleService;
+import org.example.carshering.service.interfaces.RoleService;
 import org.springframework.stereotype.Service;
 
 import org.example.carshering.exceptions.custom.RoleNotFoundException;

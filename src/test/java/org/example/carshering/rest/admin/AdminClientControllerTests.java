@@ -7,7 +7,7 @@ import org.example.carshering.dto.response.ShortUserResponse;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.exceptions.custom.RoleNotFoundException;
 import org.example.carshering.rest.BaseWebMvcTest;
-import org.example.carshering.service.ClientService;
+import org.example.carshering.service.interfaces.ClientService;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -131,8 +131,8 @@ public class AdminClientControllerTests extends BaseWebMvcTest {
     public void whenGetAllUsersWithoutFilters_thenReturnPagedUsers() throws Exception {
 
         // given
-        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", false);
-        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "ADMIN", false);
+        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", false, false);
+        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "ADMIN", false, false);
 
         Page<ShortUserResponse> page = new PageImpl<>(List.of(user1, user2));
 
@@ -161,7 +161,7 @@ public class AdminClientControllerTests extends BaseWebMvcTest {
     public void givenBannedFilter_whenGetUsers_thenReturnFilteredPagedUsers() throws Exception {
 
         // given
-        ShortUserResponse user = new ShortUserResponse(3L, "bannedUser", "banned@example.com", "CLIENT", true);
+        ShortUserResponse user = new ShortUserResponse(3L, "bannedUser", "banned@example.com", "CLIENT", true, false);
         Page<ShortUserResponse> page = new PageImpl<>(List.of(user));
 
         given(clientService.filterUsers(any(), any(Pageable.class))).willReturn(page);
@@ -185,7 +185,7 @@ public class AdminClientControllerTests extends BaseWebMvcTest {
     public void givenRoleFilter_whenGetUsers_thenReturnFilteredPagedUsers() throws Exception {
 
         // given
-        ShortUserResponse user = new ShortUserResponse(4L, "adminUser", "admin@example.com", "ADMIN", false);
+        ShortUserResponse user = new ShortUserResponse(4L, "adminUser", "admin@example.com", "ADMIN", false, false);
         Page<ShortUserResponse> page = new PageImpl<>(List.of(user));
 
         given(clientService.filterUsers(any(), any(Pageable.class))).willReturn(page);
@@ -208,7 +208,7 @@ public class AdminClientControllerTests extends BaseWebMvcTest {
     public void givenMultipleFilters_whenGetUsers_thenReturnFilteredPagedUsers() throws Exception {
 
         // given
-        ShortUserResponse user = new ShortUserResponse(5L, "activeAdmin", "activeadmin@example.com", "ADMIN", false);
+        ShortUserResponse user = new ShortUserResponse(5L, "activeAdmin", "activeadmin@example.com", "ADMIN", false, false);
         Page<ShortUserResponse> page = new PageImpl<>(List.of(user));
 
         given(clientService.filterUsers(any(), any(Pageable.class))).willReturn(page);
@@ -527,8 +527,8 @@ public class AdminClientControllerTests extends BaseWebMvcTest {
     public void givenPaginationParams_whenGetUsers_thenReturnCorrectPage() throws Exception {
 
         // given
-        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", false);
-        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "CLIENT", false);
+        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", false, false);
+        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "CLIENT", false, false);
 
         Page<ShortUserResponse> page = new PageImpl<>(List.of(user1, user2));
 

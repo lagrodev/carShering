@@ -1,13 +1,13 @@
 package org.example.carshering.rest.all;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.request.JwtRequest;
+import org.example.carshering.dto.request.AuthRequest;
 import org.example.carshering.dto.request.RegistrationRequest;
 import org.example.carshering.dto.response.UserResponse;
 import org.example.carshering.exceptions.custom.AlreadyExistsException;
 import org.example.carshering.rest.BaseWebMvcTest;
-import org.example.carshering.service.AuthService;
-import org.example.carshering.service.ClientService;
+import org.example.carshering.service.interfaces.AuthService;
+import org.example.carshering.service.interfaces.ClientService;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -57,15 +58,16 @@ public class AuthControllerTests extends BaseWebMvcTest {
     public void givenJwtRequest_whenCreateAuthToken_thenSuccessResponse() throws Exception {
 
         // given
-        JwtRequest jwtRequest = new JwtRequest("user101", "password");
+        AuthRequest authRequest = new AuthRequest("user101", "password");
         String token = "mock.jwt.token";
 
-        given(authService.createAuthToken(any(JwtRequest.class))).willReturn(token);
+        given(authService.createAuthToken(any(AuthRequest.class)))
+                .willReturn(ResponseCookie.from(token, "mock.jwt.token").build());
 
         // when
         ResultActions resultActions = mockMvc.perform(post(apiUrl + "/auth")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(jwtRequest)));
+                .content(objectMapper.writeValueAsBytes(authRequest)));
 
         // then
         resultActions
@@ -84,12 +86,12 @@ public class AuthControllerTests extends BaseWebMvcTest {
     public void givenNullCredentials_whenCreateAuthToken_thenBadRequestResponse() throws Exception {
 
         // given
-        JwtRequest jwtRequest = new JwtRequest(null, null);
+        AuthRequest authRequest = new AuthRequest(null, null);
 
         // when
         ResultActions resultActions = mockMvc.perform(post(apiUrl + "/auth")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(jwtRequest)));
+                .content(objectMapper.writeValueAsBytes(authRequest)));
 
         // then
         resultActions
@@ -134,7 +136,7 @@ public class AuthControllerTests extends BaseWebMvcTest {
                 "Ivanov",
                 "newuser123",
                 null,
-                "ivanov@example.com"
+                "ivanov@example.com", false
         );
 
         given(clientService.createUser(any(RegistrationRequest.class))).willReturn(userResponse);
@@ -328,7 +330,7 @@ public class AuthControllerTests extends BaseWebMvcTest {
                 "Li",
                 "user12",
                 null,
-                "a@b.ru"
+                "a@b.ru", false
         );
 
         given(clientService.createUser(any(RegistrationRequest.class))).willReturn(userResponse);

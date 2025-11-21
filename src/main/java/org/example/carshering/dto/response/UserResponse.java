@@ -17,5 +17,8 @@ public record UserResponse(
    @Schema(description = "Phone number", example = "+1234567890")
    String phone,
    @Schema(description = "Email address", example = "john@example.com")
-   String email
+   String email,
+   @Schema(description = "Email verification status", example = "true")
+   boolean emailVerified
+
 ) {}

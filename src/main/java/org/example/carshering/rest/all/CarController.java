@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.dto.request.CarFilterRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
-import org.example.carshering.service.*;
+import org.example.carshering.service.interfaces.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;

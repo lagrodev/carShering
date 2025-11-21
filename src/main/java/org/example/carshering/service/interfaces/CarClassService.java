@@ -1,8 +1,6 @@
-package org.example.carshering.service;
+package org.example.carshering.service.interfaces;
 
 import org.example.carshering.dto.request.create.CreateCarModelName;
-import org.example.carshering.dto.request.create.CreateCarModelsBrand;
-import org.example.carshering.dto.response.BrandModelResponse;
 import org.example.carshering.dto.response.ModelNameResponse;
 import org.example.carshering.entity.CarClass;
 

@@ -12,7 +12,7 @@ import org.example.carshering.dto.request.create.CreateContractRequest;
 import org.example.carshering.dto.request.update.UpdateContractRequest;
 import org.example.carshering.dto.response.ContractResponse;
 import org.example.carshering.security.ClientDetails;
-import org.example.carshering.service.ContractService;
+import org.example.carshering.service.interfaces.ContractService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -129,7 +129,7 @@ public class ContractController {
             Authentication auth
     ) {
         Long userId = getCurrentUserId(auth);
-        contractService.cancelContract(contractId, userId);
+        contractService.cancelContract(userId, contractId );
         return ResponseEntity.noContent().build();
     } // todo логику отмены
     // todo изменение контракта

@@ -14,8 +14,8 @@ import org.example.carshering.dto.request.update.UpdateProfileRequest;
 import org.example.carshering.dto.response.DocumentResponse;
 import org.example.carshering.dto.response.UserResponse;
 import org.example.carshering.security.ClientDetails;
-import org.example.carshering.service.ClientService;
-import org.example.carshering.service.DocumentService;
+import org.example.carshering.service.interfaces.ClientService;
+import org.example.carshering.service.interfaces.DocumentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -281,6 +281,25 @@ public class ProfileController {
         return ResponseEntity.noContent().build();
     }
 
+
+
+    @GetMapping("/verify")
+    @Operation(
+            summary = "Verify email user",
+            description = "Send latter to Verify email user of the authenticated user"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Profile send letter to email successfully"
+    )
+    @Tag(name = "verify-email")
+    @Tag(name = "Verify email",  description = "Verify email user of the authenticated user")
+    public ResponseEntity<?> verifyEmail(
+            Authentication auth
+            ) {
+        Long userId = getCurrentUserId(auth);
+        return ResponseEntity.ok(clientService.verifyEmail(userId));
+    }
 
 
 

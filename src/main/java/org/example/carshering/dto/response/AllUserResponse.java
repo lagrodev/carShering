@@ -21,5 +21,7 @@ public record AllUserResponse(
    @Schema(description = "Role name", example = "USER")
    String roleName,
    @Schema(description = "Banned status", example = "false")
-   boolean banned
+   boolean banned,
+   @Schema(description = "Email verification status", example = "true")
+   boolean emailVerified
 ) {}

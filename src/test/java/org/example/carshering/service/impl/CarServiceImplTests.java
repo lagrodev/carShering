@@ -10,8 +10,6 @@ import org.example.carshering.entity.*;
 import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.CarMapper;
 import org.example.carshering.repository.CarRepository;
-import org.example.carshering.service.CarModelService;
-import org.example.carshering.service.CarStateService;
 import org.example.carshering.service.domain.CarModelHelperService;
 import org.example.carshering.service.domain.CarStateServiceHelper;
 import org.example.carshering.util.DataUtils;
@@ -747,6 +745,42 @@ public class CarServiceImplTests {
         verify(carMapper, never()).updateCar(any(), any());
         verify(carModelService, never()).getCarModelById(any());
     }
+
+    @Test
+    @DisplayName("Test update car with null VIN skips VIN uniqueness check")
+    public void givenUpdateRequestWithNullVin_whenUpdateCar_thenSkipsVinCheckAndUpdatesSuccessfully() {
+        // given
+        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
+        CarState state = (CarState) list.get(0);
+        CarModel model = (CarModel) list.get(1);
+
+        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
+        Car savedCar = dataUtils.getJohnDoePersisted(state, model);
+        CarDetailResponse response = DataUtils.carDetailResponsePersisted();
+
+        UpdateCarRequest request = dataUtils.updateCarRequestWithNullVin();
+
+        given(carRepository.findById(1L)).willReturn(Optional.of(existingCar));
+        given(carRepository.existsByVin(null)).willReturn(false);
+        given(carModelService.getCarModelById(request.modelId())).willReturn(model);
+        given(carRepository.save(existingCar)).willReturn(savedCar);
+        given(carMapper.toDetailDto(savedCar)).willReturn(response);
+
+        // when
+        CarDetailResponse actual = serviceUnderTest.updateCar(1L, request);
+
+        // then
+        assertThat(actual).isNotNull();
+
+        verify(carMapper).updateCar(existingCar, request);
+        verify(carRepository).findById(1L);
+        verify(carRepository).existsByVin(null);
+        verify(carRepository, never()).existsByGosNumber(anyString());
+        verify(carModelService).getCarModelById(request.modelId());
+        verify(carRepository).save(existingCar);
+        verify(carMapper).toDetailDto(savedCar);
+    }
+
 
     @Test
     @DisplayName("Test update car with blank VIN and blank GosNomer throws exception")

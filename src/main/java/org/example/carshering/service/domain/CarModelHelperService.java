@@ -24,12 +24,5 @@ public class CarModelHelperService {
         return carModelRepository.save(model);
     }
 
-    @Transactional
-    public void restoreIfDeleted(CarModel model) {
-        if (model.isDeleted()) {
-            model.setDeleted(false);
-            carModelRepository.save(model);
-        }
-    }
 
 }

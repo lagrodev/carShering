@@ -1,4 +1,4 @@
-package org.example.carshering.service;
+package org.example.carshering.service.interfaces;
 
 import org.example.carshering.dto.request.FilterCarModelRequest;
 import org.example.carshering.dto.request.create.CreateCarModelRequest;

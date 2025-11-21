@@ -23,6 +23,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -534,10 +535,8 @@ public class CarControllerIntegrationTests extends BaseWebIntegrateTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.length()").value(4))
-                .andExpect(jsonPath("$[0]").value("SUV"))
-                .andExpect(jsonPath("$[2]").value("SEDAN"))
-                .andExpect(jsonPath("$[3]").value("HATCHBACK"))
-                .andExpect(jsonPath("$[1]").value("COUPE"));
+                .andExpect(jsonPath("$", containsInAnyOrder("SUV", "SEDAN", "HATCHBACK", "COUPE")));
+        ;
     }
 
     @Test

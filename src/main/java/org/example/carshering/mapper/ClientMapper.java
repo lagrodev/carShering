@@ -17,10 +17,12 @@ public interface ClientMapper {
 
     @Mapping(source = "role.name", target = "roleName")
     @Mapping(source = "banned", target = "banned")
+    @Mapping(source = "emailVerified", target = "emailVerified")
     AllUserResponse toDtoForAdmin(Client client);
 
     @Mapping(source = "role.name", target = "roleName")
     @Mapping(source = "banned", target = "banned")
+    @Mapping(source = "emailVerified", target = "emailVerified")
     ShortUserResponse toShortDtoForAdmin(Client client);
 
 

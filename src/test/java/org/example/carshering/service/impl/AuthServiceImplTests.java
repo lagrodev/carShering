@@ -1,8 +1,8 @@
 package org.example.carshering.service.impl;
 
-import org.example.carshering.dto.request.JwtRequest;
+import org.example.carshering.dto.request.AuthRequest;
 import org.example.carshering.security.ClientDetails;
-import org.example.carshering.service.ClientDetailsService;
+import org.example.carshering.service.interfaces.ClientDetailsService;
 import org.example.carshering.utils.JwtTokenUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,8 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,7 +44,7 @@ public class AuthServiceImplTests {
     @DisplayName("Test createAuthToken returns JWT when credentials are valid")
     public void givenValidCredentials_whenCreateAuthToken_thenReturnToken() {
         // given
-        JwtRequest request = new JwtRequest("john", "password");
+        AuthRequest request = new AuthRequest("john", "password");
 
         ClientDetails userDetails = mock(ClientDetails.class);
         given(clientDetailsService.loadUserByUsername("john"))
@@ -55,7 +53,7 @@ public class AuthServiceImplTests {
                 .willReturn("jwt-token");
 
         // when
-        String result = serviceUnderTest.createAuthToken(request);
+        String result = serviceUnderTest.createAuthToken(request).getValue();
 
         // then
         assertThat(result).isEqualTo("jwt-token");
@@ -76,7 +74,7 @@ public class AuthServiceImplTests {
     @DisplayName("Test createAuthToken throws BadCredentialsException when credentials invalid")
     public void givenInvalidCredentials_whenCreateAuthToken_thenThrowBadCredentialsException() {
         // given
-        JwtRequest request = new JwtRequest("john", "wrongPassword");
+        AuthRequest request = new AuthRequest("john", "wrongPassword");
 
         doThrow(new BadCredentialsException("Bad credentials"))
                 .when(authenticationManager)
@@ -97,7 +95,7 @@ public class AuthServiceImplTests {
     @DisplayName("Test createAuthToken throws LockedException when account is locked")
     public void givenLockedAccount_whenCreateAuthToken_thenThrowLockedException() {
         // given
-        JwtRequest request = new JwtRequest("john", "password");
+        AuthRequest request = new AuthRequest("john", "password");
 
         doThrow(new LockedException("Account locked"))
                 .when(authenticationManager)
@@ -118,7 +116,7 @@ public class AuthServiceImplTests {
     @DisplayName("Test createAuthToken calls dependencies in correct order")
     public void givenValidRequest_whenCreateAuthToken_thenVerifyInvocationOrder() {
         // given
-        JwtRequest request = new JwtRequest("alice", "qwerty");
+        AuthRequest request = new AuthRequest("alice", "qwerty");
 
         ClientDetails userDetails = mock(ClientDetails.class);
         given(clientDetailsService.loadUserByUsername("alice"))
@@ -143,7 +141,7 @@ public class AuthServiceImplTests {
     @DisplayName("Test createAuthToken throws BadCredentialsException with correct message when credentials invalid")
     public void givenInvalidCredentials_whenCreateAuthToken_thenThrowBadCredentialsExceptionWithMessage() {
         // given
-        JwtRequest request = new JwtRequest("john", "wrongPassword");
+        AuthRequest request = new AuthRequest("john", "wrongPassword");
 
         doThrow(new BadCredentialsException("Bad credentials"))
                 .when(authenticationManager)
@@ -172,7 +170,7 @@ public class AuthServiceImplTests {
     @DisplayName("Test createAuthToken throws LockedException with correct message when account is locked")
     public void givenLockedAccount_whenCreateAuthToken_thenThrowLockedExceptionWithMessage() {
         // given
-        JwtRequest request = new JwtRequest("john", "password");
+        AuthRequest request = new AuthRequest("john", "password");
 
         doThrow(new LockedException("Account locked"))
                 .when(authenticationManager)
@@ -203,7 +201,7 @@ public class AuthServiceImplTests {
     @DisplayName("Test createAuthToken throws UsernameNotFoundException when user not found")
     public void givenNonExistentUser_whenCreateAuthToken_thenThrowUsernameNotFoundException() {
         // given
-        JwtRequest request = new JwtRequest("unknown", "password");
+        AuthRequest request = new AuthRequest("unknown", "password");
 
         given(clientDetailsService.loadUserByUsername("unknown"))
                 .willThrow(new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found"));

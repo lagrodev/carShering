@@ -30,10 +30,6 @@ public class GlobalExceptionHandler {
     }
 
 
-
-
-
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<AppError> handleValidation(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()

@@ -3,12 +3,14 @@ package org.example.carshering.it.all;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.dto.request.create.CreateContractRequest;
 import org.example.carshering.dto.request.update.UpdateContractRequest;
 import org.example.carshering.entity.*;
 import org.example.carshering.it.BaseWebIntegrateTest;
 import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
+import org.example.carshering.util.WithMockClientDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,8 +19,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -37,6 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Slf4j
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -83,6 +85,10 @@ public class ContractControllerIntegrationTests extends BaseWebIntegrateTest {
 
     @Autowired
     private RentalStateRepository rentalStateRepository;
+    @Autowired
+    private DocumentRepository documentRepository;
+    @Autowired
+    private DocumentTypeRepository documentTypeRepository;
 
     @BeforeEach
     void resetSequences() {
@@ -116,7 +122,6 @@ public class ContractControllerIntegrationTests extends BaseWebIntegrateTest {
         roleRepository.deleteAll();
         rentalStateRepository.deleteAll();
     }
-
 
     @BeforeEach
     void setUp() throws ServletException, IOException {
@@ -182,7 +187,7 @@ public class ContractControllerIntegrationTests extends BaseWebIntegrateTest {
         RentalState state = rentalStateRepository.findByNameIgnoreCase(stateName)
                 .orElseGet(() -> rentalStateRepository.save(dataUtils.getRentalState(stateName)));
 
-        Client client = clientRepository.findByEmailAndDeletedFalse(prefix + "_mail@example.com")
+        Client client = clientRepository.findByEmailAndDeletedFalse(prefix + "@mail.ru")
                 .orElseGet(() -> clientRepository.save(dataUtils.createUniqueClient(prefix)));
 
         Contract contract = dataUtils.createContract(client, car, state, start, end);
@@ -190,24 +195,7 @@ public class ContractControllerIntegrationTests extends BaseWebIntegrateTest {
         return List.of(contract, client);
     }
 
-
-    @Autowired
-    private DocumentRepository documentRepository;
-
-    @Autowired
-    private DocumentTypeRepository documentTypeRepository;
-
-
-    @Test
-    @WithMockClientDetails(username = "testuser")
-    @DisplayName("Test create contract functionality")
-    public void givenContractDto_whenCreateContract_thenSuccessResponse() throws Exception {
-        // given
-        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
-                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
-        ));
-
+    private HashMap<String, Object> createAndSaveClientWithVerifiedDocument() {
         Role role = roleRepository.save(Role.builder().name("USER").build());
 
 
@@ -219,17 +207,39 @@ public class ContractControllerIntegrationTests extends BaseWebIntegrateTest {
                 .role(role)
                 .phone("+1234567890")
                 .password("password")
-
                 .build()
         );
-       var dt = documentTypeRepository.save(DocumentType.builder().name("PASSPORT").build());
 
-       Document document = dataUtils.createAndSaveDocument(client, dt, "222222", "XYU" );
+        var dt = documentTypeRepository.save(DocumentType.builder().name("PASSPORT").build());
+
+        Document document = dataUtils.createAndSaveDocument(client, dt, "222222", "XYU");
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("Client", client);
+        hashMap.put("Role", role);
+        hashMap.put("Document", document);
+        hashMap.put("DocumentType", dt);
+
+        return hashMap;
+    }
+
+    @Test
+    @WithMockClientDetails(username = "testuser")
+    @DisplayName("Test create contract functionality")
+    public void givenContractDto_whenCreateContract_thenSuccessResponse() throws Exception {
+        // given
+        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
+                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+        ));
+        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
+        Client client = (Client) hashMap.get("Client");
+
+        Document document = (Document) hashMap.get("Document");
 
         document.setVerified(true);
-        documentRepository.save(document
 
-        );
+        documentRepository.save(document);
 
         rentalStateRepository.save(dataUtils.getRentalState("PENDING"));
 
@@ -238,8 +248,6 @@ public class ContractControllerIntegrationTests extends BaseWebIntegrateTest {
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusDays(10)
         );
-
-        System.out.println("Auth in test: " + SecurityContextHolder.getContext().getAuthentication());
 
         // when
         ResultActions resultActions = mockMvc.perform(post(apiUrl)
@@ -258,362 +266,547 @@ public class ContractControllerIntegrationTests extends BaseWebIntegrateTest {
                 .andExpect(jsonPath("$.model").value("TransientModelName"));
     }
 
-//    @Test
-//    @DisplayName("Test create contract with invalid data functionality")
-//    public void givenInvalidContractDto_whenCreateContract_thenValidationErrorResponse() throws Exception {
-//
-//        // given
-//        CreateContractRequest invalidRequest = new CreateContractRequest(
-//                null, // carId — null
-//                LocalDate.now().minusDays(1), // дата в прошлом
-//                LocalDate.now().minusDays(5) // дата в прошлом
-//        );
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(post(apiUrl)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsBytes(invalidRequest)));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.status", is(400)))
-//                .andExpect(jsonPath("$.error", is("VALIDATION_ERROR")));
-//    }
-//
-//    @Test
-//    @DisplayName("Test create contract with non-existent car functionality")
-//    public void givenContractDtoWithNonExistentCar_whenCreateContract_thenErrorResponse() throws Exception {
-//
-//        // given
-//        CreateContractRequest request = new CreateContractRequest(
-//                999L,
-//                LocalDate.now().plusDays(1),
-//                LocalDate.now().plusDays(10)
-//        );
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(post(apiUrl)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsBytes(request)));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isNotFound())
-//                .andExpect(jsonPath("$.status", is(404)))
-//                .andExpect(jsonPath("$.error", is("CarNotFoundException")))
-//                .andExpect(jsonPath("$.message").value("Car not found"));
-//    }
-//
-//    @Test
-//    @DisplayName("Test get all contracts functionality")
-//    public void whenGetAllContracts_thenReturnPagedContracts() throws Exception {
-//
-//        // given
-//        List<?> carAttributes1 = getCarWithSpecificAttributes("Toyota", "Camry", "ECONOMY", "AVAILABLE", "SEDAN");
-//        List<?> carAttributes2 = getCarWithSpecificAttributes("Honda", "Accord", "ECONOMY", "AVAILABLE", "SEDAN");
-//
-//        Car carEntity1 = dataUtils.getJohnDoeTransient(
-//                (CarState) carAttributes1.get(0),
-//                (CarModel) carAttributes1.get(1),
-//                "A123BC", "VIN123",
-//                2022, 100.0
-//        );
-//        carRepository.save(carEntity1);
-//
-//        Car carEntity2 = dataUtils.getJohnDoeTransient(
-//                (CarState) carAttributes2.get(0),
-//                (CarModel) carAttributes2.get(1),
-//                "B456CD", "VIN456",
-//                2021, 150.0
-//        );
-//        carRepository.save(carEntity2);
-//
-//        var list1 = saveContract("user1", carEntity1, "PENDING",
-//                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
-//        Contract saved1 = contractRepository.save((Contract) list1.get(0));
-//
-//        var list2 = saveContract("user1", carEntity2, "CONFIRMED",
-//                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
-//        Contract saved2 = contractRepository.save((Contract) list2.get(0));
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(get(apiUrl)
-//                .contentType(MediaType.APPLICATION_JSON));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.content", notNullValue()))
-//                .andExpect(jsonPath("$.content[0].id").value(1L))
-//                .andExpect(jsonPath("$.content[0].brand").value("Toyota"))
-//                .andExpect(jsonPath("$.content[0].state").value("PENDING"))
-//                .andExpect(jsonPath("$.content[1].id").value(2L))
-//                .andExpect(jsonPath("$.content[1].brand").value("Honda"))
-//                .andExpect(jsonPath("$.content[1].state").value("CONFIRMED"));
-//    }
-//
-//    @Test
-//    @DisplayName("Test get contract by id functionality")
-//    public void givenContractId_whenGetContract_thenSuccessResponse() throws Exception {
-//
-//        // given
-//        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
-//                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
-//        ));
-//
-//        var list = saveContract("user1", car, "PENDING",
-//                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
-//        Contract saved = contractRepository.save((Contract) list.get(0));
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(get(apiUrl + "/" + saved.getId())
-//                .contentType(MediaType.APPLICATION_JSON));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.id", notNullValue()))
-//                .andExpect(jsonPath("$.id").value(1L))
-//                .andExpect(jsonPath("$.brand").value("TransientBrand"))
-//                .andExpect(jsonPath("$.model").value("TransientModelName"))
-//                .andExpect(jsonPath("$.state").value("PENDING"));
-//    }
-//
-//    @Test
-//    @DisplayName("Test get contract by incorrect id functionality")
-//    public void givenIncorrectContractId_whenGetContract_thenErrorResponse() throws Exception {
-//
-//        // given
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(get(apiUrl + "/999")
-//                .contentType(MediaType.APPLICATION_JSON));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isNotFound())
-//                .andExpect(jsonPath("$.status", is(404)))
-//                .andExpect(jsonPath("$.error", is("NotFoundException")))
-//                .andExpect(jsonPath("$.message").value("Contract not found"));
-//    }
-//
-//    @Test
-//    @DisplayName("Test get contract with non-numeric contractId functionality")
-//    public void givenNonNumericContractId_whenGetContract_thenBadRequestResponse() throws Exception {
-//
-//        // given
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(get(apiUrl + "/invalid-id")
-//                .contentType(MediaType.APPLICATION_JSON));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.status", is(400)))
-//                .andExpect(jsonPath("$.error", is("VALIDATION_ERROR")))
-//                .andExpect(jsonPath("$.message", is("Invalid value for parameter 'contractId': 'invalid-id'")));
-//    }
-//
-//    @Test
-//    @DisplayName("Test cancel contract functionality")
-//    public void givenContractId_whenCancelContract_thenNoContentResponse() throws Exception {
-//
-//        // given
-//        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
-//                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
-//        ));
-//
-//        var list = saveContract("user1", car, "PENDING",
-//                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
-//        Contract saved = contractRepository.save((Contract) list.get(0));
-//
-//        rentalStateRepository.save(dataUtils.getRentalState("CANCELLED"));
-//
-//        Long contractId = saved.getId();
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(delete(apiUrl + "/{contractId}/cancel", contractId)
-//                .contentType(MediaType.APPLICATION_JSON));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isNoContent());
-//    }
-//
-//    @Test
-//    @DisplayName("Test cancel contract by incorrect id functionality")
-//    public void givenIncorrectContractId_whenCancelContract_thenErrorResponse() throws Exception {
-//
-//        // given
-//        Long contractId = 999L;
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(delete(apiUrl + "/{contractId}/cancel", contractId)
-//                .contentType(MediaType.APPLICATION_JSON));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isNotFound())
-//                .andExpect(jsonPath("$.status", is(404)))
-//                .andExpect(jsonPath("$.error", is("NotFoundException")))
-//                .andExpect(jsonPath("$.message").value("Contract not found"));
-//    }
-//
-//    @Test
-//    @DisplayName("Test cancel contract by another user functionality")
-//    public void givenContractIdOfAnotherUser_whenCancelContract_thenForbiddenResponse() throws Exception {
-//
-//        // given
-//        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
-//                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
-//        ));
-//
-//        var list = saveContract("user1", car, "PENDING",
-//                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
-//        Contract saved = contractRepository.save((Contract) list.get(0));
-//
-//        Long contractId = saved.getId();
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(delete(apiUrl + "/{contractId}/cancel", contractId)
-//                .contentType(MediaType.APPLICATION_JSON));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isForbidden())
-//                .andExpect(jsonPath("$.status", is(403)))
-//                .andExpect(jsonPath("$.error", is("UnauthorizedContractAccessException")))
-//                .andExpect(jsonPath("$.message").value("Access denied"));
-//    }
-//
-//    @Test
-//    @DisplayName("Test update contract functionality")
-//    public void givenUpdateContractDto_whenUpdateContract_thenSuccessResponse() throws Exception {
-//
-//        // given
-//        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
-//                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
-//        ));
-//
-//        var list = saveContract("user1", car, "PENDING",
-//                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
-//        Contract saved = contractRepository.save((Contract) list.get(0));
-//
-//        UpdateContractRequest request = new UpdateContractRequest(
-//                LocalDate.now().plusDays(2),
-//                LocalDate.now().plusDays(12)
-//        );
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(patch(apiUrl + "/" + saved.getId())
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsBytes(request)));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.id", notNullValue()))
-//                .andExpect(jsonPath("$.id").value(1L))
-//                .andExpect(jsonPath("$.brand").value("TransientBrand"))
-//                .andExpect(jsonPath("$.model").value("TransientModelName"))
-//                .andExpect(jsonPath("$.state").value("PENDING"));
-//    }
-//
-//    @Test
-//    @DisplayName("Test update contract with invalid data functionality")
-//    public void givenInvalidUpdateContractDto_whenUpdateContract_thenValidationErrorResponse() throws Exception {
-//
-//        // given
-//        UpdateContractRequest invalidRequest = new UpdateContractRequest(
-//                LocalDate.now().minusDays(1), // дата в прошлом
-//                null // null дата
-//        );
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(patch(apiUrl + "/1")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsBytes(invalidRequest)));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.status", is(400)))
-//                .andExpect(jsonPath("$.error", is("VALIDATION_ERROR")));
-//    }
-//
-//    @Test
-//    @DisplayName("Test update contract with incorrect id functionality")
-//    public void givenUpdateContractDtoWithIncorrectId_whenUpdateContract_thenErrorResponse() throws Exception {
-//
-//        // given
-//        UpdateContractRequest request = new UpdateContractRequest(
-//                LocalDate.now().plusDays(2),
-//                LocalDate.now().plusDays(12)
-//        );
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(patch(apiUrl + "/999")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsBytes(request)));
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isNotFound())
-//                .andExpect(jsonPath("$.status", is(404)))
-//                .andExpect(jsonPath("$.error", is("NotFoundException")))
-//                .andExpect(jsonPath("$.message").value("Contract not found"));
-//    }
-//
-//    @Test
-//    @DisplayName("Test update contract by another user functionality")
-//    public void givenUpdateContractDtoByAnotherUser_whenUpdateContract_thenForbiddenResponse() throws Exception {
-//
-//        // given
-//        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
-//                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
-//        ));
-//
-//        var list = saveContract("user1", car, "PENDING",
-//                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
-//        Contract saved = contractRepository.save((Contract) list.get(0));
-//
-//        UpdateContractRequest request = new UpdateContractRequest(
-//                LocalDate.now().plusDays(2),
-//                LocalDate.now().plusDays(12)
-//        );
-//
-//        // when
-//        ResultActions resultActions = mockMvc.perform(patch(apiUrl + "/" + saved.getId())
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsBytes(request))
-//        );
-//
-//        // then
-//        resultActions
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(status().isForbidden())
-//                .andExpect(jsonPath("$.status", is(403)))
-//                .andExpect(jsonPath("$.error", is("UnauthorizedContractAccessException")))
-//                .andExpect(jsonPath("$.message").value("Access denied"));
-//    }
+    @Test
+    @DisplayName("Test create contract with invalid data functionality")
+    @WithMockClientDetails(username = "testuser")
+    public void givenInvalidContractDto_whenCreateContract_thenValidationErrorResponse() throws Exception {
+        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
+                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+        ));
+        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
+        Client client = (Client) hashMap.get("Client");
+
+        Document document = (Document) hashMap.get("Document");
+
+        document.setVerified(true);
+
+        documentRepository.save(document);
+
+        rentalStateRepository.save(dataUtils.getRentalState("PENDING"));
+
+        // given
+        CreateContractRequest invalidRequest = new CreateContractRequest(
+                1L, // carId — null
+                LocalDate.now().minusDays(1), // дата в прошлом
+                LocalDate.now().minusDays(5) // дата в прошлом
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(post(apiUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(invalidRequest)));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.error", is("VALIDATION_ERROR")));
+    }
+
+
+    @Test
+    @DisplayName("Test create contract with invalid start data functionality")
+    @WithMockClientDetails(username = "testuser")
+    public void givenInvalidContractDto_whenCreateContract_thenValidationError() throws Exception {
+        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
+                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+        ));
+        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
+        Client client = (Client) hashMap.get("Client");
+
+        Document document = (Document) hashMap.get("Document");
+
+        document.setVerified(true);
+
+        documentRepository.save(document);
+
+        rentalStateRepository.save(dataUtils.getRentalState("PENDING"));
+
+        // given
+        CreateContractRequest invalidRequest = new CreateContractRequest(
+                1L,
+                LocalDate.now().plusDays(3), // дата начала позже даты окончания
+                LocalDate.now().plusDays(1) // дата окончания, норм
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(post(apiUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(invalidRequest)));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.error", is("InvalidContractDateRangeException")));
+    }
+
+    @Test
+    @WithMockClientDetails(username = "testuser")
+    @DisplayName("Test create contract with non-existent car functionality")
+    public void givenContractDtoWithNonExistentCar_whenCreateContract_thenErrorResponse() throws Exception {
+        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
+                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+        ));
+        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
+        Client client = (Client) hashMap.get("Client");
+
+        Document document = (Document) hashMap.get("Document");
+
+        document.setVerified(true);
+
+        documentRepository.save(document);
+
+        rentalStateRepository.save(dataUtils.getRentalState("PENDING"));
+        // given
+        CreateContractRequest request = new CreateContractRequest(
+                999L,
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(10)
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(post(apiUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(request)));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.error", is("CarNotFoundException")))
+                .andExpect(jsonPath("$.message").value("Car not found"));
+    }
+
+    @Test
+    @WithMockClientDetails(username = "testuser")
+    @DisplayName("Test create contract with non-verificate document functionality")
+    public void givenContractDtoWithNonHaveVerificateDocument_whenCreateContract_thenErrorResponse() throws Exception {
+        getCarStateAndCarModelAndSaveAllDependencies();
+        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
+        Client client = (Client) hashMap.get("Client");
+
+        Document document = (Document) hashMap.get("Document");
+
+
+        documentRepository.save(document);
+
+        rentalStateRepository.save(dataUtils.getRentalState("PENDING"));
+        // given
+        CreateContractRequest request = new CreateContractRequest(
+                1L,
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(10)
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(post(apiUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(request)));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.error", is("UnverifiedClientDocumentException")))
+                .andExpect(jsonPath("$.message").value("The document is not verified. Please wait for verification or attach the relevant document"));
+    }
+
+
+
+
+
+    @Test
+    @DisplayName("Test get all contracts functionality")
+    @WithMockClientDetails(username = "testuser")
+    public void whenGetAllContracts_thenReturnPagedContracts() throws Exception {
+        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
+        Client client = (Client) hashMap.get("Client");
+
+        Document document = (Document) hashMap.get("Document");
+
+        document.setVerified(true);
+        // given
+        List<?> carAttributes1 = getCarWithSpecificAttributes("Toyota", "Camry", "ECONOMY", "AVAILABLE", "SEDAN");
+        List<?> carAttributes2 = getCarWithSpecificAttributes("Honda", "Accord", "ECONOMY", "AVAILABLE", "SEDAN");
+
+        Car carEntity1 = dataUtils.getJohnDoeTransient(
+                (CarState) carAttributes1.get(0),
+                (CarModel) carAttributes1.get(1),
+                "A123BC", "VIN123",
+                2022, 100.0
+        );
+        carRepository.save(carEntity1);
+
+        Car carEntity2 = dataUtils.getJohnDoeTransient(
+                (CarState) carAttributes2.get(0),
+                (CarModel) carAttributes2.get(1),
+                "B456CD", "VIN456",
+                2021, 150.0
+        );
+        carRepository.save(carEntity2);
+
+        var list1 = saveContract("testuser", carEntity1, "PENDING",
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+        Contract saved1 = contractRepository.save((Contract) list1.get(0));
+
+        var list2 = saveContract("testuser", carEntity2, "CONFIRMED",
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+        Contract saved2 = contractRepository.save((Contract) list2.get(0));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(get(apiUrl)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", notNullValue()))
+                .andExpect(jsonPath("$.content[0].id").value(1L))
+                .andExpect(jsonPath("$.content[0].brand").value("Toyota"))
+                .andExpect(jsonPath("$.content[0].state").value("PENDING"))
+                .andExpect(jsonPath("$.content[1].id").value(2L))
+                .andExpect(jsonPath("$.content[1].brand").value("Honda"))
+                .andExpect(jsonPath("$.content[1].state").value("CONFIRMED"));
+    }
+
+    @Test
+    @DisplayName("Test get contract by id functionality")
+    @WithMockClientDetails(username = "testuser")
+    public void givenContractId_whenGetContract_thenSuccessResponse() throws Exception {
+        // given
+        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
+                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+        ));
+        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
+        Client client = (Client) hashMap.get("Client");
+
+        Document document = (Document) hashMap.get("Document");
+
+        document.setVerified(true);
+        var list = saveContract("testuser", car, "PENDING",
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+        Contract saved = contractRepository.save((Contract) list.get(0));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(get(apiUrl + "/" + saved.getId())
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.brand").value("TransientBrand"))
+                .andExpect(jsonPath("$.model").value("TransientModelName"))
+                .andExpect(jsonPath("$.state").value("PENDING"));
+    }
+
+    @Test
+    @DisplayName("Test get contract by incorrect id functionality")
+    @WithMockClientDetails(username = "testuser")
+    public void givenIncorrectContractId_whenGetContract_thenErrorResponse() throws Exception {
+
+        // given
+        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
+        // when
+        ResultActions resultActions = mockMvc.perform(get(apiUrl + "/999")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.error", is("NotFoundException")))
+                .andExpect(jsonPath("$.message").value("Contract not found"));
+    }
+
+    @Test
+    @WithMockClientDetails(username = "testuser")
+    @DisplayName("Test get contract with non-numeric contractId functionality")
+    public void givenNonNumericContractId_whenGetContract_thenBadRequestResponse() throws Exception {
+
+        // given
+
+        // when
+        ResultActions resultActions = mockMvc.perform(get(apiUrl + "/invalid-id")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.error", is("VALIDATION_ERROR")))
+                .andExpect(jsonPath("$.message", is("Invalid value for parameter 'contractId': 'invalid-id'")));
+    }
+
+    @Test
+    @WithMockClientDetails(username = "testuser")
+    @DisplayName("Test cancel contract functionality")
+    public void givenContractId_whenCancelContract_thenNoContentResponse() throws Exception {
+
+        // given
+        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
+        Client client = (Client) hashMap.get("Client");
+
+        Document document = (Document) hashMap.get("Document");
+
+        document.setVerified(true);
+
+        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
+                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+        ));
+
+        var list = saveContract("testuser", car, "PENDING",
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+        Contract saved = contractRepository.save((Contract) list.get(0));
+
+        rentalStateRepository.save(dataUtils.getRentalState("CANCELLED"));
+
+        Long contractId = saved.getId();
+
+        rentalStateRepository.save(dataUtils.getRentalState("CANCELLATION_REQUESTED"));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(delete(apiUrl + "/{contractId}/cancel", contractId)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockClientDetails(username = "testuser")
+    @DisplayName("Test cancel contract by incorrect id functionality")
+    public void givenIncorrectContractId_whenCancelContract_thenErrorResponse() throws Exception {
+
+        // given
+        Long contractId = 999L;
+        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
+        Client client = (Client) hashMap.get("Client");
+
+        Document document = (Document) hashMap.get("Document");
+
+        document.setVerified(true);
+        rentalStateRepository.save(dataUtils.getRentalState("CANCELLATION_REQUESTED"));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(delete(apiUrl + "/{contractId}/cancel", contractId)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.error", is("NotFoundException")))
+                .andExpect(jsonPath("$.message").value("Contract not found"));
+    }
+
+    @Test
+    @DisplayName("Test cancel contract by another user functionality")
+    @WithMockClientDetails(username = "testuser", id = 999L)
+    public void givenContractIdOfAnotherUser_whenCancelContract_thenForbiddenResponse() throws Exception {
+
+        // given
+        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
+                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+        ));
+
+        var list = saveContract("user1", car, "PENDING",
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+        Contract saved = contractRepository.save((Contract) list.get(0));
+
+        Client anotherClient = clientRepository.save(list.get(1) instanceof Client c ? c : null);
+
+        Long contractId = saved.getId();
+        rentalStateRepository.save(dataUtils.getRentalState("CANCELLATION_REQUESTED"));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(delete(apiUrl + "/{contractId}/cancel", contractId)
+                .contentType(MediaType.APPLICATION_JSON));
+        Contract contract = (Contract)  list.getFirst();
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status", is(403)))
+                .andExpect(jsonPath("$.error", is("UnauthorizedContractAccessException")))
+                .andExpect(jsonPath("$.message").value("You can't terminate someone else's contract"));
+    }
+
+    @Test
+    @WithMockClientDetails(username = "testuser")
+    @DisplayName("Test update contract functionality")
+    public void givenUpdateContractDto_whenUpdateContract_thenSuccessResponse() throws Exception {
+
+        // given
+
+        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
+                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+        ));
+        var list = saveContract("user1", car, "PENDING",
+                LocalDate.now().plusDays(15), LocalDate.now().plusDays(20));
+        Contract saved = contractRepository.save((Contract) list.get(0));
+
+        Client anotherClient = clientRepository.save(list.get(1) instanceof Client c ? c : null);
+
+        Long contractId = saved.getId();
+        rentalStateRepository.save(dataUtils.getRentalState("CANCELLATION_REQUESTED"));
+
+
+        UpdateContractRequest request = new UpdateContractRequest(
+                LocalDate.now().plusDays(2),
+                LocalDate.now().plusDays(12)
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(patch(apiUrl + "/" + saved.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(request)));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.brand").value("TransientBrand"))
+                .andExpect(jsonPath("$.model").value("TransientModelName"))
+                .andExpect(jsonPath("$.state").value("PENDING"));
+    }
+
+    @Test
+    @WithMockClientDetails(username = "testuser")
+    @DisplayName("Test update contract with invalid data functionality")
+    public void givenInvalidUpdateContractDto_whenUpdateContract_thenValidationErrorResponse() throws Exception {
+
+        // given
+        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
+                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+        ));
+        var list = saveContract("user1", car, "PENDING",
+                LocalDate.now().plusDays(15), LocalDate.now().plusDays(20));
+        Contract saved = contractRepository.save((Contract) list.get(0));
+
+        Client anotherClient = clientRepository.save(list.get(1) instanceof Client c ? c : null);
+
+        Long contractId = saved.getId();
+        rentalStateRepository.save(dataUtils.getRentalState("CANCELLATION_REQUESTED"));
+
+        UpdateContractRequest invalidRequest = new UpdateContractRequest(
+                LocalDate.now().minusDays(1), // дата в прошлом
+                null // null дата
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(patch(apiUrl + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(invalidRequest)));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.error", is("VALIDATION_ERROR")));
+    }
+
+    @Test
+    @WithMockClientDetails(username = "testuser")
+    @DisplayName("Test update contract with incorrect id functionality")
+    public void givenUpdateContractDtoWithIncorrectId_whenUpdateContract_thenErrorResponse() throws Exception {
+
+        // given
+        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
+                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+        ));
+        var list = saveContract("user1", car, "PENDING",
+                LocalDate.now().plusDays(15), LocalDate.now().plusDays(20));
+        Contract saved = contractRepository.save((Contract) list.get(0));
+
+        Client anotherClient = clientRepository.save(list.get(1) instanceof Client c ? c : null);
+
+        Long contractId = saved.getId();
+        rentalStateRepository.save(dataUtils.getRentalState("CANCELLATION_REQUESTED"));
+
+        UpdateContractRequest request = new UpdateContractRequest(
+                LocalDate.now().plusDays(2),
+                LocalDate.now().plusDays(12)
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(patch(apiUrl + "/999")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(request)));
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.error", is("NotFoundException")))
+                .andExpect(jsonPath("$.message").value("Contract not found"));
+    }
+
+    @Test
+    @WithMockClientDetails(username = "testuser", id = 999L)
+    @DisplayName("Test update contract by another user functionality")
+    public void givenUpdateContractDtoByAnotherUser_whenUpdateContract_thenForbiddenResponse() throws Exception {
+
+        // given
+
+
+        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
+                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+        ));
+
+        var list = saveContract("user1", car, "PENDING",
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+        Contract saved = contractRepository.save((Contract) list.get(0));
+        Client anotherClient = clientRepository.save(list.get(1) instanceof Client c ? c : null);
+
+        Long contractId = saved.getId();
+        rentalStateRepository.save(dataUtils.getRentalState("CANCELLATION_REQUESTED"));
+        UpdateContractRequest request = new UpdateContractRequest(
+                LocalDate.now().plusDays(2),
+                LocalDate.now().plusDays(12)
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(patch(apiUrl + "/" + saved.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(request))
+        );
+
+        // then
+        resultActions
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status", is(403)))
+                .andExpect(jsonPath("$.error", is("UnauthorizedContractAccessException")))
+                .andExpect(jsonPath("$.message").value("You can't terminate someone else's contract"));
+    }
 }
 

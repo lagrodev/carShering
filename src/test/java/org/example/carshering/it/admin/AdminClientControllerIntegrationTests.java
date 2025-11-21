@@ -180,8 +180,8 @@ public class AdminClientControllerIntegrationTests extends BaseWebIntegrateTest 
         Role role2 = roleRepository.save(Role.builder().name("ADMIN").build());
 
 
-        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", false);
-        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "ADMIN", false);
+        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", false, false);
+        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "ADMIN", false, false);
 
         Client client1 = dataUtils.createAndSaveClient("Иван", "Иванов", "user1",
                 "+79991234567", "user1@example.com", role1, "password");
@@ -221,8 +221,8 @@ public class AdminClientControllerIntegrationTests extends BaseWebIntegrateTest 
     public void givenBannedFilter_whenGetUsers_thenReturnFilteredPagedUsers() throws Exception {
 
         // given
-        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", true);
-        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "ADMIN", false);
+        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", true, false);
+        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "ADMIN", false, false);
         Page<ShortUserResponse> page = new PageImpl<>(List.of(user1, user2));
         Role role1 = roleRepository.save(Role.builder().name("CLIENT").build());
         Role role2 = roleRepository.save(Role.builder().name("ADMIN").build());
@@ -256,8 +256,8 @@ public class AdminClientControllerIntegrationTests extends BaseWebIntegrateTest 
 
         // given
 
-        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", true);
-        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "ADMIN", false);
+        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", true, false);
+        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "ADMIN", false, false);
         Page<ShortUserResponse> page = new PageImpl<>(List.of(user1, user2));
         Role role1 = roleRepository.save(Role.builder().name("CLIENT").build());
         Role role2 = roleRepository.save(Role.builder().name("ADMIN").build());
@@ -294,9 +294,9 @@ public class AdminClientControllerIntegrationTests extends BaseWebIntegrateTest 
     public void givenMultipleFilters_whenGetUsers_thenReturnFilteredPagedUsers() throws Exception {
 
         // given
-        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", true);
-        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "ADMIN", false);
-        ShortUserResponse user3 = new ShortUserResponse(2L, "user3", "user3@example.com", "ADMIN", true);
+        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", true, false);
+        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "ADMIN", false, false);
+        ShortUserResponse user3 = new ShortUserResponse(2L, "user3", "user3@example.com", "ADMIN", true, false);
         Page<ShortUserResponse> page = new PageImpl<>(List.of(user1, user2));
         Role role1 = roleRepository.save(Role.builder().name("CLIENT").build());
         Role role2 = roleRepository.save(Role.builder().name("ADMIN").build());
@@ -669,8 +669,8 @@ public class AdminClientControllerIntegrationTests extends BaseWebIntegrateTest 
     public void givenPaginationParams_whenGetUsers_thenReturnCorrectPage() throws Exception {
 
         // given
-        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", false);
-        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "CLIENT", false);
+        ShortUserResponse user1 = new ShortUserResponse(1L, "user1", "user1@example.com", "CLIENT", false, false);
+        ShortUserResponse user2 = new ShortUserResponse(2L, "user2", "user2@example.com", "CLIENT", false, false);
 
         Page<ShortUserResponse> page = new PageImpl<>(List.of(user1, user2));
 

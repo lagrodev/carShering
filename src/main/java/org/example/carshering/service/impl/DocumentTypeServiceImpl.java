@@ -1,12 +1,11 @@
 package org.example.carshering.service.impl;
 
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.response.DocumentTypeResponse;
 import org.example.carshering.entity.DocumentType;
 import org.example.carshering.exceptions.custom.DocumentTypeException;
 import org.example.carshering.repository.DocumentTypeRepository;
-import org.example.carshering.service.DocumentTypeService;
+import org.example.carshering.service.interfaces.DocumentTypeService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

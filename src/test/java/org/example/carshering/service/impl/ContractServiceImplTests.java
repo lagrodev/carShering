@@ -1,6 +1,5 @@
 package org.example.carshering.service.impl;
 
-import jakarta.validation.ValidationException;
 import org.example.carshering.dto.request.FilterContractRequest;
 import org.example.carshering.dto.request.create.CreateContractRequest;
 import org.example.carshering.dto.request.update.UpdateContractRequest;
@@ -14,9 +13,6 @@ import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.ContractMapper;
 import org.example.carshering.repository.ContractRepository;
 import org.example.carshering.repository.RentalStateRepository;
-import org.example.carshering.service.CarService;
-import org.example.carshering.service.ClientService;
-import org.example.carshering.service.DocumentService;
 import org.example.carshering.service.domain.CarServiceHelperService;
 import org.example.carshering.service.domain.ClientServiceHelper;
 import org.example.carshering.service.domain.DocumentServiceHelper;
@@ -123,7 +119,7 @@ public class ContractServiceImplTests {
         given(documentService.hasDocument(userId)).willReturn(true);
         given(documentService.findDocument(userId)).willReturn(documentResponse);
         given(carService.getEntity(request.carId())).willReturn(car);
-        given(rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId())).willReturn(true);
+        given(rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), null)).willReturn(true);
         given(contractMapper.toEntity(request)).willReturn(contractEntity);
         given(rentalDomainService.calculateCost(car, request.dataStart(), request.dataEnd())).willReturn(100.0);
         given(rentalStateRepository.findByNameIgnoreCase("PENDING")).willReturn(Optional.of(pendingState));
@@ -143,7 +139,7 @@ public class ContractServiceImplTests {
         verify(documentService).hasDocument(userId);
         verify(documentService).findDocument(userId);
         verify(carService).getEntity(request.carId());
-        verify(rentalDomainService).isCarAvailable(request.dataStart(), request.dataEnd(), car.getId());
+        verify(rentalDomainService).isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), null);
         verify(contractRepository).save(contractEntity);
         verify(contractMapper).toDto(savedContract);
     }
@@ -162,26 +158,6 @@ public class ContractServiceImplTests {
         // when + then
         assertThrows(
                 InvalidContractDateRangeException.class,
-                () -> serviceUnderTest.createContract(userId, request)
-        );
-
-        verify(contractRepository, never()).save(any(Contract.class));
-    }
-
-    @Test
-    @DisplayName("Test create contract with start date in past throws exception")
-    public void givenStartDateInPast_whenCreateContract_thenThrowException() {
-        // given
-        Long userId = 1L;
-        CreateContractRequest request = new CreateContractRequest(
-                1L,
-                LocalDate.now().minusDays(1),
-                LocalDate.now().plusDays(5)
-        );
-
-        // when + then
-        assertThrows(
-                ValidationException.class,
                 () -> serviceUnderTest.createContract(userId, request)
         );
 
@@ -273,7 +249,7 @@ public class ContractServiceImplTests {
         given(documentService.hasDocument(userId)).willReturn(true);
         given(documentService.findDocument(userId)).willReturn(documentResponse);
         given(carService.getEntity(request.carId())).willReturn(car);
-        given(rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId())).willReturn(false);
+        given(rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), null)).willReturn(false);
 
         // when + then
         assertThrows(
@@ -933,7 +909,7 @@ public class ContractServiceImplTests {
         );
 
         given(contractRepository.findById(contractId)).willReturn(Optional.of(contract));
-        given(rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId())).willReturn(true);
+        given(rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), contractId)).willReturn(true);
 
 
         given(rentalDomainService.calculateCost(
@@ -954,7 +930,7 @@ public class ContractServiceImplTests {
         assertThat(actual.totalCost()).isEqualTo(120.0);
 
         verify(contractRepository).findById(contractId);
-        verify(rentalDomainService).isCarAvailable(request.dataStart(), request.dataEnd(), car.getId());
+        verify(rentalDomainService).isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), contractId);
         verify(contractMapper).updateContractFromRequest(request, contract);
         verify(contractRepository).save(contract);
     }
@@ -1064,7 +1040,7 @@ public class ContractServiceImplTests {
         contract.setId(contractId);
 
         given(contractRepository.findById(contractId)).willReturn(Optional.of(contract));
-        given(rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId())).willReturn(false);
+        given(rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), contractId)).willReturn(false);
 
         // when + then
         assertThrows(
@@ -1171,7 +1147,7 @@ public class ContractServiceImplTests {
         );
 
         given(contractRepository.findById(contractId)).willReturn(Optional.of(contract));
-        given(rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId())).willReturn(true);
+        given(rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), contractId)).willReturn(true);
         doAnswer(invocation -> {
             Contract c = invocation.getArgument(1);
             c.setDataStart(request.dataStart());
@@ -1273,7 +1249,7 @@ public class ContractServiceImplTests {
         contract.setId(contractId);
 
         given(contractRepository.findById(contractId)).willReturn(Optional.of(contract));
-        given(rentalDomainService.isCarAvailable(any(), any(), any())).willReturn(true);
+        given(rentalDomainService.isCarAvailable(any(), any(), any(), eq(contractId))).willReturn(true);
         given(rentalDomainService.calculateCost(any(), any(), any())).willReturn(500.0);
         given(contractMapper.toDto(any(Contract.class))).willReturn(mock(ContractResponse.class));
         given(contractRepository.save(any(Contract.class))).willAnswer(inv -> inv.getArgument(0));

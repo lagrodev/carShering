@@ -16,9 +16,10 @@ public class RentalDomainService {
 
     private final ContractRepository contractRepository;
 
-    public boolean isCarAvailable(LocalDate start, LocalDate end, Long carId) {
-        return contractRepository.findOverlappingContracts(start, end, carId).isEmpty();
+    public boolean isCarAvailable(LocalDate start, LocalDate end, Long carId, Long excludeContractId) {
+        return contractRepository.findOverlappingContracts(start, end, carId, excludeContractId).isEmpty();
     }
+
 
     public double calculateCost(Car car, LocalDate start, LocalDate end) {
         long days = ChronoUnit.DAYS.between(start, end);

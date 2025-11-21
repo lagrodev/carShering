@@ -13,17 +13,13 @@ import org.example.carshering.exceptions.custom.BannedClientAccessException;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.mapper.DocumentMapper;
 import org.example.carshering.repository.DocumentRepository;
-import org.example.carshering.service.ClientService;
-import org.example.carshering.service.DocumentService;
-import org.example.carshering.service.DocumentTypeService;
+import org.example.carshering.service.interfaces.DocumentService;
 import org.example.carshering.service.domain.ClientServiceHelper;
 import org.example.carshering.service.domain.DocumentTypeServiceHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

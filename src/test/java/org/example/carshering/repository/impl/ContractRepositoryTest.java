@@ -304,37 +304,65 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
     }
 
     @Test
-    @DisplayName("findOverlappingContracts returns only contracts with relevant states and overlapping dates")
-    public void findOverlappingContracts_checks() {
+    @DisplayName("findOverlappingContracts returns only contracts with relevant states, overlapping dates, and excludes given contractId")
+    public void findOverlappingContracts_checksWithExcludeId() {
         // given
+        var deps = getCarStateAndCarModelAndSaveAllDependencies();
         Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-
-                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
-                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
+                (CarState) deps.get(0),
+                (CarModel) deps.get(1)
         ));
 
         LocalDate start = LocalDate.of(2025, 1, 10);
         LocalDate end = LocalDate.of(2025, 1, 20);
 
-        Contract c1 =contractRepository.save ((Contract) saveContract("overlap", car, "BOOKED",
+        // BOOKED, пересекается
+        Contract c1 = contractRepository.save((Contract) saveContract("overlap", car, "BOOKED",
                 LocalDate.of(2025, 1, 5), LocalDate.of(2025, 1, 15)).getFirst());
-        Contract c2 = contractRepository.save ((Contract) saveContract("overlap", car, "CANCELLED",
+
+        // CANCELLED, игнорируется по статусу
+        Contract c2 = contractRepository.save((Contract) saveContract("overlap", car, "CANCELLED",
                 LocalDate.of(2025, 1, 12), LocalDate.of(2025, 1, 18)).getFirst());
-        contractRepository.save ((Contract) saveContract("overlap", car, "ACTIVE",
+
+        // ACTIVE, начинается ровно в день окончания диапазона — не пересекается
+        Contract c3 = contractRepository.save((Contract) saveContract("overlap", car, "ACTIVE",
                 LocalDate.of(2025, 1, 20), LocalDate.of(2025, 1, 25)).getFirst());
-        contractRepository.save ((Contract) saveContract("overlap", car, "PENDING",
+
+        // PENDING, заканчивается ровно в день начала диапазона — не пересекается
+        Contract c4 = contractRepository.save((Contract) saveContract("overlap", car, "PENDING",
                 LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 10)).getFirst());
-        Contract c5 = contractRepository.save ((Contract) saveContract("overlap", car, "ACTIVE",
+
+        // ACTIVE, полностью внутри диапазона — пересекается
+        Contract c5 = contractRepository.save((Contract) saveContract("overlap", car, "ACTIVE",
                 LocalDate.of(2025, 1, 11), LocalDate.of(2025, 1, 12)).getFirst());
 
         // when
-        List<Contract> found = contractRepository.findOverlappingContracts(start, end, car.getId());
+        // передаём contractId = null → ничего не исключается
+        List<Contract> foundAll = contractRepository.findOverlappingContracts(start, end, car.getId(), null);
+
+        // передаём contractId = c1 → исключаем c1 из выборки
+        List<Contract> foundExcludingC1 = contractRepository.findOverlappingContracts(start, end, car.getId(), c1.getId());
 
         // then
-        // c1 and c5 should be returned (states BOOKED/ACTIVE/PENDING are considered), c2 is CANCELLED and ignored, other edge ones do not overlap
-        assertThat(found).extracting(Contract::getId).containsExactlyInAnyOrder(c1.getId(), c5.getId());
-        assertThat(found).noneMatch(ct -> ct.getId().equals(c2.getId()));
+        // без исключения должны вернуться c1 и c5
+        assertThat(foundAll)
+                .extracting(Contract::getId)
+                .containsExactlyInAnyOrder(c1.getId(), c5.getId());
+
+        // при исключении c1 должен остаться только c5
+        assertThat(foundExcludingC1)
+                .extracting(Contract::getId)
+                .containsExactly(c5.getId());
+
+        // проверяем, что CANCELLED не попал
+        assertThat(foundAll)
+                .noneMatch(c -> c.getId().equals(c2.getId()));
+
+        // проверяем, что граничные случаи не засчитываются
+        assertThat(foundAll)
+                .allMatch(c -> c.getDataEnd().isAfter(start) && c.getDataStart().isBefore(end));
     }
+
 
     @Test
     @DisplayName("findOverlappingContracts boundary cases: touching ranges are not overlaps")
@@ -366,7 +394,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
                 LocalDate.of(2025, 3, 10), LocalDate.of(2025, 3, 20)).getFirst());
 
         // when
-        List<Contract> found = contractRepository.findOverlappingContracts(start, end, car.getId());
+        List<Contract> found = contractRepository.findOverlappingContracts(start, end, car.getId(), null);
 
         // then
         assertThat(found).extracting(Contract::getId)
@@ -392,7 +420,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
                 LocalDate.of(2025, 2, 10), LocalDate.of(2025, 2, 15)).getFirst()); // starts exactly at end -> should not overlap
 
         // when
-        List<Contract> found = contractRepository.findOverlappingContracts(start, end, car.getId());
+        List<Contract> found = contractRepository.findOverlappingContracts(start, end, car.getId(), null);
 
         // then
         assertThat(found).isEmpty();

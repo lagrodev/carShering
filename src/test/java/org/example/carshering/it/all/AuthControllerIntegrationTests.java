@@ -1,13 +1,12 @@
 package org.example.carshering.it.all;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.request.JwtRequest;
+import org.example.carshering.dto.request.AuthRequest;
 import org.example.carshering.dto.request.RegistrationRequest;
 import org.example.carshering.entity.Client;
 import org.example.carshering.entity.Role;
 import org.example.carshering.it.BaseWebIntegrateTest;
-import org.example.carshering.repository.ClientRepository;
-import org.example.carshering.repository.RoleRepository;
+import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,17 +50,65 @@ public class AuthControllerIntegrationTests extends BaseWebIntegrateTest {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private ContractRepository contractRepository;
+
+    @Autowired
+    private CarModelRepository carModelRepository;
+
+    @Autowired
+    private BrandRepository brandRepository;
+
+    @Autowired
+    private ModelNameRepository modelNameRepository;
+
+    @Autowired
+    private CarClassRepository carClassRepository;
+
+    @Autowired
+    private CarRepository carRepository;
+
+    @Autowired
+    private CarStateRepository carStateRepository;
+
+    @Autowired
+    private RentalStateRepository rentalStateRepository;
+    @Autowired
+    private DocumentRepository documentRepository;
+    @Autowired
+    private DocumentTypeRepository documentTypeRepository;
+
     @BeforeEach
     void resetSequences() {
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.document_id_seq RESTART WITH 1");
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.doctype_id_seq RESTART WITH 1");
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.contract_id_seq RESTART WITH 1");
         jdbcTemplate.execute("ALTER SEQUENCE car_rental.client_id_seq RESTART WITH 1");
         jdbcTemplate.execute("ALTER SEQUENCE car_rental.role_id_seq RESTART WITH 1");
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.car_id_seq RESTART WITH 1");
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.car_model_id_model_seq RESTART WITH 1");
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.car_state_id_seq RESTART WITH 1");
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.brands_id_seq RESTART WITH 1");
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.models_id_seq RESTART WITH 1");
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.car_classes_id_seq RESTART WITH 1");
+        jdbcTemplate.execute("ALTER SEQUENCE car_rental.rental_state_id_seq RESTART WITH 1");
     }
 
     @BeforeEach
     @Transactional
     public void setup() {
+        documentRepository.deleteAll();
+        documentTypeRepository.deleteAll();
+        contractRepository.deleteAll();
+        carRepository.deleteAll();
+        carStateRepository.deleteAll();
+        carModelRepository.deleteAll();
+        carClassRepository.deleteAll();
+        modelNameRepository.deleteAll();
+        brandRepository.deleteAll();
         clientRepository.deleteAll();
         roleRepository.deleteAll();
+        rentalStateRepository.deleteAll();
     }
 
 
@@ -83,12 +130,12 @@ public class AuthControllerIntegrationTests extends BaseWebIntegrateTest {
                 .build();
         clientRepository.save(client);
 
-        JwtRequest jwtRequest = new JwtRequest("user101", "password");
+        AuthRequest authRequest = new AuthRequest("user101", "password");
 
         // when
         ResultActions resultActions = mockMvc.perform(post(apiUrl + "/auth")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(jwtRequest)));
+                .content(objectMapper.writeValueAsBytes(authRequest)));
 
         // then
         resultActions
@@ -107,12 +154,12 @@ public class AuthControllerIntegrationTests extends BaseWebIntegrateTest {
     public void givenNullCredentials_whenCreateAuthToken_thenBadRequestResponse() throws Exception {
 
         // given
-        JwtRequest jwtRequest = new JwtRequest(null, null);
+        AuthRequest authRequest = new AuthRequest(null, null);
 
         // when
         ResultActions resultActions = mockMvc.perform(post(apiUrl + "/auth")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(jwtRequest)));
+                .content(objectMapper.writeValueAsBytes(authRequest)));
 
         // then
         resultActions

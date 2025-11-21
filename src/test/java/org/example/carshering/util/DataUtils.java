@@ -555,6 +555,16 @@ public class DataUtils {
                 .build();
     }
 
+    public UpdateCarRequest updateCarRequestWithNullVin() {
+        return UpdateCarRequest.builder()
+                .modelId(1L)
+                .yearOfIssue(2020)
+                .gosNumber("1123")
+                .vin(null)
+                .rent(10.0)
+                .build();
+    }
+
     public Client createAndSaveClient(String login, String email, boolean banned) {
         Client client = Client.builder()
                 .firstName("First")

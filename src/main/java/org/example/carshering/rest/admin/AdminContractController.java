@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.request.FilterContractRequest;
 import org.example.carshering.dto.response.ContractResponse;
-import org.example.carshering.service.ContractService;
+import org.example.carshering.service.interfaces.ContractService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;

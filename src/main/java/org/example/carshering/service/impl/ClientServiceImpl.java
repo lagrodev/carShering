@@ -1,22 +1,19 @@
 package org.example.carshering.service.impl;
 
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.request.ChangePasswordRequest;
 import org.example.carshering.dto.request.FilterUserRequest;
 import org.example.carshering.dto.request.RegistrationRequest;
+import org.example.carshering.dto.request.ResetPasswordRequest;
 import org.example.carshering.dto.request.update.UpdateProfileRequest;
-import org.example.carshering.dto.response.AllUserResponse;
-import org.example.carshering.dto.response.ShortUserResponse;
-import org.example.carshering.dto.response.UserResponse;
+import org.example.carshering.dto.response.*;
 import org.example.carshering.entity.Client;
 import org.example.carshering.entity.Role;
 import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.ClientMapper;
 import org.example.carshering.repository.ClientRepository;
-import org.example.carshering.service.ClientService;
-import org.example.carshering.service.ContractService;
-import org.example.carshering.service.RoleService;
+import org.example.carshering.service.interfaces.ClientService;
+import org.example.carshering.service.interfaces.EmailService;
 import org.example.carshering.service.domain.ContractServiceHelper;
 import org.example.carshering.service.domain.RoleServiceHelper;
 import org.springframework.data.domain.Page;
@@ -32,7 +29,6 @@ import java.util.Set;
 public class ClientServiceImpl implements ClientService {
 
 
-
     private final ClientMapper clientMapper;
 
     private final PasswordEncoder passwordEncoder;
@@ -40,6 +36,7 @@ public class ClientServiceImpl implements ClientService {
     private final RoleServiceHelper roleService;
     private final ContractServiceHelper contractService;
     private final ClientRepository clientRepository;
+    private final EmailService emailService;
 
     @Override
     public AllUserResponse findAllUser(Long userId) {
@@ -85,8 +82,6 @@ public class ClientServiceImpl implements ClientService {
         return clientMapper.toDtoForAdmin(client);
     }
 
-
-
     @Override
     @Transactional
     public AllUserResponse updateRole(Long userId, String roleName) {
@@ -99,8 +94,6 @@ public class ClientServiceImpl implements ClientService {
 
         return clientMapper.toDtoForAdmin(client);
     }
-
-
 
     @Override
     public Page<ShortUserResponse> filterUsers(FilterUserRequest filter, Pageable pageable) {
@@ -118,6 +111,37 @@ public class ClientServiceImpl implements ClientService {
 
         return clientRepository.findByFilter(filter.banned(), filter.roleName(), pageable)
                 .map(clientMapper::toShortDtoForAdmin);
+    }
+
+    @Override
+    @Transactional
+    public VerifyStatusResponse verifyEmail(Long userId) {
+        Client client = clientRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Client not found with id %s", String.valueOf(userId))); // todo вопрос, а  надо ли это исключение? я уже в аккаунте => я априоре есть в бд....
+
+        if (client.isEmailVerified()) {
+            throw new RuntimeException("email is already verified"); // todo castom
+        }
+
+        emailService.sendVerificationEmail(client);
+
+        return new VerifyStatusResponse("VERIFICATION_EMAIL_SENT", "Verification email sent to " + client.getEmail());
+
+    }
+
+    @Override
+    public ResetPasswordResponse resetPassword(ResetPasswordRequest request) {
+        Client client = clientRepository.findByEmailAndDeletedFalse(request.email()).orElseThrow(
+                () -> new NotFoundException("Client not found with id %s", request.email())
+        );
+
+        if (!client.isEmailVerified()) {
+            emailService.sendVerificationEmail(client);
+            throw new EmailNotVerifiedException("We can't support for help this account, you need to verified email. We have sent a new email for verification");
+        }
+        emailService.sendResetPasswordEmail(client);
+
+        return new ResetPasswordResponse("RESET_EMAIL_SENT", "Reset password email sent to " + client.getEmail());
     }
 
 
@@ -145,15 +169,22 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    @Transactional
     public void changePassword(Long userId, ChangePasswordRequest request) {
         Client client = getEntity(userId);
 
         if (!passwordEncoder.matches(request.oldPassword(), client.getPassword())) {
             throw new PasswordException("Incorrect password");
         }
+        updatePassword(client, request.newPassword());
+    }
 
-        client.setPassword(passwordEncoder.encode(request.newPassword()));
-        clientRepository.save(client);
+    @Transactional
+    @Override
+    public void updatePassword(Client client, String password) {
+        client.setPassword(passwordEncoder.encode(password));
+        clientRepository.save(client); // todo при смене пароля все сессии юзера должны быть инвалидированы, но это только после того, как появится рефреш токен
+        emailService.sendPasswordResetConfirmationEmail(client);
     }
 
     @Override
@@ -167,8 +198,6 @@ public class ClientServiceImpl implements ClientService {
                 client.setPhone(request.phone());
             } else throw new AlreadyExistsException("This phone is assigned to another account");
         }
-
-
         clientRepository.save(client);
 
     }

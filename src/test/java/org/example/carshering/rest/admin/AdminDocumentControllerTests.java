@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.carshering.dto.response.DocumentResponse;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.rest.BaseWebMvcTest;
-import org.example.carshering.service.DocumentService;
+import org.example.carshering.service.interfaces.DocumentService;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

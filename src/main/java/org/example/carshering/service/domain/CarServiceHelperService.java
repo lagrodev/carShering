@@ -39,9 +39,6 @@ public class CarServiceHelperService {
             model.setDeleted(false);
         }
 
-        System.out.println("Updating car state to: " + state.getStatus());
-
-        System.out.println(state.getId());
 
         car.setState(state);
         carRepository.save(car);

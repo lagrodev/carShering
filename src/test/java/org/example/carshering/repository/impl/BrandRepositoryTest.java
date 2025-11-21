@@ -4,7 +4,9 @@ import org.example.carshering.entity.Brand;
 import org.example.carshering.repository.AbstractRepositoryTest;
 import org.example.carshering.repository.BrandRepository;
 import org.example.carshering.util.DataUtils;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -23,19 +25,16 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @ActiveProfiles("test")
 public class BrandRepositoryTest extends AbstractRepositoryTest {
 
+    // <!-- Tests --> //
+    @Autowired
+    private BrandRepository brandRepository;
+    @Autowired
+    private DataUtils dataUtils;
+
     @BeforeEach
     public void setUp() {
         brandRepository.deleteAll();
     }
-
-
-
-    // <!-- Tests --> //
-    @Autowired
-    private BrandRepository brandRepository;
-
-    @Autowired
-    private DataUtils dataUtils;
 
     @Test
     @DisplayName("Test save brand functionality")
@@ -227,7 +226,7 @@ public class BrandRepositoryTest extends AbstractRepositoryTest {
      */
     @Test
     @DisplayName("findByNameIgnoreCase is safe against SQL injection attempts")
-    void findByNameIgnoreCase_sqlInjectionAttempt_returnsEmpty() {
+    public void findByNameIgnoreCase_sqlInjectionAttempt_returnsEmpty() {
         // given
         Brand legitimateBrand = new Brand();
         legitimateBrand.setName("BMW");

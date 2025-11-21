@@ -37,7 +37,6 @@ public class CarClassServiceImplTests {
     @InjectMocks
     private CarClassServiceImpl serviceUnderTest;
 
-
     @Test
     @DisplayName("Test createCarClass returns ModelNameResponse after saving car class")
     public void givenCreateCarClassRequest_whenCreateCarClass_thenReturnResponse() {

@@ -18,7 +18,9 @@ public record CreateCarRequest(
         @Schema(description = "Vehicle Identification Number (VIN) of the car", example = "123")
         @NotBlank String vin,
         @Schema(description = "Rent price of the car", example = "463746394")
-        @NotNull Double rent
+        @NotNull Double rent,
+        @Schema(description = "ID of the car state", example = "1")
+        @NotNull Long stateId
 /*
 {
   "modelId": "1",

@@ -2,7 +2,10 @@ package org.example.carshering.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,11 +36,6 @@ public class Client {
 
     @Column(nullable = false, name = "email" )
     private String email;
-//todo сделать, чтобы email и т.п. не были unique через
-// indexes = {
-//           @Index(name = "uk_client_login_active", columnList = "login", where = "is_deleted = false"),
-//           @Index(name = "uk_client_email_active", columnList = "email", where = "is_deleted = false")
-//       }
 
     @Column(nullable = false)
     private String password;
@@ -47,6 +45,21 @@ public class Client {
 
     @Column(name = "is_banned", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean banned =  false;
+
+
+    //@Column(name="email_verified", nullable = false, columnDefinition = "boolean default false")
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    //@Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @CreationTimestamp
+    private Instant createdAt;
+
+    @UpdateTimestamp
+//    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "role_id")

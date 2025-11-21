@@ -1,4 +1,4 @@
-package org.example.carshering.it.all;
+package org.example.carshering.util;
 
 import org.example.carshering.security.ClientDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +21,7 @@ public @interface WithMockClientDetails {
     String password() default "password";
     boolean banned() default false;
     boolean deleted() default false;
-    String[] roles() default {"USER"};
+    String[] roles() default {"ROLE_USER"};
 
     class Factory implements WithSecurityContextFactory<WithMockClientDetails> {
         @Override
@@ -37,7 +37,6 @@ public @interface WithMockClientDetails {
                     annotation.banned(), annotation.deleted()
             );
 
-            // установите другие необходимые поля
 
             Authentication auth = new UsernamePasswordAuthenticationToken(
                     principal,

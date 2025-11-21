@@ -6,7 +6,7 @@ import org.example.carshering.entity.CarState;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.mapper.CarStateMapper;
 import org.example.carshering.repository.CarStateRepository;
-import org.example.carshering.service.CarStateService;
+import org.example.carshering.service.interfaces.CarStateService;
 import org.springframework.stereotype.Service;
 import java.util.List;
 

@@ -7,7 +7,7 @@ import org.example.carshering.entity.CarClass;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.mapper.CarClassMapper;
 import org.example.carshering.repository.CarClassRepository;
-import org.example.carshering.service.CarClassService;
+import org.example.carshering.service.interfaces.CarClassService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -7,8 +7,6 @@ spring:
       hibernate:
         format_sql: false
 
-
-
   profiles:
     active: test
 

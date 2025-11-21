@@ -6,7 +6,7 @@ import org.example.carshering.exceptions.custom.EntityNotFoundException;
 import org.example.carshering.exceptions.custom.InvalidContractStateException;
 import org.example.carshering.exceptions.custom.InvalidContractCancellationStateException;
 import org.example.carshering.rest.BaseWebMvcTest;
-import org.example.carshering.service.ContractService;
+import org.example.carshering.service.interfaces.ContractService;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

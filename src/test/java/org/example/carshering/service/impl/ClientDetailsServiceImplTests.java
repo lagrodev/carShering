@@ -4,7 +4,6 @@ import org.example.carshering.entity.Client;
 import org.example.carshering.entity.Role;
 import org.example.carshering.repository.ClientRepository;
 import org.example.carshering.security.ClientDetails;
-import org.example.carshering.service.ClientDetailsService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

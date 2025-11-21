@@ -1,7 +1,7 @@
 package org.example.carshering.service.impl;
 
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.dto.request.FilterContractRequest;
 import org.example.carshering.dto.request.create.CreateContractRequest;
 import org.example.carshering.dto.request.update.UpdateContractRequest;
@@ -14,16 +14,14 @@ import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.ContractMapper;
 import org.example.carshering.repository.ContractRepository;
 import org.example.carshering.repository.RentalStateRepository;
-import org.example.carshering.service.CarService;
-import org.example.carshering.service.ClientService;
-import org.example.carshering.service.ContractService;
-import org.example.carshering.service.DocumentService;
+import org.example.carshering.service.interfaces.ContractService;
 import org.example.carshering.service.domain.CarServiceHelperService;
 import org.example.carshering.service.domain.ClientServiceHelper;
 import org.example.carshering.service.domain.DocumentServiceHelper;
 import org.example.carshering.service.domain.RentalDomainService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +32,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ContractServiceImpl implements ContractService {
     private static final Set<String> ACTIVE_STATES = Set.of("ACTIVE", "PENDING", "CANCELLATION REQUESTED", "CONFIRMED");
     private final ContractRepository contractRepository;
@@ -64,12 +63,6 @@ public class ContractServiceImpl implements ContractService {
         if (!request.dataEnd().isAfter(request.dataStart())) {
             throw new InvalidContractDateRangeException("The end date must be later than the start date");
         }
-
-        if (request.dataStart().isBefore(LocalDate.now())) {
-            throw new ValidationException("Start date cannot be in the past");
-        }
-
-
         Client client = clientService.getEntity(userId);
 
 
@@ -83,7 +76,7 @@ public class ContractServiceImpl implements ContractService {
 
         Car car = carService.getEntity(request.carId());
 
-        if (!rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId())) {
+        if (!rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), null)) {
             throw new CarUnavailableOnDatesException("The car is not available on the selected dates");
         }
 
@@ -101,6 +94,9 @@ public class ContractServiceImpl implements ContractService {
     public void cancelContract(Long userId, Long contractId) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        log.info("Contract client id = {}, Current user id = {}",
+                contract.getClient().getId(), userId);
 
         if (!contract.getClient().getId().equals(userId)) {
             throw new UnauthorizedContractAccessException("You can't terminate someone else's contract");
@@ -140,6 +136,7 @@ public class ContractServiceImpl implements ContractService {
 
 
     @Override
+    @Transactional
     public ContractResponse findContract(Long contractId, Long userId) {
         Contract contract = contractRepository.findByIdAndUserId(contractId, userId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
@@ -169,6 +166,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
+    @Transactional
     public ContractResponse getContractById(Long contractId) {
 
         Contract contract = contractRepository.findById(contractId)
@@ -276,6 +274,21 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
+    @Transactional
+    @Scheduled(cron = "0 0 * * * *") // каждый час
+    public void setActive() {
+        List<Contract> contracts = contractRepository
+                .findAllByStateNameAndDataStartBefore("CONFIRMED", LocalDate.now().plusDays(1));
+
+        for (Contract contract : contracts) {
+            contract.setState(getStateByName("ACTIVE"));
+        }
+
+        contractRepository.saveAll(contracts);
+    }
+
+
+
     @Override
     @Transactional
     public ContractResponse updateContract(Long userId, Long contractId, UpdateContractRequest request) {
@@ -298,8 +311,8 @@ public class ContractServiceImpl implements ContractService {
         if (!rentalDomainService.isCarAvailable(
                 request.dataStart(),
                 request.dataEnd(),
-                contract.getCar().getId()
-        )) {
+                contract.getCar().getId(),
+                contract.getId())) {
             throw new CarUnavailableOnDatesException("The car is not available on the selected dates");
         }
 

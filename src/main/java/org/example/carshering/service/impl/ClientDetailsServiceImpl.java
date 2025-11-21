@@ -1,10 +1,11 @@
 package org.example.carshering.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.entity.Client;
 import org.example.carshering.repository.ClientRepository;
 import org.example.carshering.security.ClientDetails;
-import org.example.carshering.service.ClientDetailsService;
+import org.example.carshering.service.interfaces.ClientDetailsService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ClientDetailsServiceImpl implements ClientDetailsService {
 
     private final ClientRepository clientRepository;
@@ -45,4 +47,14 @@ public class ClientDetailsServiceImpl implements ClientDetailsService {
                 client.isDeleted()
         );
     }
+
+
+    @Override
+    public void setEmailVerified(Client client) {
+        client.setEmailVerified(true);
+
+        clientRepository.save(client);
+    }
+
+
 }

@@ -34,16 +34,17 @@ public class RentalDomainServiceTests {
         LocalDate start = LocalDate.of(2025, 1, 10);
         LocalDate end = LocalDate.of(2025, 1, 15);
         Long carId = 1L;
+        Long contractId = 1L;
 
-        given(contractRepository.findOverlappingContracts(start, end, carId))
+        given(contractRepository.findOverlappingContracts(start, end, carId,contractId))
                 .willReturn(List.of());
 
         // when
-        boolean result = serviceUnderTest.isCarAvailable(start, end, carId);
+        boolean result = serviceUnderTest.isCarAvailable(start, end, carId,contractId);
 
         // then
         assertThat(result).isTrue();
-        verify(contractRepository).findOverlappingContracts(start, end, carId);
+        verify(contractRepository).findOverlappingContracts(start, end, carId,contractId);
     }
 
     @Test
@@ -55,15 +56,15 @@ public class RentalDomainServiceTests {
         Long carId = 1L;
 
         Contract overlappingContract = new Contract();
-        given(contractRepository.findOverlappingContracts(start, end, carId))
+        given(contractRepository.findOverlappingContracts(start, end, carId,1L))
                 .willReturn(List.of(overlappingContract));
 
         // when
-        boolean result = serviceUnderTest.isCarAvailable(start, end, carId);
+        boolean result = serviceUnderTest.isCarAvailable(start, end, carId,1L);
 
         // then
         assertThat(result).isFalse();
-        verify(contractRepository).findOverlappingContracts(start, end, carId);
+        verify(contractRepository).findOverlappingContracts(start, end, carId,1L);
     }
 
     @Test

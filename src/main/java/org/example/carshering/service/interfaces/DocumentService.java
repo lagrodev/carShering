@@ -1,4 +1,4 @@
-package org.example.carshering.service;
+package org.example.carshering.service.interfaces;
 
 import jakarta.validation.Valid;
 import org.example.carshering.dto.request.create.CreateDocumentRequest;
@@ -6,8 +6,6 @@ import org.example.carshering.dto.request.update.UpdateDocumentRequest;
 import org.example.carshering.dto.response.DocumentResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 
 public interface DocumentService {
