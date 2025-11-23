@@ -19,19 +19,21 @@ public abstract class CarMapper {
     protected CarModelRepository carModelRepository;
 
 
-    @Mapping(source = "model.brand.name", target = "brand")
-    @Mapping(source = "model.model.name", target = "model")
-    @Mapping(source = "model.bodyType", target = "bodyType")
-    @Mapping(source = "model.idModel", target = "modelId")
-    @Mapping(source = "model.carClass.name", target = "carClass")
-    @Mapping(source = "state.status", target = "status")
-    public abstract CarDetailResponse toDetailDto(Car car);
+    @Mapping(source = "car.model.brand.name", target = "brand")
+    @Mapping(source = "car.model.model.name", target = "model")
+    @Mapping(source = "car.model.bodyType", target = "bodyType")
+    @Mapping(source = "car.model.idModel", target = "modelId")
+    @Mapping(source = "car.model.carClass.name", target = "carClass")
+    @Mapping(source = "car.state.status", target = "status")
+    @Mapping(source = "favorite", target = "favorite")
+    public abstract CarDetailResponse toDetailDto(Car car, boolean favorite);
 
-    @Mapping(source = "model.brand.name", target = "brand")
-    @Mapping(source = "model.model.name", target = "model")
-    @Mapping(source = "model.carClass.name", target = "carClass")
-    @Mapping(source = "state.status", target = "status")
-    public abstract CarListItemResponse toListItemDto(Car car);
+    @Mapping(source = "car.model.brand.name", target = "brand")
+    @Mapping(source = "car.model.model.name", target = "model")
+    @Mapping(source = "car.model.carClass.name", target = "carClass")
+    @Mapping(source = "car.state.status", target = "status")
+    @Mapping(source = "favorite", target = "favorite")
+    public abstract CarListItemResponse toListItemDto(Car car, boolean favorite);
 
 
     @Mapping(target = "model", source = "modelId")

@@ -112,7 +112,7 @@ public class CarServiceImplTests {
 
         given(carRepository.save(carEntity)).willReturn(savedCar);
 
-        given(carMapper.toDetailDto(savedCar)).willReturn(response);
+        given(carMapper.toDetailDto(savedCar, false)).willReturn(response);
 
         // when
 
@@ -127,7 +127,7 @@ public class CarServiceImplTests {
 
         verify(carMapper).toEntity(request);
         verify(carRepository).save(carEntity);
-        verify(carMapper).toDetailDto(savedCar);
+        verify(carMapper).toDetailDto(savedCar, false);
     }
 
     @Test
@@ -904,10 +904,10 @@ public class CarServiceImplTests {
         CarDetailResponse response = DataUtils.carDetailResponsePersisted();
 
         given(carRepository.findById(anyLong())).willReturn(Optional.of(existingCar));
-        given(carMapper.toDetailDto(existingCar)).willReturn(response);
+        given(carMapper.toDetailDto(existingCar, false)).willReturn(response);
 
         // when
-        CarDetailResponse actual = serviceUnderTest.getValidCarById(1L);
+        CarDetailResponse actual = serviceUnderTest.getValidCarById(1L, false);
 
         // then
         assertThat(actual).isNotNull();
@@ -916,7 +916,7 @@ public class CarServiceImplTests {
         assertThat(actual.status()).isEqualTo("AVAILABLE");
 
         verify(carRepository).findById(1L);
-        verify(carMapper).toDetailDto(existingCar);
+        verify(carMapper).toDetailDto(existingCar, false);
     }
 
 
@@ -936,11 +936,11 @@ public class CarServiceImplTests {
         // when + then
         assertThrows(
                 StateException.class,
-                () -> serviceUnderTest.getValidCarById(1L)
+                () -> serviceUnderTest.getValidCarById(1L, false)
         );
 
         verify(carRepository).findById(1L);
-        verify(carMapper, never()).toDetailDto(any(Car.class));
+        verify(carMapper, never()).toDetailDto(any(Car.class), anyBoolean());
     }
 
     @Test
@@ -954,11 +954,11 @@ public class CarServiceImplTests {
         // when + then
         assertThrows(
                 CarNotFoundException.class,
-                () -> serviceUnderTest.getValidCarById(1L)
+                () -> serviceUnderTest.getValidCarById(1L, false)
         );
 
         verify(carRepository).findById(1L);
-        verify(carMapper, never()).toDetailDto(any(Car.class));
+        verify(carMapper, never()).toDetailDto(any(Car.class), anyBoolean());
     }
 
     @Test
@@ -1281,7 +1281,7 @@ public class CarServiceImplTests {
 
 
 
-        CarListItemResponse responseDto = new CarListItemResponse(1L,"BMW", "X5", "SUV", 2000, 2009.3, "AVAILABLE");
+        CarListItemResponse responseDto = new CarListItemResponse(1L,"BMW", "X5", "SUV", 2000, 2009.3, "AVAILABLE", false);
 
 
 
@@ -1295,10 +1295,14 @@ public class CarServiceImplTests {
                 anyString(),
                 anyList(),
                 anyList(),
+                any(),
+                any(),
+                any(),
+                any(),
                 any(Pageable.class)
         )).willReturn(pageResult);
 
-        given(carMapper.toListItemDto(any(Car.class))).willReturn(responseDto);
+        given(carMapper.toListItemDto(any(Car.class), false)).willReturn(responseDto);
 
         // when
         Page<CarListItemResponse> result = serviceUnderTest.getAllCars(pageable, filter);
@@ -1316,10 +1320,14 @@ public class CarServiceImplTests {
                 eq("SUV"),
                 eq(List.of("SUV")),
                 eq(List.of("AVAILABLE")),
+                any(),
+                any(),
+                any(),
+                any(),
                 eq(pageable)
         );
 
-        verify(carMapper).toListItemDto(carEntity);
+        verify(carMapper).toListItemDto(carEntity, false);
     }
 
     @Test
@@ -1337,10 +1345,14 @@ public class CarServiceImplTests {
         given(filter.minYear()).willReturn(null);
         given(filter.maxYear()).willReturn(null);
         given(filter.bodyType()).willReturn(null);
+        given(filter.dateStart()).willReturn(null);
+        given(filter.dateEnd()).willReturn(null);
+        given(filter.minCell()).willReturn(null);
+        given(filter.maxCell()).willReturn(null);
 
         Page<Car> pageResult = new PageImpl<>(List.of());
         given(carRepository.findByFilter(
-                isNull(), isNull(), any(), any(), any(), isNull(), isNull(), any(Pageable.class)
+                isNull(), isNull(), any(), any(), any(), isNull(), isNull(), any(), any(), any(), any(), any(Pageable.class)
         )).willReturn(pageResult);
 
         // when
@@ -1349,7 +1361,7 @@ public class CarServiceImplTests {
         // then
         assertThat(result).isNotNull();
         verify(carRepository).findByFilter(
-                isNull(), isNull(), any(), any(), any(), isNull(), isNull(), eq(pageable)
+                isNull(), isNull(), any(), any(), any(), isNull(), isNull(), any(), any(), any(), any(), eq(pageable)
         );
     }
 
@@ -1369,6 +1381,6 @@ public class CarServiceImplTests {
                 () -> serviceUnderTest.getAllCars(pageable, filter)
         );
 
-        verify(carRepository, never()).findByFilter(any(), any(), any(), any(), any(), any(), any(), any());
+        verify(carRepository, never()).findByFilter(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
     }
 }

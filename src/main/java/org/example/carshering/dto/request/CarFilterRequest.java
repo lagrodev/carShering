@@ -1,6 +1,8 @@
 package org.example.carshering.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.time.LocalDate;
 import java.util.List;
 
 // CarFilterRequest.java
@@ -19,6 +21,14 @@ public record CarFilterRequest(
         @Schema(description = "List of car classes", example = "[\"Economy\", \"Business\"]")
         List<String> carClasses,
         @Schema(description = "List of car states", example = "[\"AVAILABLE\", \"RENTED\"]")
-        List<String> carState
+        List<String> carState,
+        @Schema(description = "Start date for car availability filter", example = "2025-01-01")
+        LocalDate dateStart,
+        @Schema(description = "End date for car availability filter", example = "2025-01-31")
+        LocalDate dateEnd,
+        @Schema(description = "Minimum price per day", example = "1000")
+        Double minCell,
+        @Schema(description = "Maximum price per day", example = "5000")
+        Double maxCell
 ) {
 }

@@ -7,12 +7,14 @@ import org.example.carshering.dto.request.update.UpdateCarRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
 import org.example.carshering.dto.response.CarStateResponse;
+import org.example.carshering.dto.response.MinMaxCellForFilters;
 import org.example.carshering.entity.Car;
 import org.example.carshering.entity.CarModel;
 import org.example.carshering.entity.CarState;
 import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.CarMapper;
 import org.example.carshering.repository.CarRepository;
+import org.example.carshering.repository.FavoriteRepository;
 import org.example.carshering.service.domain.CarModelHelperService;
 import org.example.carshering.service.domain.CarStateServiceHelper;
 import org.example.carshering.service.interfaces.CarService;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +74,7 @@ public class CarServiceImpl implements CarService {
 
         car.setState(state);
 
-        return carMapper.toDetailDto(carRepository.save(car));
+        return carMapper.toDetailDto(carRepository.save(car), false);
     }
 
 
@@ -96,14 +99,14 @@ public class CarServiceImpl implements CarService {
         carMapper.updateCar(car, request);
 
         if (request.modelId() == null) {
-            return carMapper.toDetailDto(carRepository.save(car));
+            return carMapper.toDetailDto(carRepository.save(car), false);
         }
 
         CarModel newModel = carModelService.getCarModelById(request.modelId());
 
         car.setModel(newModel);
 
-        return carMapper.toDetailDto(carRepository.save(car));
+        return carMapper.toDetailDto(carRepository.save(car), false);
     }
 
 
@@ -111,7 +114,7 @@ public class CarServiceImpl implements CarService {
     public CarDetailResponse getCarById(Long carId) {
         var car = getCarOrThrow(carId);
 
-        return carMapper.toDetailDto(car);
+        return carMapper.toDetailDto(car, false);
     }
 
     @Override
@@ -120,14 +123,14 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public CarDetailResponse getValidCarById(Long carId) {
+    public CarDetailResponse getValidCarById(Long carId, boolean favorite) {
         Car car = getCarOrThrow(carId);
 
         if (!CAR_STATE_AVAILABLE.equalsIgnoreCase(car.getState().getStatus())) {
             throw new StateException("Car not available");
         }
 
-        return carMapper.toDetailDto(car);
+        return carMapper.toDetailDto(car, favorite);
     }
 
 
@@ -159,6 +162,8 @@ public class CarServiceImpl implements CarService {
         updateCarState(carId, CAR_STATE_UNAVAILABLE);
     }
 
+
+
     private Car getCarOrThrow(Long carId) {
         return carRepository.findById(carId)
                 .orElseThrow(() -> new CarNotFoundException("Car not found"));
@@ -183,12 +188,49 @@ public class CarServiceImpl implements CarService {
     public Page<CarListItemResponse> getAllCars(Pageable pageable, CarFilterRequest filter) {
         validateSortProperties(pageable.getSort());
 
+        filter = normalizeFilterRequest(filter);
+
+
+
+        return carRepository.findByFilter(
+                filter.brands(),
+                filter.models(),
+                filter.minYear(),
+                filter.maxYear(),
+                filter.bodyType(),
+                filter.carClasses(),
+                filter.carState(),
+                filter.dateStart(),
+                filter.dateEnd(),
+                filter.minCell(),
+                filter.maxCell(),
+                pageable
+        ).map(car -> carMapper.toListItemDto(car, false));
+    }
+    @Override
+    public MinMaxCellForFilters getMinMaxCell(CarFilterRequest filter) {
+        filter = normalizeFilterRequest(filter);
+
+        return carRepository.findMinMaxPriceByFilter(
+                filter.brands(),
+                filter.models(),
+                filter.minYear(),
+                filter.maxYear(),
+                filter.bodyType(),
+                filter.carClasses(),
+                filter.carState(),
+                filter.dateStart(),
+                filter.dateEnd()
+        );
+    }
+
+    private CarFilterRequest normalizeFilterRequest(CarFilterRequest filter) {
         List<String> brands = isEmpty(filter.brands()) ? null : filter.brands();
         List<String> models = isEmpty(filter.models()) ? null : filter.models();
         List<String> carClasses = isEmpty(filter.carClasses()) ? null : filter.carClasses();
         List<String> carStates = isEmpty(filter.carState()) ? null : filter.carState();
 
-        return carRepository.findByFilter(
+        return new CarFilterRequest(
                 brands,
                 models,
                 filter.minYear(),
@@ -196,8 +238,11 @@ public class CarServiceImpl implements CarService {
                 filter.bodyType(),
                 carClasses,
                 carStates,
-                pageable
-        ).map(carMapper::toListItemDto);
+                filter.dateStart(),
+                filter.dateEnd(),
+                filter.minCell(),
+                filter.maxCell()
+        );
     }
 
 

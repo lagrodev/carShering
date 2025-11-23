@@ -8,8 +8,6 @@ import org.example.carshering.dto.response.AuthResponse;
 public interface AuthService {
     AuthResponse login(AuthRequest authRequest);
 
-    void verifyToken(String code);
-
     void resetPassword(String code, NewPasswordRequest request);
 
     AuthResponse refreshAccessToken(RefreshTokenRequest refreshToken);

@@ -195,7 +195,8 @@ public class AdminCarControllerIntegrationTests extends BaseWebIntegrateTest {
                 202,// пустой госномер
                 "",
                 "",
-                -100.0 // отрицательная аренда
+                -100.0, // отрицательная аренда,
+                null
         );
 
         // when
@@ -609,8 +610,8 @@ public class AdminCarControllerIntegrationTests extends BaseWebIntegrateTest {
     @DisplayName("Test get all cars without filters functionality")
     public void whenGetAllCarsWithoutFilters_thenReturnPagedCars() throws Exception {
         // given
-        CarListItemResponse car1 = new CarListItemResponse(1L, "Tesla", "BUSINESS", "Model S", 2022, 100.0, "AVAILABLE");
-        CarListItemResponse car2 = new CarListItemResponse(2L, "BMW", "PREMIUM", "X5", 2021, 150.0, "BOOKED");
+        CarListItemResponse car1 = new CarListItemResponse(1L, "Tesla", "BUSINESS", "Model S", 2022, 100.0, "AVAILABLE", false);
+        CarListItemResponse car2 = new CarListItemResponse(2L, "BMW", "PREMIUM", "X5", 2021, 150.0, "BOOKED", false);
 
         List<?> carAttributes1 = getCarWithSpecificAttributes("Tesla", "Model S", "PREMIUM", "AVAILABLE", "SEDAN");
         List<?> carAttributes2 = getCarWithSpecificAttributes("BMW", "X5", "PREMIUM", "BOOKED", "SUV");

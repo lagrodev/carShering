@@ -95,7 +95,8 @@ public class AdminCarControllerTests extends BaseWebMvcTest {
                 202,// пустой госномер
                 "",
                 "",
-                -100.0 // отрицательная аренда
+                -100.0, // отрицательная аренда,
+                null
         );
 
         // when
@@ -435,8 +436,8 @@ public class AdminCarControllerTests extends BaseWebMvcTest {
     @DisplayName("Test get all cars without filters functionality")
     public void whenGetAllCarsWithoutFilters_thenReturnPagedCars() throws Exception {
         // given
-        CarListItemResponse car1 = new CarListItemResponse(1L, "Tesla", "BUSINESS", "Model S", 2022, 100.0, "AVAILABLE");
-        CarListItemResponse car2 = new CarListItemResponse(2L, "BMW", "PREMIUM", "X5", 2021, 150.0, "BOOKED");
+        CarListItemResponse car1 = new CarListItemResponse(1L, "Tesla", "BUSINESS", "Model S", 2022, 100.0, "AVAILABLE", false);
+        CarListItemResponse car2 = new CarListItemResponse(2L, "BMW", "PREMIUM", "X5", 2021, 150.0, "BOOKED", false);
 
         Page<CarListItemResponse> page = new org.springframework.data.domain.PageImpl<>(List.of(car1, car2));
 
@@ -465,7 +466,7 @@ public class AdminCarControllerTests extends BaseWebMvcTest {
     @DisplayName("Test get all cars with filters functionality")
     public void givenFilters_whenGetCars_thenReturnFilteredPagedCars() throws Exception {
         // given
-        CarListItemResponse car = new CarListItemResponse(3L, "Toyota", "ECONOMY", "Camry", 2020, 50.0, "AVAILABLE");
+        CarListItemResponse car = new CarListItemResponse(3L, "Toyota", "ECONOMY", "Camry", 2020, 50.0, "AVAILABLE", false);
         Page<CarListItemResponse> page = new org.springframework.data.domain.PageImpl<>(List.of(car));
 
         given(carService.getAllCars(any(Pageable.class), any())).willReturn(page);

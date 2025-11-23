@@ -20,10 +20,12 @@ import org.example.carshering.service.interfaces.CarStateService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -193,40 +195,57 @@ public class AdminCarController {
     @Tag(name = "Get Cars", description = "Retrieve a paginated list of cars with optional filtering parameters")
     @GetMapping
     public Page<CarListItemResponse> getCars(
-          @Parameter(
-            description = "Filter by car brand",
-            example = "Toyota"
-          )  @RequestParam(value = "brand", required = false) String brand,
-           @Parameter(
-            description = "Filter by car model",
-            example = "Camry"
-           ) @RequestParam(value = "model", required = false) String model,
-          @Parameter(
-            description = "Minimum manufacturing year",
-            example = "2015"
-          )  @RequestParam(value = "minYear", required = false) Integer minYear,
-         @Parameter(
-            description = "Maximum manufacturing year",
-            example = "2023"
-         )   @RequestParam(value = "maxYear", required = false) Integer maxYear,
-          @Parameter(
-            description = "Filter by body type",
-            example = "Sedan"
-          )  @RequestParam(value = "body_type", required = false) String bodyType,
-          @Parameter(
-            description = "Filter by car class",
-            example = "Economy"
-          )  @RequestParam(value = "car_class", required = false) String carClass,
-          @Parameter(
-            description = "Filter by car state",
-            example = "AVAILABLE"
-          )  @RequestParam(value = "car_state", required = false) String carState,
-           @Parameter(
-            description = "Pagination and sorting information"
-           ) @PageableDefault(size = 20, sort = "model.brand.name") Pageable pageable
+            @Parameter(
+                    description = "Filter by car brand",
+                    example = "Toyota"
+            ) @RequestParam(value = "brand", required = false) String brand,
+            @Parameter(
+                    description = "Filter by car model",
+                    example = "Camry"
+            ) @RequestParam(value = "model", required = false) String model,
+            @Parameter(
+                    description = "Minimum manufacturing year",
+                    example = "2015"
+            ) @RequestParam(value = "minYear", required = false) Integer minYear,
+            @Parameter(
+                    description = "Maximum manufacturing year",
+                    example = "2023"
+            ) @RequestParam(value = "maxYear", required = false) Integer maxYear,
+            @Parameter(
+                    description = "Filter by body type",
+                    example = "Sedan"
+            ) @RequestParam(value = "body_type", required = false) String bodyType,
+            @Parameter(
+                    description = "Filter by car class",
+                    example = "Economy"
+            ) @RequestParam(value = "car_class", required = false) String carClass,
+            @Parameter(
+                    description = "Filter by car state",
+                    example = "AVAILABLE"
+            ) @RequestParam(value = "car_state", required = false) String carState,
+            @Parameter(
+                    description = "Start date for car availability",
+                    example = "2025-01-01"
+            ) @RequestParam(value = "date_start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateStart,
+            @Parameter(
+                    description = "End date for car availability",
+                    example = "2025-01-31"
+            ) @RequestParam(value = "date_end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateEnd,
+            @Parameter(
+                    description = "Minimum price per day",
+                    example = "1000"
+            ) @RequestParam(value = "min_cell", required = false) Double minCell,
+            @Parameter(
+                    description = "Maximum price per day",
+                    example = "5000"
+            ) @RequestParam(value = "max_cell", required = false) Double maxCell,
+
+            @Parameter(
+                    description = "Pagination and sorting information"
+            ) @PageableDefault(size = 20, sort = "model.brand.name") Pageable pageable
     ) {
 
-        var filter = CarController.createFilter(brand, model, minYear, maxYear, bodyType, carClass, carState);
+        var filter = CarController.createFilter(brand, model, minYear, maxYear, bodyType, carClass, carState, dateStart, dateEnd, minCell, maxCell);
         return carService.getAllCars(pageable, filter);
     }
 

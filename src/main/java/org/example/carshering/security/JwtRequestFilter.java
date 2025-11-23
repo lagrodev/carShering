@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.service.interfaces.ClientDetailsService;
 import org.example.carshering.utils.JwtTokenUtils;
+import org.junit.jupiter.api.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,7 +39,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             jwtToken = authHeader.substring(7);
         }
 
-        // 2. Если в заголовке нет — ищем в cookie
+
         if (jwtToken == null) {
             jakarta.servlet.http.Cookie[] cookies = request.getCookies();
             if (cookies != null) {

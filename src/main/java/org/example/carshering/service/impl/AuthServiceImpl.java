@@ -29,7 +29,6 @@ import java.time.temporal.ChronoUnit;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final JwtTokenUtils jwtTokenUtils;
     private final ClientDetailsService clientDetailsService;
     private final AuthenticationManager authenticationManager;
     private final CodeRepository codeRepository;
@@ -65,30 +64,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-    @Transactional
-    @Override
-    // это для почты... :\ мне не нравится что это тут
-    // todo подумать, может лучше перенести это отсюда..
-    public void verifyToken(String code) {
 
-        VerificationCode verificationCode = codeRepository
-                .findByCodeAndTypeIs(
-                        code, VerificationCode.VerificationCodeType.EMAIL_VERIFICATION)
-                .orElseThrow(() -> new NotFoundException("Token not found")); // TODO: custom exception
-
-        boolean isExpired = verificationCode.getCreatedAt()
-                .plus(15, ChronoUnit.MINUTES)
-                .isBefore(Instant.now());
-
-        if (isExpired) {
-            throw new RuntimeException("Time life token has passed");
-        }
-
-        Client client = verificationCode.getClient();
-
-        clientDetailsService.setEmailVerified(client);
-        codeRepository.delete(verificationCode); // TODO: use a service method for this
-    }
 
     @Override
     public void resetPassword(String code, NewPasswordRequest request) {

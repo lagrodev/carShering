@@ -6,6 +6,7 @@ import org.example.carshering.dto.request.update.UpdateCarRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
 import org.example.carshering.dto.response.CarStateResponse;
+import org.example.carshering.dto.response.MinMaxCellForFilters;
 import org.example.carshering.entity.Car;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,7 @@ public interface CarService  {
 
     Car getEntity(Long carId);
 
-    CarDetailResponse getValidCarById(Long carId);
+    CarDetailResponse getValidCarById(Long carId, boolean favorite);
 
 
     CarDetailResponse createCar(CreateCarRequest request);
@@ -30,4 +31,5 @@ public interface CarService  {
 
     void deleteCar(Long carId);
 
+    MinMaxCellForFilters getMinMaxCell(CarFilterRequest filter);
 }

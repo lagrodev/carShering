@@ -11,14 +11,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.dto.request.CarFilterRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
+import org.example.carshering.dto.response.MinMaxCellForFilters;
+import org.example.carshering.security.ClientDetails;
 import org.example.carshering.service.interfaces.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -32,14 +38,20 @@ public class CarController {
     private final CarBrandService carBrandService;
     private final CarModelNameService carModelNameService;
     private final CarClassService carClassService;
+    private final FavoriteService favoriteService;
 
-    public static CarFilterRequest createFilter(@RequestParam(value = "brand", required = false) String brand,
-                                                @RequestParam(value = "model", required = false) String model,
-                                                @RequestParam(value = "minYear", required = false) Integer minYear,
-                                                @RequestParam(value = "maxYear", required = false) Integer maxYear,
-                                                @RequestParam(value = "body_type", required = false) String bodyType,
-                                                @RequestParam(value = "car_class", required = false) String carClass,
-                                                @RequestParam(value = "car_state", required = false) String carState) {
+    public static CarFilterRequest createFilter(String brand,
+                                                String model,
+                                                Integer minYear,
+                                                Integer maxYear,
+                                                String bodyType,
+                                                String carClass,
+                                                String carState,
+                                                LocalDate dateStart,
+                                                LocalDate dateEnd,
+                                                Double minCell,
+                                                Double maxCell
+    ) {
         List<String> brands = brand != null ? Arrays.asList(brand.split(",")) : List.of();
         List<String> models = model != null ? Arrays.asList(model.split(",")) : List.of();
         List<String> carClasses = carClass != null ? Arrays.asList(carClass.split(",")) : List.of();
@@ -52,7 +64,11 @@ public class CarController {
                 maxYear,
                 bodyType,
                 carClasses,
-                carStates
+                carStates,
+                dateStart,
+                dateEnd,
+                minCell,
+                maxCell
         );
     }
 
@@ -84,13 +100,83 @@ public class CarController {
             @RequestParam(value = "body_type", required = false) String bodyType,
             @Parameter(description = "Filter by car class", example = "Business")
             @RequestParam(value = "car_class", required = false) String carClass,
+            @Parameter(description = "Start date for car availability", example = "2025-01-01")
+            @RequestParam(value = "date_start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateStart,
+            @Parameter(description = "End date for car availability", example = "2025-01-31")
+            @RequestParam(value = "date_end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateEnd,
+            @Parameter(description = "Minimum price per day", example = "1000")
+            @RequestParam(value = "min_cell", required = false) Double minCell,
+            @Parameter(description = "Maximum price per day", example = "5000")
+            @RequestParam(value = "max_cell", required = false) Double maxCell,
             @Parameter(description = "Pagination and sorting information")
-            @PageableDefault(size = 20, sort = "model.brand.name") Pageable pageable
+            @PageableDefault(size = 20, sort = "model.brand.name") Pageable pageable,
+            @Parameter(hidden = true) Authentication auth
     ) {
         //todo: узнать  у нее - это норма?
-        var filter = createFilter(brand, model, minYear, maxYear, bodyType, carClass, "AVAILABLE");
-        return carService.getAllCars(pageable, filter);
+        var filter = createFilter(brand, model, minYear, maxYear, bodyType, carClass, "AVAILABLE", dateStart, dateEnd, minCell, maxCell);
+        var carsPage = carService.getAllCars(pageable, filter);
+        if (auth != null) {
+            log.info("User '{}' is browsing the car catalogue with filters: brand='{}', model='{}', minYear='{}', maxYear='{}', bodyType='{}', carClass='{}', dateStart='{}', dateEnd='{}', minCell='{}', maxCell='{}'.",
+                    auth.getName(), brand, model, minYear, maxYear, bodyType, carClass, dateStart, dateEnd, minCell, maxCell);
+            Set<Long> favorites = favoriteService.getAllFavoriteCarIds(((ClientDetails) auth.getPrincipal()).getId());
+
+            log.info("User '{}' has {} favorite cars.", auth.getName(), favorites.size());
+            carsPage = carsPage.map(carDto -> {
+                boolean isFav = favorites.contains(carDto.id());
+                return new CarListItemResponse(
+                        carDto.id(),
+                        carDto.brand(),
+                        carDto.carClass(),
+                        carDto.model(),
+                        carDto.yearOfIssue(),
+                        carDto.rent(),
+                        carDto.status(),
+                        isFav
+                );
+            });
+
+        }
+
+        return carsPage;
     }
+
+    @GetMapping("/filters/min-max-cell")
+    @Operation(
+            summary = "Get Min and Max Cell for Filters",
+            description = "Retrieve the minimum and maximum rental prices per day for available cars based on filters"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Minimum and maximum rental prices retrieved successfully",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = MinMaxCellForFilters.class)
+            )
+    )
+    @Tag(name = "get-min-max-cell-for-filters")
+    @Tag(name = "Get Min and Max Cell for Filters", description = "Retrieve the minimum and maximum rental prices per day for available cars based on filters")
+    public MinMaxCellForFilters getMaxCell(
+            @Parameter(description = "Filter by car brand", example = "Toyota")
+            @RequestParam(value = "brand", required = false) String brand,
+            @Parameter(description = "Filter by car model", example = "Camry")
+            @RequestParam(value = "model", required = false) String model,
+            @Parameter(description = "Minimum year of issue", example = "2015")
+            @RequestParam(value = "minYear", required = false) Integer minYear,
+            @Parameter(description = "Maximum year of issue", example = "2023")
+            @RequestParam(value = "maxYear", required = false) Integer maxYear,
+            @Parameter(description = "Filter by body type", example = "Sedan")
+            @RequestParam(value = "body_type", required = false) String bodyType,
+            @Parameter(description = "Filter by car class", example = "Business")
+            @RequestParam(value = "car_class", required = false) String carClass,
+            @Parameter(description = "Start date for car availability", example = "2025-01-01")
+            @RequestParam(value = "date_start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateStart,
+            @Parameter(description = "End date for car availability", example = "2025-01-31")
+            @RequestParam(value = "date_end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateEnd
+    ) {
+        var filter = createFilter(brand, model, minYear, maxYear, bodyType, carClass, "AVAILABLE", dateStart, dateEnd, null, null);
+        return carService.getMinMaxCell(filter);
+    }
+
 
     @GetMapping("/{carId}")
     @Operation(
@@ -109,9 +195,17 @@ public class CarController {
     @Tag(name = "Get Valid Car", description = "Retrieve detailed information about a specific available car by its ID")
     public CarDetailResponse findValidCar(
             @Parameter(description = "ID of the car to retrieve", example = "1")
-            @PathVariable Long carId
+            @PathVariable Long carId,
+            @Parameter(hidden = true) Authentication auth
     ) {
-        return carService.getValidCarById(carId);
+        if (auth != null) {
+            var car = favoriteService.getFavorite(((ClientDetails) auth.getPrincipal()).getId(), carId);
+            if (car != null) {
+                return carService.getValidCarById(carId, true);
+            }
+        }
+
+        return carService.getValidCarById(carId, false);
     }
 
     @GetMapping("/filters/brands")

@@ -3,6 +3,8 @@ package org.example.carshering.service.impl;
 import org.example.carshering.dto.request.AuthRequest;
 import org.example.carshering.security.ClientDetails;
 import org.example.carshering.service.interfaces.ClientDetailsService;
+import org.example.carshering.service.interfaces.JwtService;
+import org.example.carshering.service.interfaces.OpaqueService;
 import org.example.carshering.utils.JwtTokenUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,9 @@ import static org.mockito.Mockito.*;
 public class AuthServiceImplTests {
 
     @Mock
+    private JwtService jwtService;
+
+    @Mock
     private JwtTokenUtils jwtTokenUtils;
 
     @Mock
@@ -49,11 +54,12 @@ public class AuthServiceImplTests {
         ClientDetails userDetails = mock(ClientDetails.class);
         given(clientDetailsService.loadUserByUsername("john"))
                 .willReturn(userDetails);
-        given(jwtTokenUtils.generateToken(userDetails))
-                .willReturn("jwt-token");
+
+        given(jwtService.generateAccessToken(any(ClientDetails.class))).willReturn("jwt-token");
+        given(opaqueService.createOpaqueToken(any(ClientDetails.class))).willReturn("opaque-token");
 
         // when
-        String result = serviceUnderTest.createAuthToken(request).getValue();
+        String result = serviceUnderTest.login(request).accessToken();
 
         // then
         assertThat(result).isEqualTo("jwt-token");
@@ -67,7 +73,7 @@ public class AuthServiceImplTests {
         assertThat(token.getCredentials()).isEqualTo("password");
 
         verify(clientDetailsService).loadUserByUsername("john");
-        verify(jwtTokenUtils).generateToken(userDetails);
+        verify(jwtService).generateAccessToken(userDetails);
     }
 
     @Test
@@ -83,7 +89,7 @@ public class AuthServiceImplTests {
         // when + then
         assertThrows(
                 BadCredentialsException.class,
-                () -> serviceUnderTest.createAuthToken(request)
+                () -> serviceUnderTest.login(request)
         );
 
         verify(authenticationManager)
@@ -104,7 +110,7 @@ public class AuthServiceImplTests {
         // when + then
         assertThrows(
                 LockedException.class,
-                () -> serviceUnderTest.createAuthToken(request)
+                () -> serviceUnderTest.login(request)
         );
 
         verify(authenticationManager)
@@ -121,24 +127,30 @@ public class AuthServiceImplTests {
         ClientDetails userDetails = mock(ClientDetails.class);
         given(clientDetailsService.loadUserByUsername("alice"))
                 .willReturn(userDetails);
-        given(jwtTokenUtils.generateToken(userDetails))
-                .willReturn("valid-token");
+        given(jwtService.generateAccessToken(any(ClientDetails.class))).willReturn("jwt-token");
+        given(opaqueService.createOpaqueToken(any(ClientDetails.class))).willReturn("opaque-token");
+
 
         // when
-        serviceUnderTest.createAuthToken(request);
+        serviceUnderTest.login(request);
 
         // then
-        InOrder inOrder = inOrder(authenticationManager, clientDetailsService, jwtTokenUtils);
+        InOrder inOrder = inOrder(authenticationManager, clientDetailsService, jwtService);
         inOrder.verify(authenticationManager)
                 .authenticate(new UsernamePasswordAuthenticationToken("alice", "qwerty"));
         inOrder.verify(clientDetailsService).loadUserByUsername("alice");
-        inOrder.verify(jwtTokenUtils).generateToken(userDetails);
+        inOrder.verify(jwtService).generateAccessToken(userDetails);
     }
+    @Mock
+    private OpaqueService opaqueService;
+
+
 
 //
 
     @Test
     @DisplayName("Test createAuthToken throws BadCredentialsException with correct message when credentials invalid")
+
     public void givenInvalidCredentials_whenCreateAuthToken_thenThrowBadCredentialsExceptionWithMessage() {
         // given
         AuthRequest request = new AuthRequest("john", "wrongPassword");
@@ -150,7 +162,7 @@ public class AuthServiceImplTests {
         // when + then
         BadCredentialsException exception = assertThrows(
                 BadCredentialsException.class,
-                () -> serviceUnderTest.createAuthToken(request)
+                () -> serviceUnderTest.login(request)
         );
 
         assertThat(exception.getMessage()).isEqualTo("Incorrect login or password");
@@ -179,7 +191,7 @@ public class AuthServiceImplTests {
         // when + then
         LockedException exception = assertThrows(
                 LockedException.class,
-                () -> serviceUnderTest.createAuthToken(request)
+                () -> serviceUnderTest.login(request)
         );
 
         assertThat(exception.getMessage()).isEqualTo("Account has been blocked");
@@ -196,7 +208,6 @@ public class AuthServiceImplTests {
     }
 
 
-
     @Test
     @DisplayName("Test createAuthToken throws UsernameNotFoundException when user not found")
     public void givenNonExistentUser_whenCreateAuthToken_thenThrowUsernameNotFoundException() {
@@ -209,7 +220,7 @@ public class AuthServiceImplTests {
         // when + then
         assertThrows(
                 org.springframework.security.core.userdetails.UsernameNotFoundException.class,
-                () -> serviceUnderTest.createAuthToken(request)
+                () -> serviceUnderTest.login(request)
         );
 
         verify(authenticationManager).authenticate(new UsernamePasswordAuthenticationToken("unknown", "password"));

@@ -27,5 +27,7 @@ public record CarDetailResponse(
         @Schema(description = "Car status", example = "AVAILABLE")
         String status,
         @Schema(description = "Rental price per day", example = "2500.0")
-        Double rent
+        Double rent,
+        @Schema(description = "Is the car in user's favorites", example = "true")
+        boolean favorite
 ) {}

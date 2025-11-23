@@ -15,7 +15,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "contracts")
+@ToString(exclude = {"contracts", "favorites"})
 @Builder
 public class Client {
     @Id
@@ -67,5 +67,9 @@ public class Client {
 
     @OneToMany(mappedBy = "client")
     private List<Contract> contracts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "client")
+    private List<Favorite> favorites = new ArrayList<>();
+
 
 }

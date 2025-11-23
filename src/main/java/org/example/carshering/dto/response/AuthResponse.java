@@ -1,8 +1,10 @@
 package org.example.carshering.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 
 @Schema(description = "Authentication response with tokens")
+@Builder
 public record AuthResponse (
         @Schema(description = "Token type", example = "Bearer")
         String type,

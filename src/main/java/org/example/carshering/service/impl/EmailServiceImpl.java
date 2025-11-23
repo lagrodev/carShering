@@ -3,13 +3,19 @@ package org.example.carshering.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.entity.Client;
 import org.example.carshering.entity.VerificationCode;
+import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.repository.CodeRepository;
+import org.example.carshering.service.interfaces.ClientDetailsService;
 import org.example.carshering.service.interfaces.EmailService;
 import org.example.carshering.utils.VerificationToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @RequiredArgsConstructor
 @Service
@@ -37,6 +43,31 @@ public class EmailServiceImpl implements EmailService {
         codeRepository.save(verificationCode);
         return code;
     }
+    private final ClientDetailsService clientDetailsService;
+
+    @Transactional
+    @Override
+    public void verifyToken(String code) {
+
+        VerificationCode verificationCode = codeRepository
+                .findByCodeAndTypeIs(
+                        code, VerificationCode.VerificationCodeType.EMAIL_VERIFICATION)
+                .orElseThrow(() -> new NotFoundException("Token not found")); // TODO: custom exception
+
+        boolean isExpired = verificationCode.getCreatedAt()
+                .plus(15, ChronoUnit.MINUTES)
+                .isBefore(Instant.now());
+
+        if (isExpired) {
+            throw new RuntimeException("Time life token has passed");
+        }
+
+        Client client = verificationCode.getClient();
+
+        clientDetailsService.setEmailVerified(client);
+        codeRepository.delete(verificationCode); // TODO: use a service method for this
+    }
+
 
 
     public void sendVerificationEmail(Client client, String verificationCode) {

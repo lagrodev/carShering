@@ -339,7 +339,7 @@ public class CarControllerTests extends BaseWebMvcTest {
                 .rent(50.0)
                 .build();
 
-        given(carService.getValidCarById(1L)).willReturn(carDetailResponse);
+        given(carService.getValidCarById(1L, false)).willReturn(carDetailResponse);
 
         // when
         ResultActions resultActions = mockMvc.perform(get(apiUrl + "/1")
@@ -367,7 +367,7 @@ public class CarControllerTests extends BaseWebMvcTest {
     public void givenIncorrectCarId_whenGetCar_thenErrorResponse() throws Exception {
 
         // given
-        given(carService.getValidCarById(999L))
+        given(carService.getValidCarById(999L, false))
                 .willThrow(new CarNotFoundException("Car not found"));
 
         // when

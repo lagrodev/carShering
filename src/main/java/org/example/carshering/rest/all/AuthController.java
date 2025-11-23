@@ -9,7 +9,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.dto.request.*;
+import org.example.carshering.dto.request.AuthRequest;
+import org.example.carshering.dto.request.NewPasswordRequest;
+import org.example.carshering.dto.request.RefreshTokenRequest;
+import org.example.carshering.dto.request.RegistrationRequest;
 import org.example.carshering.dto.response.AuthResponse;
 import org.example.carshering.dto.response.UserResponse;
 import org.example.carshering.service.interfaces.AuthService;
@@ -27,6 +30,7 @@ import java.util.Map;
 @Tag(name = "Authentication", description = "Endpoints for user authentication and registration")
 @RequestMapping("/api")
 public class AuthController {
+
     private final AuthService authService;
 
     private final ClientService clientService;
@@ -121,27 +125,61 @@ public class AuthController {
     }
 
 
-    @GetMapping("/verify")
+    @PostMapping("/refresh")
     @Operation(
-            summary = "Verify Email",
-            description = "Verify user email using verification code sent to email"
+            summary = "Refresh Token",
+            description = "Refresh access token using refresh token from cookies"
     )
     @ApiResponse(
-            responseCode = "302",
-            description = "Email verified successfully, redirect to profile"
+            responseCode = "200",
+            description = "Token refreshed successfully"
     )
     @ApiResponse(
-            responseCode = "400",
-            description = "Invalid or expired verification code"
+            responseCode = "401",
+            description = "Invalid or missing refresh token"
     )
-    @Tag(name = "verify-email")
-    @Tag(name = "Verify Email", description = "Verify user email using verification code sent to email")
-    public ResponseEntity<Void> verifyToken(
-            @Parameter(description = "Email verification code", example = "abc123xyz456")
-            @RequestParam("code") String code
+    @Tag(name = "refresh-token")
+    @Tag(name = "Refresh Token", description = "Refresh access token using refresh token from cookies")
+    public ResponseEntity<?> refreshToken(
+            @Parameter(description = "Refresh token from cookie", required = true)
+            @CookieValue(value = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response
     ) {
-        authService.verifyToken(code);
-        return ResponseEntity.ok().build();
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .header(HttpHeaders.SET_COOKIE, clearCookie("access_token").toString())
+                    .header(HttpHeaders.SET_COOKIE, clearCookie("refresh_token").toString())
+                    .body(Map.of("error", "Invalid refresh token"));
+        }
+
+
+        RefreshTokenRequest request = new RefreshTokenRequest(refreshToken);
+        AuthResponse tokens = authService.refreshAccessToken(request);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, buildCookie("access_token", tokens.accessToken(), 30 * 60).toString())
+                .header(HttpHeaders.SET_COOKIE, buildCookie("refresh_token", tokens.refreshToken(), 7 * 24 * 60 * 60).toString())
+                .body(Map.of("message", "Token refreshed successfully"));
+    }
+
+    private ResponseCookie clearCookie(String name) {
+        return ResponseCookie.from(name, "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/api")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+    }
+
+    private ResponseCookie buildCookie(String name, String value, int maxAgeSeconds) {
+        return ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .secure(false) // например, по профилю
+                .path("/api")
+                .maxAge(maxAgeSeconds)
+                .sameSite("Lax")
+                .build();
     }
 
     @PostMapping("/reset")
@@ -173,96 +211,6 @@ public class AuthController {
     ) {
         authService.resetPassword(code, request);
         return ResponseEntity.ok().build();
-    }
-
-
-    @PostMapping("/reset-password")
-    @Operation(
-            summary = "Request Password Reset",
-            description = "Initiate password reset process by sending reset email"
-    )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Password reset email sent successfully"
-    )
-    @ApiResponse(
-            responseCode = "404",
-            description = "Email not found"
-    )
-    @ApiResponse(
-            responseCode = "403",
-            description = "Email not verified"
-    )
-    @Tag(name = "request-password-reset")
-    @Tag(name = "Request Password Reset", description = "Initiate password reset process by sending reset email")
-    public ResponseEntity<?> resetPassword(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Email address for password reset",
-                    required = true,
-                    content = @Content(
-                            schema = @Schema(implementation = ResetPasswordRequest.class)
-                    )
-            )
-            @RequestBody @Valid ResetPasswordRequest request
-    ) {
-        var response = clientService.resetPassword(request);
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/refresh")
-    @Operation(
-            summary = "Refresh Token",
-            description = "Refresh access token using refresh token from cookies"
-    )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Token refreshed successfully"
-    )
-    @ApiResponse(
-            responseCode = "401",
-            description = "Invalid or missing refresh token"
-    )
-    @Tag(name = "refresh-token")
-    @Tag(name = "Refresh Token", description = "Refresh access token using refresh token from cookies")
-    public ResponseEntity<?> refreshToken(
-            @Parameter(description = "Refresh token from cookie", required = true)
-            @CookieValue("refresh_token") String refreshToken,
-            HttpServletResponse response
-    ) {
-        if (refreshToken == null || refreshToken.isBlank()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .header(HttpHeaders.SET_COOKIE, clearCookie("access_token").toString())
-                    .header(HttpHeaders.SET_COOKIE, clearCookie("refresh_token").toString())
-                    .body(Map.of("error", "Invalid refresh token"));
-        }
-
-
-        RefreshTokenRequest request = new RefreshTokenRequest(refreshToken);
-        AuthResponse tokens = authService.refreshAccessToken(request);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, buildCookie("access_token", tokens.accessToken(), 30 * 60).toString())
-                .header(HttpHeaders.SET_COOKIE, buildCookie("refresh_token", tokens.refreshToken(), 7 * 24 * 60 * 60).toString())
-                .body(Map.of("message", "Token refreshed successfully"));
-    }
-    private ResponseCookie clearCookie(String name) {
-        return ResponseCookie.from(name, "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .sameSite("Strict")
-                .build();
-    }
-
-    private ResponseCookie buildCookie(String name, String value, int maxAgeSeconds) {
-        return ResponseCookie.from(name, value)
-                .httpOnly(true)
-                .secure(false) // например, по профилю
-                .path("/api")
-                .maxAge(maxAgeSeconds)
-                .sameSite("Lax")
-                .build();
     }
 
 

@@ -47,5 +47,9 @@ public class Car {
     @OneToMany(mappedBy = "car")
     private List<Contract> contracts = new ArrayList<>();;
 
+    @OneToMany(mappedBy = "car")
+    private List<Favorite> favorites = new ArrayList<>();
+
+
     // TODO: @CreateDate @UpdateDate
 }

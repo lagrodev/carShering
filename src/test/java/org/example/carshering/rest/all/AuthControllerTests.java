@@ -3,6 +3,7 @@ package org.example.carshering.rest.all;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.carshering.dto.request.AuthRequest;
 import org.example.carshering.dto.request.RegistrationRequest;
+import org.example.carshering.dto.response.AuthResponse;
 import org.example.carshering.dto.response.UserResponse;
 import org.example.carshering.exceptions.custom.AlreadyExistsException;
 import org.example.carshering.rest.BaseWebMvcTest;
@@ -59,10 +60,12 @@ public class AuthControllerTests extends BaseWebMvcTest {
 
         // given
         AuthRequest authRequest = new AuthRequest("user101", "password");
-        String token = "mock.jwt.token";
+        AuthResponse authResponse = AuthResponse.builder()
+                .accessToken("Acs").refreshToken("refr").type("psss").build();
 
-        given(authService.createAuthToken(any(AuthRequest.class)))
-                .willReturn(ResponseCookie.from(token, "mock.jwt.token").build());
+
+        given(authService.login(any(AuthRequest.class)))
+                .willReturn(authResponse);
 
         // when
         ResultActions resultActions = mockMvc.perform(post(apiUrl + "/auth")
