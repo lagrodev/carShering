@@ -2,7 +2,11 @@ package org.example.carshering.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class Favorite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,5 +30,8 @@ public class Favorite {
     @ManyToOne
     @JoinColumn(name = "car_id", nullable = false)
     private Car car;
+
+    @CreationTimestamp
+    private Instant createdAt;
 
 }

@@ -32,7 +32,7 @@ public class AdminClientController {
     @GetMapping("/users/{userId}")
     @Operation(
             summary = "Get User by ID",
-            description = "Retrieve detailed information about a specific user by their ID"
+            description = "Retrieve detailed information about a specific user by their ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -42,10 +42,12 @@ public class AdminClientController {
                     schema = @Schema(implementation = AllUserResponse.class)
             )
     )
-    @Tag(name = "get-user-by-id")
-    @Tag(name = "Get User by ID", description = "Retrieve detailed information about a specific user by their ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "User not found"
+    )
     public AllUserResponse getUser(
-            @Parameter(description = "ID of the user to retrieve", example = "1")
+            @Parameter(description = "ID of the user to retrieve", example = "1", required = true)
             @PathVariable Long userId
     ) {
         return clientService.findAllUser(userId);
@@ -54,18 +56,16 @@ public class AdminClientController {
     @GetMapping("/users")
     @Operation(
             summary = "Get All Users",
-            description = "Retrieve a paginated list of users with optional filtering"
+            description = "Retrieve a paginated list of users with optional filtering by ban status and role (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "Paginated list of users retrieved successfully",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = ShortUserResponse.class)
+                    schema = @Schema(implementation = Page.class)
             )
     )
-    @Tag(name = "get-all-users")
-    @Tag(name = "Get All Users", description = "Retrieve a paginated list of users with optional filtering")
     public Page<ShortUserResponse> getAllUsers(
             @Parameter(description = "Filter by banned status", example = "false")
             @RequestParam(value = "banned", required = false) Boolean banned,
@@ -87,16 +87,18 @@ public class AdminClientController {
     @PatchMapping("/users/{userId}/ban")
     @Operation(
             summary = "Ban User",
-            description = "Ban a user by their ID"
+            description = "Ban a user by their ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "User banned successfully"
     )
-    @Tag(name = "ban-user")
-    @Tag(name = "Ban User", description = "Ban a user by their ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "User not found"
+    )
     public ResponseEntity<?> banUser(
-            @Parameter(description = "ID of the user to ban", example = "1")
+            @Parameter(description = "ID of the user to ban", example = "1", required = true)
             @PathVariable Long userId
     ) {
         var client = clientService.banUser(userId);
@@ -106,16 +108,18 @@ public class AdminClientController {
     @PatchMapping("/users/{userId}/unban")
     @Operation(
             summary = "Unban User",
-            description = "Unban a user by their ID"
+            description = "Unban a user by their ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "User unbanned successfully"
     )
-    @Tag(name = "unban-user")
-    @Tag(name = "Unban User", description = "Unban a user by their ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "User not found"
+    )
     public ResponseEntity<?> unbanUser(
-            @Parameter(description = "ID of the user to unban", example = "1")
+            @Parameter(description = "ID of the user to unban", example = "1", required = true)
             @PathVariable Long userId
     ) {
         var client = clientService.unbanUser(userId);
@@ -125,16 +129,22 @@ public class AdminClientController {
     @PatchMapping("/users/{userId}/updateRole")
     @Operation(
             summary = "Update User Role",
-            description = "Update the role of a user by their ID"
+            description = "Update the role of a user by their ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "User role updated successfully"
     )
-    @Tag(name = "update-user-role")
-    @Tag(name = "Update User Role", description = "Update the role of a user by their ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "User not found"
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid role name"
+    )
     public ResponseEntity<?> updateRole(
-            @Parameter(description = "ID of the user to update role", example = "1")
+            @Parameter(description = "ID of the user to update role", example = "1", required = true)
             @PathVariable Long userId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "New role for the user",

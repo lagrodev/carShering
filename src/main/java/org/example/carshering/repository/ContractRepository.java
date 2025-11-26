@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -28,8 +29,8 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
                     """
     )
     List<Contract> findOverlappingContracts(
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
             @Param("carId") Long carId,
             @Param("contractId") Long contractId);
 
@@ -70,5 +71,7 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     )
     List<Contract> findAllByClientAndActiveStates(@Param("client") Client client, @Param("activeStates") Collection<String> activeStates);
 
-    List<Contract> findAllByStateNameAndDataStartBefore(String confirmed, LocalDate localDate);
+    List<Contract> findAllByStateNameAndDataStartBefore(String confirmed, LocalDateTime localDate);
+
+    List<Contract> findAllByStateNameAndDataEndBefore(String completed, LocalDateTime localDateTime);
 }

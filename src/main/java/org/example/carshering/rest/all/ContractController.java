@@ -32,7 +32,7 @@ public class ContractController {
     @PostMapping
     @Operation(
             summary = "Create Contract",
-            description = "Create a new contract for the authenticated user"
+            description = "Create a new rental contract for the authenticated user"
     )
     @ApiResponse(
             responseCode = "201",
@@ -42,8 +42,14 @@ public class ContractController {
                     schema = @Schema(implementation = ContractResponse.class)
             )
     )
-    @Tag(name = "create-contract")
-    @Tag(name = "Create Contract", description = "Create a new contract for the authenticated user")
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request data or car not available for specified dates"
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Car not found"
+    )
     public ResponseEntity<?> createContract(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Contract details to create",
@@ -67,18 +73,16 @@ public class ContractController {
     @GetMapping
     @Operation(
             summary = "Get User Contracts",
-            description = "Retrieve all contracts for the authenticated user"
+            description = "Retrieve all rental contracts for the authenticated user with pagination"
     )
     @ApiResponse(
             responseCode = "200",
             description = "Paginated list of user contracts retrieved successfully",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = ContractResponse.class)
+                    schema = @Schema(implementation = Page.class)
             )
     )
-    @Tag(name = "get-user-contracts")
-    @Tag(name = "Get User Contracts", description = "Retrieve all contracts for the authenticated user")
     public Page<ContractResponse> getAllContracts(
             Authentication auth,
             @Parameter(description = "Pagination and sorting information")
@@ -91,7 +95,7 @@ public class ContractController {
     @GetMapping("/{contractId}")
     @Operation(
             summary = "Get Contract",
-            description = "Retrieve detailed information about a specific contract"
+            description = "Retrieve detailed information about a specific contract by its ID (only for contract owner)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -101,10 +105,16 @@ public class ContractController {
                     schema = @Schema(implementation = ContractResponse.class)
             )
     )
-    @Tag(name = "get-contract")
-    @Tag(name = "Get Contract", description = "Retrieve detailed information about a specific contract")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Contract not found"
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Access denied - not contract owner"
+    )
     public ContractResponse getContract(
-            @Parameter(description = "ID of the contract to retrieve", example = "1")
+            @Parameter(description = "ID of the contract to retrieve", example = "1", required = true)
             @PathVariable Long contractId,
             Authentication auth
     ) {
@@ -115,16 +125,26 @@ public class ContractController {
     @DeleteMapping("/{contractId}/cancel")
     @Operation(
             summary = "Cancel User Contract",
-            description = "Cancel a contract by the authenticated user"
+            description = "Cancel a rental contract by the authenticated user (only contract owner can cancel)"
     )
     @ApiResponse(
             responseCode = "204",
             description = "Contract cancelled successfully"
     )
-    @Tag(name = "cancel-user-contract")
-    @Tag(name = "Cancel User Contract", description = "Cancel a contract by the authenticated user")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Contract not found"
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Access denied - not contract owner"
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Contract cannot be cancelled"
+    )
     public ResponseEntity<?> cancelContract(
-            @Parameter(description = "ID of the contract to cancel", example = "1")
+            @Parameter(description = "ID of the contract to cancel", example = "1", required = true)
             @PathVariable Long contractId,
             Authentication auth
     ) {
@@ -137,7 +157,7 @@ public class ContractController {
     @PatchMapping("/{contractId}")
     @Operation(
             summary = "Update Contract",
-            description = "Update the details of an existing contract"
+            description = "Update the rental dates of an existing contract (only contract owner can update)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -147,10 +167,20 @@ public class ContractController {
                     schema = @Schema(implementation = ContractResponse.class)
             )
     )
-    @Tag(name = "update-contract")
-    @Tag(name = "Update Contract", description = "Update the details of an existing contract")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Contract not found"
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Access denied - not contract owner"
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request data or dates conflict with existing bookings"
+    )
     public ResponseEntity<?> updateContract(
-            @Parameter(description = "ID of the contract to update", example = "1")
+            @Parameter(description = "ID of the contract to update", example = "1", required = true)
             @PathVariable Long contractId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Updated contract details",

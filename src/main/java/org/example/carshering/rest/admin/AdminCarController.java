@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -40,7 +41,7 @@ public class AdminCarController {
     @GetMapping("/{carId}")
     @Operation(
             summary = "Get Car by ID",
-            description = "Retrieve detailed information about a specific car by its ID"
+            description = "Retrieve detailed information about a specific car by its ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -50,12 +51,15 @@ public class AdminCarController {
                     schema = @Schema(implementation = CarDetailResponse.class)
             )
     )
-    @Tag(name = "get-car-by-id")
-    @Tag(name = "Get Car by ID", description = "Retrieve detailed information about a specific car by its ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Car not found"
+    )
     public ResponseEntity<?> getCar(
             @Parameter(
                     description = "ID of the car to retrieve",
-                    example = "1"
+                    example = "1",
+                    required = true
             ) @PathVariable Long carId
     ) {
         return ResponseEntity.ok(carService.getCarById(carId));
@@ -63,8 +67,7 @@ public class AdminCarController {
 
     @Operation(
             summary = "Update Car",
-            description = "Update the details of an existing car by its ID"
-
+            description = "Update the details of an existing car by its ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -74,13 +77,20 @@ public class AdminCarController {
                     schema = @Schema(implementation = CarDetailResponse.class)
             )
     )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Car not found"
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request data"
+    )
     @PatchMapping("/{carId}")
-    @Tag(name = "update-car")
-    @Tag(name = "Update Car", description = "Update the details of an existing car by its ID")
     public ResponseEntity<CarDetailResponse> updateCar(
             @Parameter(
                     description = "ID of the car to update",
-                    example = "1"
+                    example = "1",
+                    required = true
             ) @PathVariable Long carId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Updated car details",
@@ -97,7 +107,7 @@ public class AdminCarController {
 
     @Operation(
             summary = "Create Car",
-            description = "Create a new car with the provided details"
+            description = "Create a new car with the provided details (admin access)"
     )
     @ApiResponse(
             responseCode = "201",
@@ -107,9 +117,11 @@ public class AdminCarController {
                     schema = @Schema(implementation = CarDetailResponse.class)
             )
     )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request data"
+    )
     @PostMapping
-    @Tag(name = "create-car")
-    @Tag(name = "Create Car", description = "Create a new car with the provided details")
     public ResponseEntity<CarDetailResponse> createCar(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Details of the car to create",
@@ -126,19 +138,22 @@ public class AdminCarController {
 
     @Operation(
             summary = "Delete Car",
-            description = "Delete an existing car by its ID"
+            description = "Delete an existing car by its ID (admin access)"
     )
     @ApiResponse(
             responseCode = "204",
             description = "Car deleted successfully"
     )
-    @Tag(name = "delete-car")
-    @Tag(name = "Delete Car", description = "Delete an existing car by its ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Car not found"
+    )
     @DeleteMapping({"/{carId}"})
     public ResponseEntity<?> deleteCar(
             @Parameter(
                     description = "ID of the car to delete",
-                    example = "1"
+                    example = "1",
+                    required = true
             ) @PathVariable Long carId
     ) {
         carService.deleteCar(carId);
@@ -148,7 +163,7 @@ public class AdminCarController {
 
     @Operation(
             summary = "Update Car State",
-            description = "Update the state of a specific car by its ID"
+            description = "Update the state of a specific car by its ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -158,13 +173,20 @@ public class AdminCarController {
                     schema = @Schema(implementation = CarStateResponse.class)
             )
     )
-    @Tag(name = "update-car-state")
-    @Tag(name = "Update Car State", description = "Update the state of a specific car by its ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Car not found"
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid state name"
+    )
     @PatchMapping("/{carId}/state")
-    public ResponseEntity<?> updateCarState( // это же для мягкого удаления, так, а тут надо убрать Invalaible
+    public ResponseEntity<?> updateCarState(
                                              @Parameter(
                                                      description = "ID of the car to update state",
-                                                     example = "1"
+                                                     example = "1",
+                                                     required = true
                                              ) @PathVariable Long carId,
                                              @io.swagger.v3.oas.annotations.parameters.RequestBody(
                                                      description = "New state for the car",
@@ -181,18 +203,16 @@ public class AdminCarController {
 
     @Operation(
             summary = "Get Cars",
-            description = "Retrieve a paginated list of cars with optional filtering parameters"
+            description = "Retrieve a paginated list of all cars with optional filtering parameters (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "Paginated list of cars retrieved successfully",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = CarListItemResponse.class)
+                    schema = @Schema(implementation = Page.class)
             )
     )
-    @Tag(name = "get-cars")
-    @Tag(name = "Get Cars", description = "Retrieve a paginated list of cars with optional filtering parameters")
     @GetMapping
     public Page<CarListItemResponse> getCars(
             @Parameter(
@@ -226,11 +246,11 @@ public class AdminCarController {
             @Parameter(
                     description = "Start date for car availability",
                     example = "2025-01-01"
-            ) @RequestParam(value = "date_start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateStart,
+            ) @RequestParam(value = "date_start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateStart,
             @Parameter(
                     description = "End date for car availability",
                     example = "2025-01-31"
-            ) @RequestParam(value = "date_end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateEnd,
+            ) @RequestParam(value = "date_end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateEnd,
             @Parameter(
                     description = "Minimum price per day",
                     example = "1000"
@@ -251,18 +271,12 @@ public class AdminCarController {
 
     @Operation(
             summary = "Get All Car States",
-            description = "Retrieve a list of all possible car states"
+            description = "Retrieve a list of all possible car states (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
-            description = "List of car states retrieved successfully",
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = CarStateResponse.class)
-            )
+            description = "List of car states retrieved successfully"
     )
-    @Tag(name = "get-all-car-states")
-    @Tag(name = "Get All Car States", description = "Retrieve a list of all possible car states")
     @GetMapping("/state")
     public List<CarStateResponse> AllCarStates(
     ) {

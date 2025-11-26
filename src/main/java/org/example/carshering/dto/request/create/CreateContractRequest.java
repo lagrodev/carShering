@@ -6,13 +6,16 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-@Schema(description = "Request to create a new contract")
+@Schema(description = "Request to create a new rental contract")
 public record CreateContractRequest(
-        @Schema(description = "ID of the car to rent", example = "1")
+        @Schema(description = "Unique identifier of the car to rent", example = "1")
         @NotNull Long carId,
-        @Schema(description = "Start date of the contract", example = "2025-12-01")
-        @FutureOrPresent @NotNull LocalDate dataStart,
-        @Schema(description = "End date of the contract", example = "2025-12-15")
-        @FutureOrPresent @NotNull LocalDate dataEnd
+        
+        @Schema(description = "Start date and time of the rental period", example = "2025-12-01T10:00:00")
+        @FutureOrPresent @NotNull LocalDateTime dataStart,
+        
+        @Schema(description = "End date and time of the rental period (must be after start date)", example = "2025-12-15T10:00:00")
+        @FutureOrPresent @NotNull LocalDateTime dataEnd
 ) {}

@@ -24,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -189,8 +190,13 @@ public class CarServiceImpl implements CarService {
         validateSortProperties(pageable.getSort());
 
         filter = normalizeFilterRequest(filter);
+        LocalDateTime dateStart = filter.dateStart();
+        LocalDateTime dateEnd = filter.dateEnd();
 
-
+        if (dateStart == null || dateEnd == null || dateStart.isAfter(dateEnd) || dateEnd.isAfter(LocalDateTime.now().plusYears(1))) {
+            dateStart = LocalDateTime.of(1000, 1, 1, 0, 0);
+            dateEnd = LocalDateTime.of(1000, 1, 2, 0, 0);
+        }
 
         return carRepository.findByFilter(
                 filter.brands(),
@@ -200,8 +206,8 @@ public class CarServiceImpl implements CarService {
                 filter.bodyType(),
                 filter.carClasses(),
                 filter.carState(),
-                filter.dateStart(),
-                filter.dateEnd(),
+                dateStart,
+                dateEnd,
                 filter.minCell(),
                 filter.maxCell(),
                 pageable
@@ -211,6 +217,13 @@ public class CarServiceImpl implements CarService {
     public MinMaxCellForFilters getMinMaxCell(CarFilterRequest filter) {
         filter = normalizeFilterRequest(filter);
 
+        LocalDateTime dateStart = filter.dateStart();
+        LocalDateTime dateEnd = filter.dateEnd();
+
+        if (dateStart == null || dateEnd == null) {
+            dateStart = LocalDateTime.of(1000, 1, 1, 0, 0);
+            dateEnd = LocalDateTime.of(1000, 1, 2, 0, 0);
+        }
         return carRepository.findMinMaxPriceByFilter(
                 filter.brands(),
                 filter.models(),
@@ -219,8 +232,8 @@ public class CarServiceImpl implements CarService {
                 filter.bodyType(),
                 filter.carClasses(),
                 filter.carState(),
-                filter.dateStart(),
-                filter.dateEnd()
+                dateStart,
+                dateEnd
         );
     }
 

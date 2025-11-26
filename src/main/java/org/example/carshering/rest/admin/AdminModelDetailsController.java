@@ -44,19 +44,16 @@ public class AdminModelDetailsController {
     @GetMapping("/models")
     @Operation(
             summary = "Get Models",
-            description = "Retrieve a paginated list of car models with optional filtering"
+            description = "Retrieve a paginated list of car models with optional filtering by brand, body type, and class (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "Paginated list of car models retrieved successfully",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = CarModelResponse.class)
+                    schema = @Schema(implementation = Page.class)
             )
     )
-    @Tag(name = "get-models")
-    @Tag(name = "Get Models", description = "Retrieve a paginated list of car models with optional filtering")
-    // todo фильтр в репозитории доп. ерунда прописана, надо сделать
     public Page<CarModelResponse> allModels(
             @Parameter(description = "Filter by brand name", example = "Toyota")
             @RequestParam(value = "brand", required = false) String brand,
@@ -77,7 +74,7 @@ public class AdminModelDetailsController {
     @GetMapping("/models/{modelId}")
     @Operation(
             summary = "Get Model by ID",
-            description = "Retrieve detailed information about a specific model by its ID"
+            description = "Retrieve detailed information about a specific car model by its ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -87,10 +84,12 @@ public class AdminModelDetailsController {
                     schema = @Schema(implementation = CarModelResponse.class)
             )
     )
-    @Tag(name = "get-model-by-id")
-    @Tag(name = "Get Model by ID", description = "Retrieve detailed information about a specific model by its ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Model not found"
+    )
     public CarModelResponse getModelById(
-            @Parameter(description = "ID of the model to retrieve", example = "1")
+            @Parameter(description = "ID of the model to retrieve", example = "1", required = true)
             @PathVariable Long modelId
     ) {
         return carModelService.getModelById(modelId);
@@ -99,7 +98,7 @@ public class AdminModelDetailsController {
     @PostMapping("/filters/brands")
     @Operation(
             summary = "Create Brand",
-            description = "Create a new car brand"
+            description = "Create a new car brand (admin access)"
     )
     @ApiResponse(
             responseCode = "201",
@@ -109,8 +108,10 @@ public class AdminModelDetailsController {
                     schema = @Schema(implementation = BrandModelResponse.class)
             )
     )
-    @Tag(name = "create-brand")
-    @Tag(name = "Create Brand", description = "Create a new car brand")
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request data or brand already exists"
+    )
     public ResponseEntity<?> createBrands(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Brand details to create",
@@ -129,7 +130,7 @@ public class AdminModelDetailsController {
     @PostMapping("/filters/models")
     @Operation(
             summary = "Create Model Name",
-            description = "Create a new model name"
+            description = "Create a new model name (admin access)"
     )
     @ApiResponse(
             responseCode = "201",
@@ -139,8 +140,10 @@ public class AdminModelDetailsController {
                     schema = @Schema(implementation = ModelNameResponse.class)
             )
     )
-    @Tag(name = "create-model-name")
-    @Tag(name = "Create Model Name", description = "Create a new model name")
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request data or model name already exists"
+    )
     public ResponseEntity<?> createModels(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Model name to create",
@@ -159,7 +162,7 @@ public class AdminModelDetailsController {
     @PostMapping("/filters/classes")
     @Operation(
             summary = "Create Class",
-            description = "Create a new car class"
+            description = "Create a new car class (admin access)"
     )
     @ApiResponse(
             responseCode = "201",
@@ -169,8 +172,10 @@ public class AdminModelDetailsController {
                     schema = @Schema(implementation = ModelNameResponse.class)
             )
     )
-    @Tag(name = "create-class")
-    @Tag(name = "Create Class", description = "Create a new car class")
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request data or class already exists"
+    )
     public ResponseEntity<?> createClasses(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Car class to create",
@@ -189,14 +194,12 @@ public class AdminModelDetailsController {
     @GetMapping("/filters/brands")
     @Operation(
             summary = "Get Brands",
-            description = "Retrieve a list of all car brands"
+            description = "Retrieve a list of all car brands (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "List of brands retrieved successfully"
     )
-    @Tag(name = "get-brands")
-    @Tag(name = "Get Brands", description = "Retrieve a list of all car brands")
     public List<String> getBrands(
     ) {
         return carBrandService.findAllBrands();
@@ -206,14 +209,12 @@ public class AdminModelDetailsController {
     @GetMapping("/filters/models")
     @Operation(
             summary = "Get Model Names",
-            description = "Retrieve a list of all model names"
+            description = "Retrieve a list of all model names (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "List of model names retrieved successfully"
     )
-    @Tag(name = "get-model-names")
-    @Tag(name = "Get Model Names", description = "Retrieve a list of all model names")
     public List<String> getModels(
     ) {
         return carModelNameService.findAllModels();
@@ -223,14 +224,12 @@ public class AdminModelDetailsController {
     @GetMapping("/filters/classes")
     @Operation(
             summary = "Get Classes",
-            description = "Retrieve a list of all car classes"
+            description = "Retrieve a list of all car classes (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "List of car classes retrieved successfully"
     )
-    @Tag(name = "get-classes")
-    @Tag(name = "Get Classes", description = "Retrieve a list of all car classes")
     public List<String> getClasses(
     ) {
         return carClassService.findAllClasses();
@@ -240,7 +239,7 @@ public class AdminModelDetailsController {
     @PutMapping("/models/{modelId}")
     @Operation(
             summary = "Update Model",
-            description = "Update the details of an existing model by its ID"
+            description = "Update the details of an existing car model by its ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -250,8 +249,14 @@ public class AdminModelDetailsController {
                     schema = @Schema(implementation = CarModelResponse.class)
             )
     )
-    @Tag(name = "update-model")
-    @Tag(name = "Update Model", description = "Update the details of an existing model by its ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Model not found"
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request data"
+    )
     public ResponseEntity<CarModelResponse> updateModel(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Updated model details",
@@ -261,7 +266,7 @@ public class AdminModelDetailsController {
                     )
             )
             @RequestBody @Valid  UpdateCarModelRequest request,
-            @Parameter(description = "ID of the model to update", example = "1")
+            @Parameter(description = "ID of the model to update", example = "1", required = true)
             @PathVariable Long modelId
     ) {
         CarModelResponse modelResponse = carModelService.updateModel(modelId, request);
@@ -272,7 +277,7 @@ public class AdminModelDetailsController {
     @PostMapping("/models")
     @Operation(
             summary = "Create Model",
-            description = "Create a new car model with the provided details"
+            description = "Create a new car model with the provided details (admin access)"
     )
     @ApiResponse(
             responseCode = "201",
@@ -282,8 +287,10 @@ public class AdminModelDetailsController {
                     schema = @Schema(implementation = CarModelResponse.class)
             )
     )
-    @Tag(name = "create-model")
-    @Tag(name = "Create Model", description = "Create a new car model with the provided details")
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request data"
+    )
     public ResponseEntity<CarModelResponse> createModel(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Model details to create",
@@ -301,16 +308,18 @@ public class AdminModelDetailsController {
     @DeleteMapping("/models/{modelId}")
     @Operation(
             summary = "Delete Model",
-            description = "Delete an existing model by its ID"
+            description = "Delete an existing car model by its ID (admin access)"
     )
     @ApiResponse(
             responseCode = "204",
             description = "Model deleted successfully"
     )
-    @Tag(name = "delete-model")
-    @Tag(name = "Delete Model", description = "Delete an existing model by its ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Model not found"
+    )
     public ResponseEntity<?> deleteModel(
-            @Parameter(description = "ID of the model to delete", example = "1")
+            @Parameter(description = "ID of the model to delete", example = "1", required = true)
             @PathVariable Long modelId
     ) {
         carModelService.deleteModel(modelId);

@@ -27,18 +27,16 @@ public class AdminDocumentController {
     @GetMapping("/documents")
     @Operation(
             summary = "Get All Documents",
-            description = "Retrieve a paginated list of documents with optional filtering for unverified documents"
+            description = "Retrieve a paginated list of documents with optional filtering for unverified documents (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "Paginated list of documents retrieved successfully",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = DocumentResponse.class)
+                    schema = @Schema(implementation = Page.class)
             )
     )
-    @Tag(name = "get-documents")
-    @Tag(name = "Get Documents", description = "Retrieve a paginated list of documents with optional filtering for unverified documents")
     public Page<DocumentResponse> getAllDocuments(
             @Parameter(description = "Show only unverified documents", example = "true")
             @RequestParam(defaultValue = "true") boolean onlyUnverified,
@@ -52,16 +50,18 @@ public class AdminDocumentController {
     @PatchMapping("/documents/{documentId}/verify")
     @Operation(
             summary = "Verify Document",
-            description = "Verify a document by its ID"
+            description = "Verify a document by its ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "Document verified successfully"
     )
-    @Tag(name = "verify-document")
-    @Tag(name = "Verify Document", description = "Verify a document by its ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Document not found"
+    )
     public ResponseEntity<?> verifyDocument(
-            @Parameter(description = "ID of the document to verify", example = "1")
+            @Parameter(description = "ID of the document to verify", example = "1", required = true)
             @PathVariable Long documentId
     ) {
         documentService.verifyDocument(documentId);

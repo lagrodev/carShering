@@ -22,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -47,8 +48,8 @@ public class CarController {
                                                 String bodyType,
                                                 String carClass,
                                                 String carState,
-                                                LocalDate dateStart,
-                                                LocalDate dateEnd,
+                                                LocalDateTime dateStart,
+                                                LocalDateTime dateEnd,
                                                 Double minCell,
                                                 Double maxCell
     ) {
@@ -75,18 +76,16 @@ public class CarController {
     @GetMapping("/catalogue")
     @Operation(
             summary = "Get Car Catalogue",
-            description = "Retrieve a paginated list of available cars with optional filtering"
+            description = "Retrieve a paginated list of available cars with optional filtering by brand, model, year, body type, class, dates, and price range"
     )
     @ApiResponse(
             responseCode = "200",
             description = "Paginated list of available cars retrieved successfully",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = CarListItemResponse.class)
+                    schema = @Schema(implementation = Page.class)
             )
     )
-    @Tag(name = "get-car-catalogue")
-    @Tag(name = "Get Car Catalogue", description = "Retrieve a paginated list of available cars with optional filtering")
     public Page<CarListItemResponse> getCatalogue(
             @Parameter(description = "Filter by car brand", example = "Toyota")
             @RequestParam(value = "brand", required = false) String brand,
@@ -101,9 +100,9 @@ public class CarController {
             @Parameter(description = "Filter by car class", example = "Business")
             @RequestParam(value = "car_class", required = false) String carClass,
             @Parameter(description = "Start date for car availability", example = "2025-01-01")
-            @RequestParam(value = "date_start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateStart,
+            @RequestParam(value = "date_start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateStart,
             @Parameter(description = "End date for car availability", example = "2025-01-31")
-            @RequestParam(value = "date_end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateEnd,
+            @RequestParam(value = "date_end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateEnd,
             @Parameter(description = "Minimum price per day", example = "1000")
             @RequestParam(value = "min_cell", required = false) Double minCell,
             @Parameter(description = "Maximum price per day", example = "5000")
@@ -143,7 +142,7 @@ public class CarController {
     @GetMapping("/filters/min-max-cell")
     @Operation(
             summary = "Get Min and Max Cell for Filters",
-            description = "Retrieve the minimum and maximum rental prices per day for available cars based on filters"
+            description = "Retrieve the minimum and maximum rental prices per day for available cars based on current filter parameters"
     )
     @ApiResponse(
             responseCode = "200",
@@ -153,8 +152,6 @@ public class CarController {
                     schema = @Schema(implementation = MinMaxCellForFilters.class)
             )
     )
-    @Tag(name = "get-min-max-cell-for-filters")
-    @Tag(name = "Get Min and Max Cell for Filters", description = "Retrieve the minimum and maximum rental prices per day for available cars based on filters")
     public MinMaxCellForFilters getMaxCell(
             @Parameter(description = "Filter by car brand", example = "Toyota")
             @RequestParam(value = "brand", required = false) String brand,
@@ -169,9 +166,9 @@ public class CarController {
             @Parameter(description = "Filter by car class", example = "Business")
             @RequestParam(value = "car_class", required = false) String carClass,
             @Parameter(description = "Start date for car availability", example = "2025-01-01")
-            @RequestParam(value = "date_start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateStart,
+            @RequestParam(value = "date_start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateStart,
             @Parameter(description = "End date for car availability", example = "2025-01-31")
-            @RequestParam(value = "date_end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateEnd
+            @RequestParam(value = "date_end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateEnd
     ) {
         var filter = createFilter(brand, model, minYear, maxYear, bodyType, carClass, "AVAILABLE", dateStart, dateEnd, null, null);
         return carService.getMinMaxCell(filter);
@@ -191,10 +188,12 @@ public class CarController {
                     schema = @Schema(implementation = CarDetailResponse.class)
             )
     )
-    @Tag(name = "get-valid-car")
-    @Tag(name = "Get Valid Car", description = "Retrieve detailed information about a specific available car by its ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Car not found or not available"
+    )
     public CarDetailResponse findValidCar(
-            @Parameter(description = "ID of the car to retrieve", example = "1")
+            @Parameter(description = "ID of the car to retrieve", example = "1", required = true)
             @PathVariable Long carId,
             @Parameter(hidden = true) Authentication auth
     ) {
@@ -211,14 +210,12 @@ public class CarController {
     @GetMapping("/filters/brands")
     @Operation(
             summary = "Get Filter Brands",
-            description = "Retrieve a list of all car brands for filtering"
+            description = "Retrieve a list of all available car brands for filtering"
     )
     @ApiResponse(
             responseCode = "200",
             description = "List of brands retrieved successfully"
     )
-    @Tag(name = "get-filter-brands")
-    @Tag(name = "Get Filter Brands", description = "Retrieve a list of all car brands for filtering")
     public List<String> getBrands() {
         return carBrandService.findAllBrands();
     }
@@ -226,14 +223,12 @@ public class CarController {
     @GetMapping("/filters/models")
     @Operation(
             summary = "Get Filter Models",
-            description = "Retrieve a list of all model names for filtering"
+            description = "Retrieve a list of all available model names for filtering"
     )
     @ApiResponse(
             responseCode = "200",
             description = "List of model names retrieved successfully"
     )
-    @Tag(name = "get-filter-models")
-    @Tag(name = "Get Filter Models", description = "Retrieve a list of all model names for filtering")
     public List<String> getModels() {
         return carModelNameService.findAllModels();
     }
@@ -241,14 +236,12 @@ public class CarController {
     @GetMapping("/filters/classes")
     @Operation(
             summary = "Get Filter Classes",
-            description = "Retrieve a list of all car classes for filtering"
+            description = "Retrieve a list of all available car classes for filtering"
     )
     @ApiResponse(
             responseCode = "200",
             description = "List of car classes retrieved successfully"
     )
-    @Tag(name = "get-filter-classes")
-    @Tag(name = "Get Filter Classes", description = "Retrieve a list of all car classes for filtering")
     public List<String> getClasses() {
         return carClassService.findAllClasses();
     }
@@ -256,14 +249,12 @@ public class CarController {
     @GetMapping("/filters/body-types")
     @Operation(
             summary = "Get Filter Body Types",
-            description = "Retrieve a list of all body types for filtering"
+            description = "Retrieve a list of all available body types for filtering"
     )
     @ApiResponse(
             responseCode = "200",
             description = "List of body types retrieved successfully"
     )
-    @Tag(name = "get-filter-body-types")
-    @Tag(name = "Get Filter Body Types", description = "Retrieve a list of all body types for filtering")
     public List<String> getBodyTypes() {
         return carModelService.findAllBodyTypes();
     }

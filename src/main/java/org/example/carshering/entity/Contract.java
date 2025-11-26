@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contract", schema = "car_rental")
@@ -19,10 +20,10 @@ public class Contract {
     private Long id;
 
     @Column(name = "data_start",  nullable = false)
-    private LocalDate dataStart;
+    private LocalDateTime dataStart;
 
     @Column(name = "data_end",   nullable = false)
-    private LocalDate dataEnd;
+    private LocalDateTime dataEnd;
 
     @Column(name = "total_cost", nullable = false)
     private Double totalCost;
@@ -37,6 +38,8 @@ public class Contract {
     @JoinColumn(name = "car_id", nullable = false)
     private Car car;
 
+    @Column(name = "duration_minutes", nullable = false)
+    private Long durationMinutes;
 
 // todo комментарии
 

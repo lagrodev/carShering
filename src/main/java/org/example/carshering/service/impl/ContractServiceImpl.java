@@ -14,18 +14,20 @@ import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.ContractMapper;
 import org.example.carshering.repository.ContractRepository;
 import org.example.carshering.repository.RentalStateRepository;
-import org.example.carshering.service.interfaces.ContractService;
 import org.example.carshering.service.domain.CarServiceHelperService;
 import org.example.carshering.service.domain.ClientServiceHelper;
 import org.example.carshering.service.domain.DocumentServiceHelper;
 import org.example.carshering.service.domain.RentalDomainService;
+import org.example.carshering.service.interfaces.ContractService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
@@ -56,7 +58,6 @@ public class ContractServiceImpl implements ContractService {
     }
 
 
-
     @Override
     @Transactional
     public ContractResponse createContract(Long userId, CreateContractRequest request) {
@@ -64,28 +65,21 @@ public class ContractServiceImpl implements ContractService {
             throw new InvalidContractDateRangeException("The end date must be later than the start date");
         }
         Client client = clientService.getEntity(userId);
-
-
         if (!documentService.hasDocument(userId)) {
             throw new MissingClientDocumentException("The client must have a document uploaded");
         }
-
         if (!documentService.findDocument(userId).verified()) {
             throw new UnverifiedClientDocumentException("The document is not verified. Please wait for verification or attach the relevant document");
         }
-
         Car car = carService.getEntity(request.carId());
-
         if (!rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), null)) {
             throw new CarUnavailableOnDatesException("The car is not available on the selected dates");
         }
-
         Contract contract = contractMapper.toEntity(request);
         contract.setClient(client);
         contract.setCar(car);
         contract.setTotalCost(rentalDomainService.calculateCost(car, request.dataStart(), request.dataEnd()));
         contract.setState(getStateByName("PENDING"));
-
         return contractMapper.toDto(contractRepository.save(contract));
     }
 
@@ -129,10 +123,6 @@ public class ContractServiceImpl implements ContractService {
         contract.setState(getStateByName("CANCELLED"));
         contractRepository.save(contract);
     }
-
-
-
-
 
 
     @Override
@@ -190,10 +180,12 @@ public class ContractServiceImpl implements ContractService {
         ensureState(contract, "PENDING");
 
         contract.setState(getStateByName("CONFIRMED"));
+        Duration duration = Duration.between(contract.getDataStart(), contract.getDataEnd());
+        long minutes = Math.max(0, duration.toMinutes());
+        contract.setDurationMinutes(minutes);
         contractRepository.save(contract);
         return contractMapper.toDto(contract);
     }
-
 
 
     @Override
@@ -207,25 +199,24 @@ public class ContractServiceImpl implements ContractService {
     }
 
 
-
-
     private ContractResponse activateIfDueForDto(Contract contract) {
 
         RentalState now = contract.getState();
 
 
         if ("CONFIRMED".equals(contract.getState().getName()) &&
-                !contract.getDataStart().isAfter(LocalDate.now())) {
+                !contract.getDataStart().isAfter(LocalDateTime.now())) {
             // В DTO временно меняем статус на ACTIVE (но не сохраняем в БД!)
 
 
-            contract.setState(getStateByName( "ACTIVE"));
+            contract.setState(getStateByName("ACTIVE"));
 
         }
         ContractResponse dto = contractMapper.toDto(contract);
         contract.setState(now); // возвращаем обратно
         return dto;
     }
+
     // FIXME: продумать логику отмены контракта
     // FIXME: аккуратно
     @Transactional
@@ -249,7 +240,7 @@ public class ContractServiceImpl implements ContractService {
             // Пользователь: только PENDING или CONFIRMED -> запрос на отмену
             if ("PENDING".equals(currentState) || "CONFIRMED".equals(currentState)) {
                 // todo тут чет сложно надо момент с датой продумать Если сервер в UTC, а пользователь в Москве — возможны ошибки в расчёте daysUntilStart.
-                long daysUntilStart = ChronoUnit.DAYS.between(LocalDate.now(), contract.getDataStart());
+                long daysUntilStart = ChronoUnit.DAYS.between(LocalDateTime.now(), contract.getDataStart());
                 if (daysUntilStart > 5) {
                     // Отмена без подтверждения
                     contract.setState(getStateByName("CANCELLED"));
@@ -257,8 +248,8 @@ public class ContractServiceImpl implements ContractService {
                     // Требуется подтверждение
                     contract.setState(getStateByName("CANCELLATION_REQUESTED"));
                 }
-            }
-            else throw new CannotCancelCompletedContractException("It is not possible to cancel a contract that has the following state:" + currentState);
+            } else
+                throw new CannotCancelCompletedContractException("It is not possible to cancel a contract that has the following state:" + currentState);
 
         }
 
@@ -268,23 +259,46 @@ public class ContractServiceImpl implements ContractService {
     @Transactional
     void setActive(Contract contract) {
         if ("CONFIRMED".equals(contract.getState().getName()) &&
-                !contract.getDataStart().isAfter(LocalDate.now())) {
+                !contract.getDataStart().isAfter(LocalDateTime.now())) {
             contract.setState(getStateByName("ACTIVE"));
             contractRepository.save(contract);
         }
     }
 
     @Transactional
-    @Scheduled(cron = "0 0 * * * *") // каждый час
+    @Scheduled(cron = "0 0 * * * *") // каждый час
     public void setActive() {
-        List<Contract> contracts = contractRepository
-                .findAllByStateNameAndDataStartBefore("CONFIRMED", LocalDate.now().plusDays(1));
+        LocalDateTime now = LocalDateTime.now();
 
-        for (Contract contract : contracts) {
-            contract.setState(getStateByName("ACTIVE"));
+
+        List<Contract> contractsToActivate = contractRepository
+                .findAllByStateNameAndDataStartBefore("CONFIRMED", now);
+
+        if (contractsToActivate.isEmpty()) return;
+
+        RentalState activeState = getStateByName("ACTIVE");
+        for (Contract contract : contractsToActivate) {
+            contract.setState(activeState);
         }
+        contractRepository.saveAll(contractsToActivate);
+    }
 
-        contractRepository.saveAll(contracts);
+    @Transactional
+    @Scheduled(cron = "0 0 * * * *") // каждый час
+    public void setCompleted() {
+        LocalDateTime now = LocalDateTime.now();
+
+
+        List<Contract> contractsToComplete = contractRepository
+                .findAllByStateNameAndDataEndBefore("ACTIVE", now);
+
+        if (contractsToComplete.isEmpty()) return;
+
+        RentalState completedState = getStateByName("COMPLETED");
+        for (Contract contract : contractsToComplete) {
+            contract.setState(completedState);
+        }
+        contractRepository.saveAll(contractsToComplete);
     }
 
 

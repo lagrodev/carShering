@@ -7,6 +7,7 @@ import org.example.carshering.repository.ContractRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -16,13 +17,13 @@ public class RentalDomainService {
 
     private final ContractRepository contractRepository;
 
-    public boolean isCarAvailable(LocalDate start, LocalDate end, Long carId, Long excludeContractId) {
+    public boolean isCarAvailable(LocalDateTime start, LocalDateTime end, Long carId, Long excludeContractId) {
         return contractRepository.findOverlappingContracts(start, end, carId, excludeContractId).isEmpty();
     }
 
 
-    public double calculateCost(Car car, LocalDate start, LocalDate end) {
-        long days = ChronoUnit.DAYS.between(start, end);
-        return days * car.getRent();
+    public double calculateCost(Car car, LocalDateTime start, LocalDateTime end) {
+        long hours = Math.max(1, ChronoUnit.HOURS.between(start, end)); // минимум 1 час
+        return hours * car.getRent();
     }
 }

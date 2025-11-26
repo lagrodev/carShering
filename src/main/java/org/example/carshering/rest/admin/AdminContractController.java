@@ -28,7 +28,7 @@ public class AdminContractController {
     @PatchMapping("/{contractId}/confirm")
     @Operation(
             summary = "Confirm Contract",
-            description = "Confirm a contract by its ID"
+            description = "Confirm a contract by its ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -38,10 +38,16 @@ public class AdminContractController {
                     schema = @Schema(implementation = ContractResponse.class)
             )
     )
-    @Tag(name = "confirm-contract")
-    @Tag(name = "Confirm Contract", description = "Confirm a contract by its ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Contract not found"
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Contract cannot be confirmed"
+    )
     public ResponseEntity<?> confirmContract(
-            @Parameter(description = "ID of the contract to confirm", example = "1")
+            @Parameter(description = "ID of the contract to confirm", example = "1", required = true)
             @PathVariable Long contractId
     ) {
         ContractResponse contractResponse = contractService.confirmContract(contractId);
@@ -52,18 +58,16 @@ public class AdminContractController {
     @GetMapping
     @Operation(
             summary = "Get All Contracts",
-            description = "Retrieve a paginated list of contracts with optional filtering"
+            description = "Retrieve a paginated list of all contracts with optional filtering by status, user, car, brand, body type, and class (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "Paginated list of contracts retrieved successfully",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = ContractResponse.class)
+                    schema = @Schema(implementation = Page.class)
             )
     )
-    @Tag(name = "get-all-contracts")
-    @Tag(name = "Get All Contracts", description = "Retrieve a paginated list of contracts with optional filtering")
     public Page<ContractResponse> getAllContracts(
             @Parameter(description = "Filter by contract status", example = "ACTIVE")
             @RequestParam(required = false) String status,
@@ -88,7 +92,7 @@ public class AdminContractController {
     @GetMapping("/{contractId}")
     @Operation(
             summary = "Get Contract by ID",
-            description = "Retrieve detailed information about a specific contract by its ID"
+            description = "Retrieve detailed information about a specific contract by its ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -98,10 +102,12 @@ public class AdminContractController {
                     schema = @Schema(implementation = ContractResponse.class)
             )
     )
-    @Tag(name = "get-contract-by-id")
-    @Tag(name = "Get Contract by ID", description = "Retrieve detailed information about a specific contract by its ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Contract not found"
+    )
     public ContractResponse getContractById(
-            @Parameter(description = "ID of the contract to retrieve", example = "1")
+            @Parameter(description = "ID of the contract to retrieve", example = "1", required = true)
             @PathVariable Long contractId
     ) {
         return contractService.getContractById(contractId);
@@ -110,16 +116,18 @@ public class AdminContractController {
     @DeleteMapping("/{contractId}/cancel")
     @Operation(
             summary = "Cancel Contract",
-            description = "Cancel a contract by its ID"
+            description = "Cancel a contract by its ID (admin access)"
     )
     @ApiResponse(
             responseCode = "200",
             description = "Contract cancelled successfully"
     )
-    @Tag(name = "cancel-contract")
-    @Tag(name = "Cancel Contract", description = "Cancel a contract by its ID")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Contract not found"
+    )
     public ResponseEntity<?> cancelContract(
-            @Parameter(description = "ID of the contract to cancel", example = "1")
+            @Parameter(description = "ID of the contract to cancel", example = "1", required = true)
             @PathVariable Long contractId
     ) {
         contractService.cancelContractByAdmin(contractId);
@@ -135,10 +143,12 @@ public class AdminContractController {
             responseCode = "204",
             description = "Cancellation confirmed successfully"
     )
-    @Tag(name = "confirm-cancellation")
-    @Tag(name = "Confirm Cancellation", description = "Confirm the cancellation of a contract by admin")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Contract not found"
+    )
     public ResponseEntity<Void> confirmCancellation(
-            @Parameter(description = "ID of the contract to confirm cancellation", example = "1")
+            @Parameter(description = "ID of the contract to confirm cancellation", example = "1", required = true)
             @PathVariable Long id
     ) {
         contractService.confirmCancellationByAdmin(id);
