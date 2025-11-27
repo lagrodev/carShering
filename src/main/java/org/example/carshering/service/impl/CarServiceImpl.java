@@ -75,9 +75,8 @@ public class CarServiceImpl implements CarService {
 
         car.setState(state);
 
-        String imageUrl = ((car.getImages() != null) && !car.getImages().isEmpty()) ? car.getImages().get(0).getUrl() : null;
 
-        CarDetailResponse carDetailResponse = carMapper.toDetailDto(carRepository.save(car), false, imageUrl);
+        CarDetailResponse carDetailResponse = carMapper.toDetailDto(carRepository.save(car), false, null);
         return carDetailResponse;
     }
 
@@ -114,7 +113,7 @@ public class CarServiceImpl implements CarService {
         return carMapper.toDetailDto(carRepository.save(car), false, imageUrl);
     }
 
-
+    @Transactional(readOnly = true)
     @Override
     public CarDetailResponse getCarById(Long carId) {
         var car = getCarOrThrow(carId);

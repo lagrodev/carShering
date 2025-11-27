@@ -17,13 +17,16 @@ import org.example.carshering.dto.response.CarStateResponse;
 import org.example.carshering.rest.all.CarController;
 import org.example.carshering.service.interfaces.CarService;
 import org.example.carshering.service.interfaces.CarStateService;
+import org.example.carshering.service.interfaces.ImageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -107,7 +110,7 @@ public class AdminCarController {
 
     @Operation(
             summary = "Create Car",
-            description = "Create a new car with the provided details (admin access)"
+            description = "Create a new car with the provided details and upload an image (admin access). This endpoint accepts multipart/form-data with two parts: 'car' (JSON) and 'image' (file)."
     )
     @ApiResponse(
             responseCode = "201",
@@ -119,22 +122,34 @@ public class AdminCarController {
     )
     @ApiResponse(
             responseCode = "400",
-            description = "Invalid request data"
+            description = "Invalid request data or image format"
     )
-    @PostMapping
+    @ApiResponse(
+            responseCode = "404",
+            description = "Referenced entity not found"
+    )
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CarDetailResponse> createCar(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Details of the car to create",
+            @Parameter(
+                    description = "Car details in JSON format",
                     required = true,
                     content = @Content(
+                            mediaType = "application/json",
                             schema = @Schema(implementation = CreateCarRequest.class)
                     )
-            ) @RequestBody @Valid CreateCarRequest request
+            ) @RequestPart("car") @Valid CreateCarRequest request,
+            @Parameter(
+                    description = "Car image file (JPEG, PNG, etc.)",
+                    required = true,
+                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
+            ) @RequestPart("image") MultipartFile image
     ) {
         CarDetailResponse car = carService.createCar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(car);
+        imageService.upload(car.id(), image);
+        return ResponseEntity.status(HttpStatus.CREATED).body(carService.getCarById(car.id()));
     }
 
+    private final ImageService imageService;
 
     @Operation(
             summary = "Delete Car",

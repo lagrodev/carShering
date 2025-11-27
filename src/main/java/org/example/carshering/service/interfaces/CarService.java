@@ -10,9 +10,11 @@ import org.example.carshering.dto.response.MinMaxCellForFilters;
 import org.example.carshering.entity.Car;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface CarService  {
 
+    @Transactional(readOnly = true)
     CarDetailResponse getCarById(Long carId);
 
     Page<CarListItemResponse> getAllCars(Pageable pageable, CarFilterRequest filter);
