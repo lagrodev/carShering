@@ -95,7 +95,7 @@ public class AnalysisServiceImpl implements AnalysisService {
                 .favoriteCarCarClass(favoriteCar != null ? favoriteCar.getModel().getCarClass().getName() : null)
                 .favoriteCarModelName(favoriteCar != null ? favoriteCar.getModel().getModel().getName() : null)
                 .favoriteCarBrand(favoriteCar != null ? favoriteCar.getModel().getBrand().getName() : null)
-                .favoriteCarImageUrl(favoriteCar != null ? favoriteCar.getImageUrl() : null)
+//                .favoriteCarImageUrl(favoriteCar != null ? favoriteCar.getImageUrl() : null)
                 .averageCost(averageCost)
                 .averageTimeDrive(averageTimeDrive)
                 .averageTimeToStartDrive(averageTimeToStartDrive)
@@ -181,8 +181,10 @@ public class AnalysisServiceImpl implements AnalysisService {
     public List<DailyRevenueResponse> getDailyRevenueBetween(LocalDate from, LocalDate to) {
         LocalDateTime start = from.atStartOfDay();
         LocalDateTime end = to.plusDays(1).atStartOfDay();
+        RentalState completed = rentalStateRepository.findByNameIgnoreCase("COMPLETED")
+                .orElseThrow(() -> new NotFoundException("COMPLETED state not found"));
 
-        return analysisRepository.getDailyRevenueBetween(start, end).stream()
+        return analysisRepository.getDailyRevenueBetween(completed, start, end).stream()
                 .map(record -> {
                     LocalDate date = record[0] instanceof LocalDate
                             ? (LocalDate) record[0]
@@ -202,6 +204,28 @@ public class AnalysisServiceImpl implements AnalysisService {
         LocalDateTime end = date.plusDays(1).atStartOfDay();
 
         return analysisRepository.getContractsByDay(completed, start, end);
+    }
+
+    @Override
+    public Page<CarAnalyticsResponse> getTopCarsByProfit(LocalDate from, LocalDate to, Pageable pageable) {
+        RentalState completed = rentalStateRepository.findByNameIgnoreCase("COMPLETED")
+                .orElseThrow(() -> new NotFoundException("COMPLETED state not found"));
+
+        LocalDateTime startDate = from.atStartOfDay();
+        LocalDateTime endDate = to.plusDays(1).atStartOfDay();
+
+        return analysisRepository.getTopCarsByProfit(completed, startDate, endDate, pageable);
+    }
+
+    @Override
+    public Page<CarAnalyticsResponse> getAllCarsAnalytics(LocalDate from, LocalDate to, Pageable pageable) {
+        RentalState completed = rentalStateRepository.findByNameIgnoreCase("COMPLETED")
+                .orElseThrow(() -> new NotFoundException("COMPLETED state not found"));
+
+        LocalDateTime startDate = from.atStartOfDay();
+        LocalDateTime endDate = to.plusDays(1).atStartOfDay();
+
+        return analysisRepository.getAllCarsAnalytics(completed, startDate, endDate, pageable);
     }
 
     private final CarStateService carStateService;

@@ -56,4 +56,7 @@ public class CarServiceHelperService {
     public Car getEntity(Long carId) {
         return getCarOrThrow(carId);
     }
+    public Car getEntityWithLock(Long carId) {
+        return carRepository.findByIdWithLock(carId).orElseThrow(() -> new CarNotFoundException("Car not found"));
+    }
 }

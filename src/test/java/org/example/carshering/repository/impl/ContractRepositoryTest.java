@@ -15,11 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.stream.StreamSupport.stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -115,7 +115,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
     }
 
 
-    private List<?> saveContract(String prefix, Car car, String stateName, LocalDate start, LocalDate end) {
+    private List<?> saveContract(String prefix, Car car, String stateName, LocalDateTime start, LocalDateTime end) {
         RentalState state = rentalStateRepository.findByNameIgnoreCase(stateName)
                 .orElseGet(() -> rentalStateRepository.save(dataUtils.getRentalState(stateName)));
 
@@ -123,7 +123,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         Client client = clientRepository.findByEmailAndDeletedFalse(prefix + "_mail@example.com")
                 .orElseGet(() -> clientRepository.save(dataUtils.createUniqueClient(prefix)));
 
-        Contract contract = dataUtils.createContract(client, car, state, start, end);
+        Contract contract = dataUtils.createContractWithDateTime(client, car, state, start, end);
 
         return List.of(contract, client);
 
@@ -142,7 +142,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
         // when
         var list = saveContract("save", car, "BOOKED",
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3));
 
 
         Client client = (Client) list.get(1);
@@ -169,7 +169,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         ));
 
         var list = saveContract("update", car, "BOOKED",
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3));
 
         Contract saved = contractRepository.save((Contract) list.getFirst());
 
@@ -210,7 +210,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         ));
 
         var list = saveContract("iduser", car, "ACTIVE",
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(2));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
         Client client = (Client) list.get(1);
         Contract saved = contractRepository.save((Contract) list.get(0));
@@ -234,7 +234,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
                 (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
         ));
 
-        var list = saveContract("missing", car, "BOOKED", LocalDate.now().plusDays(1), LocalDate.now().plusDays(2));
+        var list = saveContract("missing", car, "BOOKED", LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
 
         Client client = (Client)  list.get(1);
@@ -263,8 +263,8 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
                 (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
         ));
 
-        var list = saveContract("page", car1, "BOOKED", LocalDate.now().plusDays(1), LocalDate.now().plusDays(2));
-        var list2 = saveContract("page", car2, "BOOKED", LocalDate.now().plusDays(3), LocalDate.now().plusDays(4));
+        var list = saveContract("page", car1, "BOOKED", LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
+        var list2 = saveContract("page", car2, "BOOKED", LocalDateTime.now().plusDays(3), LocalDateTime.now().plusDays(4));
 
         Client client = (Client) list.get(1);
         contractRepository.save ((Contract) list.get(0));
@@ -290,7 +290,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         ));
 
         var list = saveContract("del", car, "BOOKED",
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(2));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
 
         Contract  saved = contractRepository.save((Contract) list.getFirst());
@@ -318,30 +318,30 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
         // BOOKED, пересекается
         Contract c1 = contractRepository.save((Contract) saveContract("overlap", car, "BOOKED",
-                LocalDate.of(2025, 1, 5), LocalDate.of(2025, 1, 15)).getFirst());
+                LocalDateTime.of(2025, 1, 5, 0, 0), LocalDateTime.of(2025, 1, 15, 0, 0)).getFirst());
 
         // CANCELLED, игнорируется по статусу
         Contract c2 = contractRepository.save((Contract) saveContract("overlap", car, "CANCELLED",
-                LocalDate.of(2025, 1, 12), LocalDate.of(2025, 1, 18)).getFirst());
+                LocalDateTime.of(2025, 1, 12, 0, 0), LocalDateTime.of(2025, 1, 18, 0, 0)).getFirst());
 
         // ACTIVE, начинается ровно в день окончания диапазона — не пересекается
-        Contract c3 = contractRepository.save((Contract) saveContract("overlap", car, "ACTIVE",
-                LocalDate.of(2025, 1, 20), LocalDate.of(2025, 1, 25)).getFirst());
+        contractRepository.save((Contract) saveContract("overlap", car, "ACTIVE",
+                LocalDateTime.of(2025, 1, 20, 0, 0), LocalDateTime.of(2025, 1, 25, 0, 0)).getFirst());
 
         // PENDING, заканчивается ровно в день начала диапазона — не пересекается
-        Contract c4 = contractRepository.save((Contract) saveContract("overlap", car, "PENDING",
-                LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 10)).getFirst());
+        contractRepository.save((Contract) saveContract("overlap", car, "PENDING",
+                LocalDateTime.of(2025, 1, 1, 0, 0), LocalDateTime.of(2025, 1, 10, 0, 0)).getFirst());
 
         // ACTIVE, полностью внутри диапазона — пересекается
         Contract c5 = contractRepository.save((Contract) saveContract("overlap", car, "ACTIVE",
-                LocalDate.of(2025, 1, 11), LocalDate.of(2025, 1, 12)).getFirst());
+                LocalDateTime.of(2025, 1, 11, 0, 0), LocalDateTime.of(2025, 1, 12, 0, 0)).getFirst());
 
         // when
         // передаём contractId = null → ничего не исключается
-        List<Contract> foundAll = contractRepository.findOverlappingContracts(start, end, car.getId(), null);
+        List<Contract> foundAll = contractRepository.findOverlappingContracts(start.atStartOfDay(), end.atStartOfDay(), car.getId(), null);
 
         // передаём contractId = c1 → исключаем c1 из выборки
-        List<Contract> foundExcludingC1 = contractRepository.findOverlappingContracts(start, end, car.getId(), c1.getId());
+        List<Contract> foundExcludingC1 = contractRepository.findOverlappingContracts(start.atStartOfDay(), end.atStartOfDay(), car.getId(), c1.getId());
 
         // then
         // без исключения должны вернуться c1 и c5
@@ -360,7 +360,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
         // проверяем, что граничные случаи не засчитываются
         assertThat(foundAll)
-                .allMatch(c -> c.getDataEnd().isAfter(start) && c.getDataStart().isBefore(end));
+                .allMatch(c -> c.getDataEnd().isAfter(start.atStartOfDay()) && c.getDataStart().isBefore(end.atStartOfDay()));
     }
 
 
@@ -379,22 +379,22 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
         // ends exactly at start -> should NOT overlap
         contractRepository.save ((Contract) saveContract("boundary", car, "BOOKED",
-                LocalDate.of(2025, 3, 1), LocalDate.of(2025, 3, 10)).getFirst());
+                LocalDateTime.of(2025, 3, 1, 0, 0), LocalDateTime.of(2025, 3, 10, 0, 0)).getFirst());
         // starts exactly at end -> should NOT overlap
         contractRepository.save ((Contract) saveContract("boundary", car, "BOOKED",
-                LocalDate.of(2025, 3, 20), LocalDate.of(2025, 3, 25)).getFirst());
+                LocalDateTime.of(2025, 3, 20, 0, 0), LocalDateTime.of(2025, 3, 25, 0, 0)).getFirst());
         // fully inside -> should overlap
         Contract inside = contractRepository.save ((Contract) saveContract("boundary", car, "ACTIVE",
-                LocalDate.of(2025, 3, 12), LocalDate.of(2025, 3, 15)).getFirst());
+                LocalDateTime.of(2025, 3, 12, 0, 0), LocalDateTime.of(2025, 3, 15, 0, 0)).getFirst());
         // covering entire range -> should overlap
         Contract covering =contractRepository.save ((Contract) saveContract("boundary", car, "ACTIVE",
-                LocalDate.of(2025, 3, 5), LocalDate.of(2025, 3, 25)).getFirst());
+                LocalDateTime.of(2025, 3, 5, 0, 0), LocalDateTime.of(2025, 3, 25, 0, 0)).getFirst());
         // exact match -> should overlap
         Contract exact = contractRepository.save ((Contract) saveContract("boundary", car, "BOOKED",
-                LocalDate.of(2025, 3, 10), LocalDate.of(2025, 3, 20)).getFirst());
+                LocalDateTime.of(2025, 3, 10, 0, 0), LocalDateTime.of(2025, 3, 20, 0, 0)).getFirst());
 
         // when
-        List<Contract> found = contractRepository.findOverlappingContracts(start, end, car.getId(), null);
+        List<Contract> found = contractRepository.findOverlappingContracts(start.atStartOfDay(), end.atStartOfDay(), car.getId(), null);
 
         // then
         assertThat(found).extracting(Contract::getId)
@@ -411,13 +411,13 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
                 (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
         ));
 
-        LocalDate start = LocalDate.of(2025, 2, 1);
-        LocalDate end = LocalDate.of(2025, 2, 10);
+        LocalDateTime start = LocalDateTime.of(2025, 2, 1,1,1);
+        LocalDateTime end = LocalDateTime.of(2025, 2, 10, 1,1);
 
         contractRepository.save ((Contract) saveContract("nooverlap", car, "BOOKED",
-                LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 5)).getFirst());
+                LocalDateTime.of(2025, 1, 1, 0, 0), LocalDateTime.of(2025, 1, 5, 0, 0)).getFirst());
         contractRepository.save ((Contract) saveContract("nooverlap", car, "ACTIVE",
-                LocalDate.of(2025, 2, 10), LocalDate.of(2025, 2, 15)).getFirst()); // starts exactly at end -> should not overlap
+                LocalDateTime.of(2025, 2, 10, 0, 0), LocalDateTime.of(2025, 2, 15, 0, 0)).getFirst()); // starts exactly at end -> should not overlap
 
         // when
         List<Contract> found = contractRepository.findOverlappingContracts(start, end, car.getId(), null);
@@ -457,12 +457,12 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         // Contract status is likely a String field, so keep "ACTIVE", "BOOKED" as literals
 
 
-        var list = saveContract("fA", carA, "ACTIVE", LocalDate.now().plusDays(1), LocalDate.now().plusDays(2));
+        var list = saveContract("fA", carA, "ACTIVE", LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
 
-        var list2 = saveContract("fA", carB, "BOOKED", LocalDate.now().plusDays(3), LocalDate.now().plusDays(4));
+        var list2 = saveContract("fA", carB, "BOOKED", LocalDateTime.now().plusDays(3), LocalDateTime.now().plusDays(4));
 
-        var list3 = saveContract("fB", carA, "ACTIVE", LocalDate.now().plusDays(5), LocalDate.now().plusDays(6));
+        var list3 = saveContract("fB", carA, "ACTIVE", LocalDateTime.now().plusDays(5), LocalDateTime.now().plusDays(6));
 
 
         Contract ca1 = contractRepository.save ((Contract) list .getFirst());
@@ -530,7 +530,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
         for (int i = 0; i < 15; i++) {
             contractRepository.save ((Contract)saveContract(
-                    "pg", car, "BOOKED", LocalDate.now().plusDays(i + 1), LocalDate.now().plusDays(i + 2)).getFirst());
+                    "pg", car, "BOOKED", LocalDateTime.now().plusDays(i + 1), LocalDateTime.now().plusDays(i + 2)).getFirst());
         }
 
         // when
@@ -554,20 +554,20 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
         // Сохраняем клиента один раз, чтобы все контракты принадлежали одному пользователю
         var list = saveContract("active_filter", car, "ACTIVE",
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(2));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
         Client client = (Client) list.get(1);
 
         // Создаём несколько контрактов с разными состояниями
         Contract active = contractRepository.save((Contract) saveContract("active_filter", car, "ACTIVE",
-                LocalDate.now().plusDays(3), LocalDate.now().plusDays(4)).getFirst());
+                LocalDateTime.now().plusDays(3), LocalDateTime.now().plusDays(4)).getFirst());
         Contract booked = contractRepository.save((Contract) saveContract("active_filter", car, "BOOKED",
-                LocalDate.now().plusDays(5), LocalDate.now().plusDays(6)).getFirst());
+                LocalDateTime.now().plusDays(5), LocalDateTime.now().plusDays(6)).getFirst());
         Contract pending = contractRepository.save((Contract) saveContract("active_filter", car, "PENDING",
-                LocalDate.now().plusDays(7), LocalDate.now().plusDays(8)).getFirst());
+                LocalDateTime.now().plusDays(7), LocalDateTime.now().plusDays(8)).getFirst());
 
         // Этот контракт не должен попасть в выборку — состояние отменено
         contractRepository.save((Contract) saveContract("active_filter", car, "CANCELLED",
-                LocalDate.now().plusDays(9), LocalDate.now().plusDays(10)).getFirst());
+                LocalDateTime.now().plusDays(9), LocalDateTime.now().plusDays(10)).getFirst());
 
         // Другой клиент — его контракт тоже не должен попасть
         Client otherClient = clientRepository.save(dataUtils.createUniqueClient("other_for_active_filter"));
@@ -607,7 +607,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         ));
 
         var list = saveContract("no_active", car, "CANCELLED",
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(2));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
         Client client = (Client) list.get(1);
         contractRepository.save((Contract) list.getFirst());
 
@@ -632,7 +632,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         ));
 
         var list = saveContract("empty_states", car, "ACTIVE",
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(2));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
         Client client = (Client) list.get(1);
         contractRepository.save((Contract) list.getFirst());
 
@@ -684,10 +684,10 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
                 (CarModel) carAList.get(1)));
 
 
-        var list = saveContract("inj", car, "ACTIVE",
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(2));
+        var list = saveContract("id", car, "ACTIVE",
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
-        Contract legitimateContract = contractRepository.save ((Contract)  list.getFirst()) ;
+        Contract legitimateContract = contractRepository.save((Contract) list.getFirst());
 
         List<String> injectionPayloads = Arrays.asList(
                 "' OR '1'='1",
@@ -769,7 +769,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
         // создаём клиента и контракт в легитимном состоянии ACTIVE
         var list = saveContract("sqlinj", car, "ACTIVE",
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3));
 
         Client client = (Client) list.get(1);
         Contract legit = contractRepository.save((Contract) list.get(0));

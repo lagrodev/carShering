@@ -1,5 +1,6 @@
 package org.example.carshering.repository;
 
+import org.example.carshering.dto.response.CarAnalyticsResponse;
 import org.example.carshering.dto.response.ContractDetailResponse;
 import org.example.carshering.dto.response.RideStats;
 import org.example.carshering.entity.Car;
@@ -235,11 +236,11 @@ AND contr.durationMinutes > 0
     SELECT DATE(contr.dataStart),
            COALESCE(SUM(contr.totalCost), 0)
     FROM Contract contr
-    WHERE contr.dataEnd >= :start AND contr.dataEnd < :end
+    WHERE contr.dataStart >= :start AND contr.dataStart < :end and contr.state = :completedState
     GROUP BY DATE(contr.dataStart)
     ORDER BY DATE(contr.dataStart)
 """)
-    List<Object[]> getDailyRevenueBetween(LocalDateTime start, LocalDateTime end);
+    List<Object[]> getDailyRevenueBetween(@Param("completedState") RentalState completedState, LocalDateTime start, LocalDateTime end);
 
 
 
@@ -269,4 +270,60 @@ AND contr.durationMinutes > 0
     List<ContractDetailResponse> getContractsByDay(@Param("completedState") RentalState completedState,
                                                    @Param("startOfDay") LocalDateTime startOfDay,
                                                    @Param("endOfDay") LocalDateTime endOfDay);
+
+    // Car Analytics Queries
+//        c.imageUrl,
+    @Query("""
+    SELECT NEW org.example.carshering.dto.response.CarAnalyticsResponse(
+        c.id,
+        c.gosNumber,
+        c.vin,
+        c.model.brand.name,
+        c.model.model.name,
+        c.model.carClass.name,
+        c.yearOfIssue,
+
+        c.rent,
+        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+        (SELECT COALESCE(AVG(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+        (SELECT COUNT(DISTINCT co.client.id) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate),
+        (SELECT COALESCE(SUM(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate)
+    )
+    FROM Car c
+    ORDER BY (SELECT COALESCE(SUM(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate) DESC
+""")
+    Page<CarAnalyticsResponse> getTopCarsByProfit(
+            @Param("completedState") RentalState completedState,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
+//        c.imageUrl,
+    @Query("""
+    SELECT NEW org.example.carshering.dto.response.CarAnalyticsResponse(
+        c.id,
+        c.gosNumber,
+        c.vin,
+        c.model.brand.name,
+        c.model.model.name,
+        c.model.carClass.name,
+        c.yearOfIssue,
+        
+        c.rent,
+        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+        (SELECT COALESCE(AVG(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+        (SELECT COUNT(DISTINCT co.client.id) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate),
+        (SELECT COALESCE(SUM(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate)
+    )
+    FROM Car c
+    ORDER BY c.id
+""")
+    Page<CarAnalyticsResponse> getAllCarsAnalytics(
+            @Param("completedState") RentalState completedState,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
 }

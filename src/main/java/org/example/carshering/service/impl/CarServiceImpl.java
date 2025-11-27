@@ -75,7 +75,10 @@ public class CarServiceImpl implements CarService {
 
         car.setState(state);
 
-        return carMapper.toDetailDto(carRepository.save(car), false);
+        String imageUrl = ((car.getImages() != null) && !car.getImages().isEmpty()) ? car.getImages().get(0).getUrl() : null;
+
+        CarDetailResponse carDetailResponse = carMapper.toDetailDto(carRepository.save(car), false, imageUrl);
+        return carDetailResponse;
     }
 
 
@@ -98,24 +101,26 @@ public class CarServiceImpl implements CarService {
 
 
         carMapper.updateCar(car, request);
+        String imageUrl = ((car.getImages() != null) && !car.getImages().isEmpty()) ? car.getImages().get(0).getUrl() : null;
 
         if (request.modelId() == null) {
-            return carMapper.toDetailDto(carRepository.save(car), false);
+            return carMapper.toDetailDto(carRepository.save(car), false, imageUrl);
         }
 
         CarModel newModel = carModelService.getCarModelById(request.modelId());
 
         car.setModel(newModel);
 
-        return carMapper.toDetailDto(carRepository.save(car), false);
+        return carMapper.toDetailDto(carRepository.save(car), false, imageUrl);
     }
 
 
     @Override
     public CarDetailResponse getCarById(Long carId) {
         var car = getCarOrThrow(carId);
+        String imageUrl = ((car.getImages() != null) && !car.getImages().isEmpty()) ? car.getImages().get(0).getUrl() : null;
 
-        return carMapper.toDetailDto(car, false);
+        return carMapper.toDetailDto(car, false, imageUrl);
     }
 
     @Override
@@ -130,8 +135,9 @@ public class CarServiceImpl implements CarService {
         if (!CAR_STATE_AVAILABLE.equalsIgnoreCase(car.getState().getStatus())) {
             throw new StateException("Car not available");
         }
+        String imageUrl = ((car.getImages() != null) && !car.getImages().isEmpty()) ? car.getImages().get(0).getUrl() : null;
 
-        return carMapper.toDetailDto(car, favorite);
+        return carMapper.toDetailDto(car, favorite, imageUrl);
     }
 
 

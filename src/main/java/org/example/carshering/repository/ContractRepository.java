@@ -1,10 +1,13 @@
 package org.example.carshering.repository;
 
+import jakarta.persistence.LockModeType;
+import org.example.carshering.entity.Car;
 import org.example.carshering.entity.Client;
 import org.example.carshering.entity.Contract;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,21 +21,25 @@ import java.util.Set;
 
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, Long> {
-    @Query(
-            """
-                    SELECT c FROM Contract c
-                        WHERE c.car.id = :carId
-                            AND (:contractId IS NULL OR c.id <> :contractId)
-                            AND c.state.name IN ('BOOKED', 'ACTIVE', 'PENDING')
-                            AND c.dataEnd > :startDate
-                            AND c.dataStart < :endDate
-                    """
-    )
+    @Query("""
+    SELECT c FROM Contract c
+    JOIN c.state s
+    WHERE c.car.id = :carId
+      AND (:contractId IS NULL OR c.id <> :contractId)
+      AND s.name IN ('BOOKED', 'ACTIVE', 'PENDING', 'CONFIRMED')
+      AND (
+        (c.dataStart < :endDate AND c.dataEnd > :startDate)
+      )
+    """)
     List<Contract> findOverlappingContracts(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             @Param("carId") Long carId,
-            @Param("contractId") Long contractId);
+            @Param("contractId") Long contractId
+    );
+
+
+
 
     @Query(
             """

@@ -71,7 +71,9 @@ public class ContractServiceImpl implements ContractService {
         if (!documentService.findDocument(userId).verified()) {
             throw new UnverifiedClientDocumentException("The document is not verified. Please wait for verification or attach the relevant document");
         }
-        Car car = carService.getEntity(request.carId());
+
+        Car car = carService.getEntityWithLock(request.carId());
+
         if (!rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), null)) {
             throw new CarUnavailableOnDatesException("The car is not available on the selected dates");
         }

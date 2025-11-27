@@ -13,6 +13,7 @@ import org.example.carshering.entity.*;
 import org.springframework.boot.test.context.TestConfiguration;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @TestConfiguration
 public class DataUtils {
@@ -58,8 +59,8 @@ public class DataUtils {
                 "ECONOMY",
                 2020,
                 "Ivanov",
-                LocalDate.now().plusDays(1),
-                LocalDate.now().plusDays(10),
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(10),
                 "VIN123456",
                 "A123BC",
                 "PENDING"
@@ -76,8 +77,8 @@ public class DataUtils {
                 "ECONOMY",
                 2020,
                 "Ivanov",
-                LocalDate.now().plusDays(1),
-                LocalDate.now().plusDays(10),
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(10),
                 "VIN123456",
                 "A123BC",
                 "CONFIRMED"
@@ -94,8 +95,8 @@ public class DataUtils {
                 "PREMIUM",
                 2021,
                 "Petrov",
-                LocalDate.now().plusDays(5),
-                LocalDate.now().plusDays(15),
+                LocalDateTime.now().plusDays(5),
+                LocalDateTime.now().plusDays(15),
                 "VIN789012",
                 "B456CD",
                 "CANCELLED"
@@ -423,7 +424,22 @@ public class DataUtils {
     // ---- CONTRACT ----
     public Contract createContract(Client client, Car car, RentalState stateName,
                                    LocalDate start, LocalDate end) {
+        long durationMinutes = java.time.Duration.between(start.atStartOfDay(), end.atStartOfDay()).toMinutes();
+        return Contract.builder()
+                .client(client)
+                .car(car)
+                .state(stateName)
+                .dataStart(start.atStartOfDay())
+                .dataEnd(end.atStartOfDay())
+                .totalCost(100.0)
+                .durationMinutes(durationMinutes)
+                .comment("cmt")
+                .build();
+    }
 
+    public Contract createContractWithDateTime(Client client, Car car, RentalState stateName,
+                                               LocalDateTime start, LocalDateTime end) {
+        long durationMinutes = java.time.Duration.between(start, end).toMinutes();
         return Contract.builder()
                 .client(client)
                 .car(car)
@@ -431,6 +447,7 @@ public class DataUtils {
                 .dataStart(start)
                 .dataEnd(end)
                 .totalCost(100.0)
+                .durationMinutes(durationMinutes)
                 .comment("cmt")
                 .build();
     }

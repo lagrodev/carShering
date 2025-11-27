@@ -28,7 +28,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -73,8 +73,8 @@ public class ContractControllerTests extends BaseWebMvcTest {
         // given
         CreateContractRequest request = new CreateContractRequest(
                 1L,
-                LocalDate.now().plusDays(1),
-                LocalDate.now().plusDays(10)
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(10)
         );
         ContractResponse response = DataUtils.contractResponsePersisted();
 
@@ -108,8 +108,8 @@ public class ContractControllerTests extends BaseWebMvcTest {
         // given
         CreateContractRequest invalidRequest = new CreateContractRequest(
                 null, // carId — null
-                LocalDate.now().minusDays(1), // дата в прошлом
-                LocalDate.now().minusDays(5) // дата в прошлом
+                LocalDateTime.now().minusDays(1), // дата в прошлом
+                LocalDateTime.now().minusDays(5) // дата в прошлом
         );
 
         when(authentication.getPrincipal()).thenReturn(clientDetails);
@@ -136,8 +136,8 @@ public class ContractControllerTests extends BaseWebMvcTest {
         // given
         CreateContractRequest request = new CreateContractRequest(
                 999L,
-                LocalDate.now().plusDays(1),
-                LocalDate.now().plusDays(10)
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(10)
         );
 
         when(authentication.getPrincipal()).thenReturn(clientDetails);
@@ -352,8 +352,8 @@ public class ContractControllerTests extends BaseWebMvcTest {
 
         // given
         UpdateContractRequest request = new UpdateContractRequest(
-                LocalDate.now().plusDays(2),
-                LocalDate.now().plusDays(12)
+                LocalDateTime.now().plusDays(2),
+                LocalDateTime.now().plusDays(12)
         );
         ContractResponse response = DataUtils.contractResponsePersisted();
 
@@ -385,7 +385,7 @@ public class ContractControllerTests extends BaseWebMvcTest {
 
         // given
         UpdateContractRequest invalidRequest = new UpdateContractRequest(
-                LocalDate.now().minusDays(1), // дата в прошлом
+                LocalDateTime.now().minusDays(1), // дата в прошлом
                 null // null дата
         );
 
@@ -412,8 +412,8 @@ public class ContractControllerTests extends BaseWebMvcTest {
 
         // given
         UpdateContractRequest request = new UpdateContractRequest(
-                LocalDate.now().plusDays(2),
-                LocalDate.now().plusDays(12)
+                LocalDateTime.now().plusDays(2),
+                LocalDateTime.now().plusDays(12)
         );
 
         when(authentication.getPrincipal()).thenReturn(clientDetails);
@@ -442,8 +442,8 @@ public class ContractControllerTests extends BaseWebMvcTest {
 
         // given
         UpdateContractRequest request = new UpdateContractRequest(
-                LocalDate.now().plusDays(2),
-                LocalDate.now().plusDays(12)
+                LocalDateTime.now().plusDays(2),
+                LocalDateTime.now().plusDays(12)
         );
 
         when(authentication.getPrincipal()).thenReturn(clientDetails);

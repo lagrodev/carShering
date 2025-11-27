@@ -1,7 +1,9 @@
 package org.example.carshering.service.interfaces;
 
+import org.example.carshering.dto.response.CarAnalyticsResponse;
 import org.example.carshering.dto.response.ContractDetailResponse;
 import org.example.carshering.dto.response.DailyRevenueResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -19,4 +21,8 @@ public interface AnalysisService {
     List<DailyRevenueResponse> getDailyRevenueBetween(LocalDate from, LocalDate to);
 
     List<ContractDetailResponse> getContractDetailsForDay(LocalDate date);
+
+    Page<CarAnalyticsResponse> getTopCarsByProfit(LocalDate from, LocalDate to, Pageable pageable);
+
+    Page<CarAnalyticsResponse> getAllCarsAnalytics(LocalDate from, LocalDate to, Pageable pageable);
 }

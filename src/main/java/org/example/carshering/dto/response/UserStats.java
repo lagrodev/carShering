@@ -22,8 +22,8 @@ public record UserStats(
         @Schema(description = "Class of user's favorite car", example = "Business")
         String favoriteCarCarClass,
         
-        @Schema(description = "Image URL of user's favorite car", example = "https://example.com/images/car.jpg")
-        String favoriteCarImageUrl,
+//        @Schema(description = "Image URL of user's favorite car", example = "https://example.com/images/car.jpg")
+//        String favoriteCarImageUrl,
 
         @Schema(description = "Total number of completed rides by user", example = "25")
         int totalRides,

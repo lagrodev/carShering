@@ -1,5 +1,6 @@
 package org.example.carshering.repository;
 
+import jakarta.persistence.LockModeType;
 import jakarta.validation.constraints.NotBlank;
 import org.example.carshering.dto.request.CarFilterRequest;
 import org.example.carshering.dto.response.MinMaxCellForFilters;
@@ -7,6 +8,7 @@ import org.example.carshering.entity.Car;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CarRepository extends JpaRepository<Car, Long> {
@@ -93,4 +96,15 @@ public interface CarRepository extends JpaRepository<Car, Long> {
       @Param("carStates") List<String> carStates,
       @Param("dateStart") LocalDateTime dateStart,
       @Param("dateEnd") LocalDateTime dateEnd);
+
+
+    @Lock(LockModeType. PESSIMISTIC_WRITE)
+    @Query("""
+    SELECT c FROM Car c
+    WHERE c.id = :carId
+    """)
+    Optional<Car> findByIdWithLock(@Param("carId") Long carId);
+
 }
+
+

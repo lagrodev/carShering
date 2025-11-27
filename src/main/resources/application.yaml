@@ -48,10 +48,22 @@ spring:
             starttls:
               enable: false
 
+    servlet:
+      multipart:
+        max-file-size: 40MB
+        max-request-size: 40MB
+
 
 frontend:
   address: localhost
   port: 5176
+
+
+minio:
+  url: http://localhost:9000
+  access-key: admin
+  secret-key: admin12345
+  bucket: car-photos
 
 server:
     address: localhost

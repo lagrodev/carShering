@@ -27,8 +27,7 @@ public class Car {
     @Column(name = "vin", nullable = false, unique = true)
     private String vin;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+
 
 
     private Double rent;
@@ -51,5 +50,7 @@ public class Car {
     private List<Favorite> favorites = new ArrayList<>();
 
 
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
+    private List<Image> images = new ArrayList<>();
     // TODO: @CreateDate @UpdateDate
 }

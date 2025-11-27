@@ -26,7 +26,8 @@ public abstract class CarMapper {
     @Mapping(source = "car.model.carClass.name", target = "carClass")
     @Mapping(source = "car.state.status", target = "status")
     @Mapping(source = "favorite", target = "favorite")
-    public abstract CarDetailResponse toDetailDto(Car car, boolean favorite);
+    @Mapping(source = "imageUrl", target = "imageUrl")
+    public abstract CarDetailResponse toDetailDto(Car car, boolean favorite, String imageUrl);
 
     @Mapping(source = "car.model.brand.name", target = "brand")
     @Mapping(source = "car.model.model.name", target = "model")

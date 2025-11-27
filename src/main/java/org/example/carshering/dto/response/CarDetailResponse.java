@@ -29,5 +29,7 @@ public record CarDetailResponse(
         @Schema(description = "Rental price per day", example = "2500.0")
         Double rent,
         @Schema(description = "Is the car in user's favorites", example = "true")
-        boolean favorite
+        boolean favorite,
+        @Schema(description = "Image URL", example = "https://example.com/car.jpg")
+        String imageUrl
 ) {}
