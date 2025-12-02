@@ -24,6 +24,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AnalysisServiceImpl implements AnalysisService {
 
+    //clickhouse
+
     private  final AnalysisRepository analysisRepository;
 
     private LocalTime getAverageStartTime(Long userId) {

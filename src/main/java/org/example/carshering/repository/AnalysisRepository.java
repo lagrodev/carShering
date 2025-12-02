@@ -154,7 +154,7 @@ AND contr.durationMinutes > 0
     Long allRidesMinute();
 
     @Query("""
-    SELECT sum(contr.durationMinutes) FROM Contract contr 
+    SELECT sum(contr.durationMinutes) FROM Contract contr
     WHERE contr.durationMinutes > 0
       AND contr.dataStart >= :startOfMonth
       AND contr.dataStart < :startOfNextMonth
