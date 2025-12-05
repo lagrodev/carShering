@@ -4,7 +4,7 @@ import org.example.carshering.dto.request.create.CreateContractRequest;
 import org.example.carshering.dto.request.FilterContractRequest;
 import org.example.carshering.dto.request.update.UpdateContractRequest;
 import org.example.carshering.dto.response.ContractResponse;
-import org.example.carshering.entity.Client;
+import org.example.carshering.domain.entity.Client;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

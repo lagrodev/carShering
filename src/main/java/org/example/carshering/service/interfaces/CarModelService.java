@@ -4,7 +4,7 @@ import org.example.carshering.dto.request.FilterCarModelRequest;
 import org.example.carshering.dto.request.create.CreateCarModelRequest;
 import org.example.carshering.dto.request.update.UpdateCarModelRequest;
 import org.example.carshering.dto.response.CarModelResponse;
-import org.example.carshering.entity.CarModel;
+import org.example.carshering.domain.entity.CarModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

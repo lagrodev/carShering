@@ -1,7 +1,7 @@
 package org.example.carshering.service.interfaces;
 
 import org.example.carshering.dto.response.DocumentTypeResponse;
-import org.example.carshering.entity.DocumentType;
+import org.example.carshering.domain.entity.DocumentType;
 
 import java.util.List;
 

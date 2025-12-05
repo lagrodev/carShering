@@ -1,8 +1,8 @@
 package org.example.carshering.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.entity.Client;
-import org.example.carshering.entity.VerificationCode;
+import org.example.carshering.domain.entity.Client;
+import org.example.carshering.domain.entity.VerificationCode;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.repository.CodeRepository;
 import org.example.carshering.service.interfaces.ClientDetailsService;

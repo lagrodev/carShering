@@ -1,6 +1,6 @@
 package org.example.carshering.service.impl;
 
-import org.example.carshering.entity.Role;
+import org.example.carshering.domain.entity.Role;
 import org.example.carshering.exceptions.custom.RoleNotFoundException;
 import org.example.carshering.repository.RoleRepository;
 import org.junit.jupiter.api.DisplayName;

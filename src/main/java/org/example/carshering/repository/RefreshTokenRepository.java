@@ -1,7 +1,7 @@
 package org.example.carshering.repository;
 
-import org.example.carshering.entity.Client;
-import org.example.carshering.entity.RefreshToken;
+import org.example.carshering.domain.entity.Client;
+import org.example.carshering.domain.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

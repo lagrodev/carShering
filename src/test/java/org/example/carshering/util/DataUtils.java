@@ -1,5 +1,6 @@
 package org.example.carshering.util;
 
+import org.example.carshering.domain.entity.*;
 import org.example.carshering.dto.request.create.CreateCarRequest;
 import org.example.carshering.dto.request.create.CreateDocumentRequest;
 import org.example.carshering.dto.request.update.UpdateCarRequest;
@@ -9,7 +10,6 @@ import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarStateResponse;
 import org.example.carshering.dto.response.ContractResponse;
 import org.example.carshering.dto.response.DocumentResponse;
-import org.example.carshering.entity.*;
 import org.springframework.boot.test.context.TestConfiguration;
 
 import java.time.LocalDate;

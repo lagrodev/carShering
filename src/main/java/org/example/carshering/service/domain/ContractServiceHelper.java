@@ -1,8 +1,8 @@
 package org.example.carshering.service.domain;
 
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.entity.Client;
-import org.example.carshering.entity.Contract;
+import org.example.carshering.domain.entity.Client;
+import org.example.carshering.domain.entity.Contract;
 import org.example.carshering.exceptions.custom.BusinessConflictException;
 import org.example.carshering.repository.ContractRepository;
 import org.springframework.stereotype.Service;

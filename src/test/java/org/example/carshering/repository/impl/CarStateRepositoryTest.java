@@ -1,6 +1,6 @@
 package org.example.carshering.repository.impl;
 
-import org.example.carshering.entity.CarState;
+import org.example.carshering.domain.entity.CarState;
 import org.example.carshering.repository.AbstractRepositoryTest;
 import org.example.carshering.repository.CarStateRepository;
 import org.example.carshering.util.DataUtils;

@@ -1,0 +1,566 @@
+@startuml
+' Car Sharing Backend - Class Diagram
+' Based on actual implementation and DDD refactor plan
+' Last updated: 2025-12-05
+
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+
+' ===========================================
+' BOUNDED CONTEXT: FLEET (Car Management)
+' ===========================================
+package "Fleet Context" <<Rectangle>> #E8F5E9 {
+
+  package "domain.entity" <<Rectangle>> {
+    class Car <<Entity>> <<AggregateRoot>> {
+      - id : Long
+      - gosNumber : GosNumber
+      - vin : Vin
+      - dailyRate : Money
+      - yearOfIssue : Year
+      - model : CarModel
+      - state : CarState
+      - contracts : List<Contract>
+      - favorites : List<Favorite>
+      - images : List<Image>
+      --
+      + isAvailableForRental() : boolean
+      + updateDailyRate(Money) : void
+      + markAsUnavailable(String) : void
+      + markAsAvailable() : void
+    }
+
+    class CarModel <<Entity>> {
+      - idModel : Long
+      - brand : Brand
+      - model : Model
+      - bodyType : String
+      - carClass : CarClass
+      - deleted : boolean
+      - cars : List<Car>
+    }
+
+    class Brand <<Entity>> {
+      - id : Long
+      - name : String
+    }
+
+    class Model <<Entity>> {
+      - id : Long
+      - name : String
+    }
+
+    class CarState <<Entity>> {
+      - id : Long
+      - status : String
+      --
+      + isAvailable() : boolean
+    }
+
+    class CarClass <<Entity>> {
+      - id : Long
+      - name : String
+    }
+
+    class Image <<Entity>> {
+      - id : Long
+      - fileName : String
+      - url : String
+      - car : Car
+    }
+  }
+
+  package "domain.valueobject" <<Rectangle>> {
+    class GosNumber <<ValueObject>> {
+      + value : String
+      --
+      + validate() : void
+    }
+
+    class Vin <<ValueObject>> {
+      + value : String
+      --
+      + validate() : void
+    }
+
+    class Year <<ValueObject>> {
+      + value : int
+      --
+      + validate() : void
+    }
+  }
+
+  package "service" <<Rectangle>> {
+    interface CarService <<ApplicationService>> {
+      + getAllCars(filter, page) : Page<CarResponse>
+      + getCarById(Long) : CarDetailResponse
+      + createCar(CreateCarRequest) : CarResponse
+      + updateCar(Long, UpdateCarRequest) : CarResponse
+      + deleteCar(Long) : void
+    }
+
+    class CarServiceImpl <<Service>> {
+      - carRepository : CarRepository
+      - carMapper : CarMapper
+      - carModelRepository : CarModelRepository
+      --
+      + getAllCars(...) : Page<CarResponse>
+      + getCarById(Long) : CarDetailResponse
+    }
+  }
+
+  package "repository" <<Rectangle>> {
+    interface CarRepository <<Repository>> {
+      + save(Car) : Car
+      + findById(Long) : Optional<Car>
+      + findAll(Specification) : List<Car>
+      + delete(Car) : void
+    }
+  }
+
+  package "rest" <<Rectangle>> {
+    class CarController <<Controller>> {
+      - carService : CarService
+      --
+      + @GetMapping getCars(filter) : ResponseEntity
+      + @GetMapping("/{id}") getCarById(id) : ResponseEntity
+      + @PostMapping createCar(request) : ResponseEntity
+      + @PutMapping("/{id}") updateCar(id, request) : ResponseEntity
+      + @DeleteMapping("/{id}") deleteCar(id) : ResponseEntity
+    }
+  }
+}
+
+' ===========================================
+' BOUNDED CONTEXT: RENTAL (Contract Management)
+' ===========================================
+package "Rental Context" <<Rectangle>> #FFF3E0 {
+
+  package "domain.entity " <<Rectangle>> {
+    class Contract <<Entity>> <<AggregateRoot>> {
+      - id : Long
+      - period : RentalPeriod
+      - totalCost : Money
+      - comment : String
+      - client : Client
+      - car : Car
+      - state : RentalState
+      --
+      + create(ClientId, CarId, RentalPeriod, Money) : Contract
+      + confirm() : void
+      + cancel() : void
+      + complete() : void
+      + updatePeriod(RentalPeriod, Money) : void
+      + canBeConfirmed() : boolean
+    }
+
+    class RentalState <<Entity>> {
+      - id : Long
+      - name : String
+      - contracts : List<Contract>
+      --
+      + canConfirm() : boolean
+      + canCancel() : boolean
+    }
+  }
+
+  package "domain.valueobject " <<Rectangle>> {
+    class RentalPeriod <<ValueObject>> {
+      + startDate : LocalDateTime
+      + endDate : LocalDateTime
+      + durationMinutes : Long
+      --
+      + validate() : void
+      + overlaps(RentalPeriod) : boolean
+      + calculateDuration() : Long
+    }
+  }
+
+  package "service " <<Rectangle>> {
+    interface ContractService <<ApplicationService>> {
+      + createContract(CreateContractRequest, Long) : ContractResponse
+      + getContractById(Long) : ContractDetailResponse
+      + getAllContracts(Long, Pageable) : Page<ContractListItemResponse>
+      + cancelContract(Long, Long) : void
+    }
+
+    class RentalDomainService <<DomainService>> {
+      --
+      + calculateTotalCost(RentalPeriod, Money) : Money
+      + checkCarAvailability(Car, RentalPeriod) : boolean
+      + validateRentalRequest(Client, Car, RentalPeriod) : void
+    }
+  }
+
+  package "repository " <<Rectangle>> {
+    interface ContractRepository <<Repository>> {
+      + save(Contract) : Contract
+      + findById(Long) : Optional<Contract>
+      + findByClientId(Long) : List<Contract>
+      + findOverlapping(Long, RentalPeriod) : List<Contract>
+    }
+  }
+
+  package "rest " <<Rectangle>> {
+    class ContractController <<Controller>> {
+      - contractService : ContractService
+      --
+      + @PostMapping createContract(request) : ResponseEntity
+      + @GetMapping getAllContracts() : ResponseEntity
+      + @GetMapping("/{id}") getContractById(id) : ResponseEntity
+      + @DeleteMapping("/{id}") cancelContract(id) : ResponseEntity
+    }
+  }
+}
+
+' ===========================================
+' BOUNDED CONTEXT: CLIENT (Client Management)
+' ===========================================
+package "Client Context" <<Rectangle>> #E3F2FD {
+
+  package "domain.entity  " <<Rectangle>> {
+    class Client <<Entity>> <<AggregateRoot>> {
+      - id : Long
+      - firstName : String
+      - lastName : String
+      - login : Login
+      - phone : Phone
+      - email : Email
+      - password : Password
+      - deleted : boolean
+      - banned : boolean
+      - emailVerified : boolean
+      - createdAt : Instant
+      - updatedAt : Instant
+      - role : Role
+      - contracts : List<Contract>
+      - favorites : List<Favorite>
+      - documents : List<Document>
+      --
+      + verifyEmail() : void
+      + ban(String) : void
+      + unban() : void
+      + canRentCar() : boolean
+      + hasVerifiedDocuments() : boolean
+    }
+
+    class Document <<Entity>> {
+      - id : Long
+      - verified : boolean
+      - documentType : DocumentType
+      - series : DocumentSeries
+      - number : DocumentNumber
+      - dateOfIssue : DateOfIssue
+      - issuingAuthority : IssuingAuthority
+      - deleted : boolean
+      - client : Client
+      --
+      + verify() : void
+    }
+
+    class DocumentType <<Entity>> {
+      - id : Long
+      - name : String
+      - required : boolean
+    }
+
+    class Favorite <<Entity>> {
+      - id : Long
+      - client : Client
+      - car : Car
+      - createdAt : Instant
+    }
+  }
+
+  package "domain.valueobject  " <<Rectangle>> {
+    class Email <<ValueObject>> {
+      + value : String
+      --
+      + validate() : void
+    }
+
+    class Phone <<ValueObject>> {
+      + value : String
+      --
+      + validate() : void
+    }
+
+    class Login <<ValueObject>> {
+      + value : String
+      --
+      + validate() : void
+    }
+
+    class Password <<ValueObject>> {
+      + value : String
+      + encoded : boolean
+      --
+      + encode() : Password
+      + matches(String) : boolean
+    }
+
+    class DocumentSeries <<ValueObject>> {
+      + value : String
+    }
+
+    class DocumentNumber <<ValueObject>> {
+      + value : String
+    }
+
+    class DateOfIssue <<ValueObject>> {
+      + value : LocalDate
+    }
+
+    class IssuingAuthority <<ValueObject>> {
+      + value : String
+    }
+  }
+
+  package "service  " <<Rectangle>> {
+    interface ClientService <<ApplicationService>> {
+      + getProfile(Long) : ProfileResponse
+      + updateProfile(Long, UpdateProfileRequest) : ProfileResponse
+      + deleteClient(Long) : void
+    }
+
+    interface DocumentService <<ApplicationService>> {
+      + createDocument(CreateDocumentRequest, Long) : DocumentResponse
+      + verifyDocument(Long, Long) : void
+    }
+
+    class DocumentVerificationService <<DomainService>> {
+      --
+      + canVerify(Document) : boolean
+      + verify(Document) : void
+    }
+  }
+
+  package "repository  " <<Rectangle>> {
+    interface ClientRepository <<Repository>> {
+      + save(Client) : Client
+      + findById(Long) : Optional<Client>
+      + findByEmail(Email) : Optional<Client>
+      + existsByEmail(Email) : boolean
+    }
+
+    interface DocumentRepository <<Repository>> {
+      + save(Document) : Document
+      + findByClientId(Long) : List<Document>
+    }
+  }
+
+  package "rest  " <<Rectangle>> {
+    class ProfileController <<Controller>> {
+      - clientService : ClientService
+      --
+      + @GetMapping getProfile() : ResponseEntity
+      + @PutMapping updateProfile(request) : ResponseEntity
+    }
+  }
+}
+
+' ===========================================
+' BOUNDED CONTEXT: IDENTITY (Authentication)
+' ===========================================
+package "Identity Context" <<Rectangle>> #F3E5F5 {
+
+  package "domain.entity   " <<Rectangle>> {
+    class Role <<Entity>> {
+      - id : Long
+      - name : String
+    }
+
+    class RefreshToken <<Entity>> {
+      - id : Long
+      - token : String
+      - expiryDate : Instant
+      - client : Client
+      --
+      + isExpired() : boolean
+    }
+
+    class VerificationCode <<Entity>> {
+      - id : Long
+      - code : String
+      - expiryDate : Instant
+      - client : Client
+      - verified : boolean
+      --
+      + isExpired() : boolean
+      + verify(String) : boolean
+    }
+  }
+
+  package "security" <<Rectangle>> {
+    class JwtService <<Service>> {
+      --
+      + generateAccessToken(Client) : String
+      + generateRefreshToken(Client) : String
+      + validateToken(String) : boolean
+      + getEmailFromToken(String) : String
+    }
+
+    class AuthService <<Service>> {
+      - clientRepository : ClientRepository
+      - jwtService : JwtService
+      - passwordEncoder : PasswordEncoder
+      --
+      + authenticate(email, password) : AuthResponse
+      + register(RegisterRequest) : void
+      + refreshToken(String) : AuthResponse
+    }
+  }
+
+  package "rest   " <<Rectangle>> {
+    class AuthController <<Controller>> {
+      - authService : AuthService
+      --
+      + @PostMapping("/auth") login(request) : ResponseEntity
+      + @PostMapping("/registration") register(request) : ResponseEntity
+      + @PostMapping("/refresh") refreshToken(cookie) : ResponseEntity
+      + @PostMapping("/logout") logout() : ResponseEntity
+    }
+  }
+}
+
+' ===========================================
+' COMMON/SHARED (Cross-cutting concerns)
+' ===========================================
+package "Common/Shared" <<Rectangle>> #EEEEEE {
+  class Money <<ValueObject>> {
+    + amount : BigDecimal
+    + currencyCode : String
+    --
+    + add(Money) : Money
+    + subtract(Money) : Money
+    + multiply(BigDecimal) : Money
+    + isLessThan(Money) : boolean
+    + isGreaterThan(Money) : boolean
+  }
+
+  package "exceptions" <<Rectangle>> {
+    class GlobalExceptionHandler <<ControllerAdvice>> {
+      --
+      + handleEntityNotFound(ex) : ResponseEntity
+      + handleValidation(ex) : ResponseEntity
+      + handleAccessDenied(ex) : ResponseEntity
+    }
+
+    class ResourceNotFoundException <<Exception>>
+    class InvalidStateTransitionException <<Exception>>
+    class ValidationException <<Exception>>
+  }
+
+  package "config" <<Rectangle>> {
+    class SecurityConfig <<Configuration>> {
+      --
+      + securityFilterChain() : SecurityFilterChain
+      + passwordEncoder() : PasswordEncoder
+    }
+
+    class JwtAuthenticationFilter <<Filter>> {
+      --
+      + doFilterInternal() : void
+    }
+  }
+}
+
+' ===========================================
+' RELATIONSHIPS - Fleet Context
+' ===========================================
+CarModel "1" *-- "*" Car : contains
+Brand "1" -- "*" CarModel : has
+Model "1" -- "*" CarModel : has
+CarClass "1" -- "*" CarModel : categorizes
+CarState "1" -- "*" Car : defines status
+Car "1" *-- "*" Image : has
+
+Car *-- GosNumber
+Car *-- Vin
+Car *-- Year
+Car *-- Money
+
+CarServiceImpl ..|> CarService
+CarServiceImpl --> CarRepository : uses
+CarController --> CarService : uses
+
+' ===========================================
+' RELATIONSHIPS - Rental Context
+' ===========================================
+Contract "*" --> "1" Client : rented by
+Contract "*" --> "1" Car : rents
+Contract "*" --> "1" RentalState : has
+Contract *-- RentalPeriod
+Contract *-- Money
+
+ContractController --> ContractService : uses
+ContractService --> RentalDomainService : uses
+ContractService --> ContractRepository : uses
+
+' ===========================================
+' RELATIONSHIPS - Client Context
+' ===========================================
+Client "1" *-- "*" Contract : has
+Client "1" *-- "*" Favorite : has
+Client "1" *-- "*" Document : owns
+Client "*" --> "1" Role : has
+Document "*" --> "1" DocumentType : classified as
+
+Client *-- Email
+Client *-- Phone
+Client *-- Login
+Client *-- Password
+Document *-- DocumentSeries
+Document *-- DocumentNumber
+Document *-- DateOfIssue
+Document *-- IssuingAuthority
+
+Favorite "*" --> "1" Car : references
+Favorite "*" --> "1" Client : belongs to
+
+ProfileController --> ClientService : uses
+ClientService --> ClientRepository : uses
+
+' ===========================================
+' RELATIONSHIPS - Identity Context
+' ===========================================
+RefreshToken "*" --> "1" Client : belongs to
+VerificationCode "*" --> "1" Client : belongs to
+
+AuthController --> AuthService : uses
+AuthService --> JwtService : uses
+AuthService --> ClientRepository : uses
+
+' ===========================================
+' SHARED RELATIONSHIPS
+' ===========================================
+Car ..> Money : uses
+Contract ..> Money : uses
+
+GlobalExceptionHandler ..> ResourceNotFoundException : handles
+GlobalExceptionHandler ..> InvalidStateTransitionException : handles
+GlobalExceptionHandler ..> ValidationException : handles
+
+' ===========================================
+' LEGEND
+' ===========================================
+legend right
+  |<back:#E8F5E9>      </back>| Fleet Context (Car Management) |
+  |<back:#FFF3E0>      </back>| Rental Context (Contract Management) |
+  |<back:#E3F2FD>      </back>| Client Context (Client & Document Management) |
+  |<back:#F3E5F5>      </back>| Identity Context (Authentication & Authorization) |
+  |<back:#EEEEEE>      </back>| Common/Shared (Cross-cutting concerns) |
+
+  **Patterns:**
+  <<AggregateRoot>> - DDD Aggregate Root
+  <<Entity>> - Domain Entity
+  <<ValueObject>> - Immutable Value Object
+  <<DomainService>> - Domain Service
+  <<ApplicationService>> - Application Service
+  <<Repository>> - Repository Pattern
+  <<Controller>> - REST Controller
+endlegend
+
+@enduml

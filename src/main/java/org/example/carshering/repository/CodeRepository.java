@@ -1,8 +1,7 @@
 package org.example.carshering.repository;
 
-import org.example.carshering.entity.VerificationCode;
+import org.example.carshering.domain.entity.VerificationCode;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
 

@@ -1,7 +1,7 @@
 package org.example.carshering.service.domain;
 
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.entity.CarModel;
+import org.example.carshering.domain.entity.CarModel;
 import org.example.carshering.exceptions.custom.CarNotFoundException;
 import org.example.carshering.repository.CarModelRepository;
 import org.springframework.stereotype.Service;

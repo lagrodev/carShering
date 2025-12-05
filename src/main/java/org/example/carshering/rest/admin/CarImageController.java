@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.response.ImageResponse;
-import org.example.carshering.entity.Image;
+import org.example.carshering.domain.entity.Image;
 import org.example.carshering.service.interfaces.ImageService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

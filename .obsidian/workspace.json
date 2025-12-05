@@ -1,0 +1,211 @@
+{
+  "main": {
+    "id": "94bffe5423065c55",
+    "type": "split",
+    "children": [
+      {
+        "id": "a69d644c3d5465b6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1cfffef2b8ee6e65",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "refactor_plan.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "refactor_plan"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "1d00b7a0db41fc1a",
+    "type": "split",
+    "children": [
+      {
+        "id": "c0890e7d8dfffd09",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0addf50e909c8f07",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Файловый менеджер"
+            }
+          },
+          {
+            "id": "543b804190be2af3",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Поиск"
+            }
+          },
+          {
+            "id": "5c9e8903f8491e46",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Закладки"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "dc187b2e85a39299",
+    "type": "split",
+    "children": [
+      {
+        "id": "f3d5935858f9ccd3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a54e7e646b3809b2",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "refactor_plan.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Обратные ссылки для refactor_plan"
+            }
+          },
+          {
+            "id": "6ae488a31f12f82f",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "refactor_plan.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Исходящие ссылки из refactor_plan"
+            }
+          },
+          {
+            "id": "f0ed7abd1d8b07bc",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Теги"
+            }
+          },
+          {
+            "id": "622d655e427abfe9",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Все свойства"
+            }
+          },
+          {
+            "id": "4813d3be0982ea19",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "refactor_plan.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Структура refactor_plan"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Меню быстрого перехода": false,
+      "graph:Граф": false,
+      "canvas:Создать новый холст": false,
+      "daily-notes:Сегодняшняя заметка": false,
+      "templates:Вставить шаблон": false,
+      "command-palette:Открыть палитру команд": false,
+      "bases:Создать новую базу": false
+    }
+  },
+  "active": "1cfffef2b8ee6e65",
+  "lastOpenFiles": [
+    "target/generated-sources/annotations/org/example/carshering/mapper/CarMapperImpl.java",
+    "target/generated-sources/annotations/org/example/carshering/mapper/CarClassMapperImpl.java",
+    "target/generated-sources/annotations/org/example/carshering/mapper/ModelNameMapperImpl.java",
+    "target/generated-sources/annotations/org/example/carshering/mapper/CarStateMapperImpl.java",
+    "target/generated-sources/annotations/org/example/carshering/mapper/ModelMapperImpl.java",
+    "target/generated-sources/annotations/org/example/carshering/mapper/BrandMapperImpl.java",
+    "target/generated-sources/annotations/org/example/carshering/mapper",
+    "target/generated-sources/annotations/org/example/carshering",
+    "target/generated-sources/annotations/org/example",
+    "target/generated-sources/annotations/org",
+    "src/main/java/org/example/carshering/mapper/CarMapper.java~",
+    "PASSWORD_VALUE_OBJECT_COMPLETE.md",
+    "VALUE_OBJECTS_ANALYSIS_AND_NEXT_STEPS.md",
+    "VALUE_OBJECTS_ENGLISH_FIXED.md",
+    "VALUE_OBJECTS_COMPLETE_NEXT_STEPS.md",
+    "CAR_VALUE_OBJECTS_ANALYSIS.md",
+    "README.md",
+    "PHONE_CLIENT_ANALYSIS.md",
+    "ENTITY_DEPENDENCIES_ANALYSIS.md",
+    "refactor_plan.md",
+    "HELP.md",
+    "docs/Entity_Dependencies_Graph-Car_Sharing_Backend___Entity_Dependencies_Graph____2025_12_04.png"
+  ]
+}

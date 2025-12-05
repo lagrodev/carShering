@@ -1,9 +1,7 @@
 package org.example.carshering.mapper;
 
 import org.example.carshering.dto.response.CarStateResponse;
-import org.example.carshering.dto.response.UserResponse;
-import org.example.carshering.entity.CarState;
-import org.example.carshering.entity.Client;
+import org.example.carshering.domain.entity.CarState;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 

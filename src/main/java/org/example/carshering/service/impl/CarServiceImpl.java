@@ -8,13 +8,12 @@ import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
 import org.example.carshering.dto.response.CarStateResponse;
 import org.example.carshering.dto.response.MinMaxCellForFilters;
-import org.example.carshering.entity.Car;
-import org.example.carshering.entity.CarModel;
-import org.example.carshering.entity.CarState;
+import org.example.carshering.domain.entity.Car;
+import org.example.carshering.domain.entity.CarModel;
+import org.example.carshering.domain.entity.CarState;
 import org.example.carshering.exceptions.custom.*;
 import org.example.carshering.mapper.CarMapper;
 import org.example.carshering.repository.CarRepository;
-import org.example.carshering.repository.FavoriteRepository;
 import org.example.carshering.service.domain.CarModelHelperService;
 import org.example.carshering.service.domain.CarStateServiceHelper;
 import org.example.carshering.service.interfaces.CarService;
@@ -27,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

@@ -1,0 +1,30 @@
+@startuml Token Refresh Communication
+title Обновление токена доступа - Communication Diagram
+
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+actor User as user
+rectangle "Frontend" as frontend #FFFACD
+rectangle "API" as api #ADD8E6
+database "Database" as db #E6E6FA
+
+user -right-> frontend : 1: Действие (токен истёк)
+frontend -> frontend : 2: Получена ошибка 401
+frontend -right-> api : 3: POST /api/auth/refresh
+api -> api : 4: Валидация токена
+api -right-> db : 5: Проверить токен
+db -left-> api : 6: Токен валиден
+api -> api : 7: Генерация access token
+api -> api : 8: Генерация refresh token
+api -right-> db : 9: Удалить старый токен
+db -left-> api : 10: Удалено
+api -right-> db : 11: Сохранить новый токен
+db -left-> api : 12: Сохранено
+api -left-> frontend : 13: 200 OK + токены
+frontend -> frontend : 14: Обновить cookies
+frontend -> frontend : 15: Повторить запрос
+frontend -left-> user : 16: Результат действия
+
+@enduml

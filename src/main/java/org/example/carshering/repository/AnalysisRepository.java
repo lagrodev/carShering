@@ -1,11 +1,10 @@
 package org.example.carshering.repository;
 
-import org.example.carshering.dto.response.CarAnalyticsResponse;
 import org.example.carshering.dto.response.ContractDetailResponse;
 import org.example.carshering.dto.response.RideStats;
-import org.example.carshering.entity.Car;
-import org.example.carshering.entity.CarState;
-import org.example.carshering.entity.RentalState;
+import org.example.carshering.domain.entity.Car;
+import org.example.carshering.domain.entity.CarState;
+import org.example.carshering.domain.entity.RentalState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -74,10 +74,18 @@ WHERE contr.client.id = :userId
     Integer findByTotalRidesdes(Long userId);
 
     @Query(""" 
-select sum(contr.totalCost) from Contract contr 
+select sum(contr.totalCost.amount) from Contract contr 
 WHERE contr.client.id = :userId 
 """)
     Long findByTotalSpent(@Param("userId") Long userId);
+
+    @Query(""" 
+select avg(contr.totalCost.amount/contr.durationMinutes*60)
+from Contract contr 
+where contr.client.id = :userId 
+AND contr.durationMinutes > 0 
+""")
+    Double getAverageCostPerHour(@Param("userId") Long userId);
 
     @Query(""" 
 select sum(contr.durationMinutes) from Contract contr 
@@ -85,14 +93,6 @@ where contr.client.id = :userId
 AND contr.dataStart >= :startOfMonth 
 """)
     Long totalMinutesThisMonth(@Param("userId") Long userId, @Param("startOfMonth") LocalDateTime startOfMonth);
-
-    @Query(""" 
-select avg(contr.totalCost/contr.durationMinutes*60)
-from Contract contr 
-where contr.client.id = :userId 
-AND contr.durationMinutes > 0 
-""")
-    Double getAverageCostPerHour(@Param("userId") Long userId);
 
     @Query(""" 
 select avg(contr.durationMinutes) from Contract contr 
@@ -216,25 +216,25 @@ AND contr.durationMinutes > 0
 
     @Query(
             """
-        SELECT sum(contr.totalCost) from Contract contr
+        SELECT sum(contr.totalCost.amount) from Contract contr
 """
     )
-    Double totalRevenue();
+    BigDecimal totalRevenue();
 
     @Query(
             """
-        SELECT sum(contr.totalCost) from Contract contr
+        SELECT sum(contr.totalCost.amount) from Contract contr
         where contr.dataStart >= :startOfMonth
       AND contr.dataStart < :startOfNextMonth
 """
     )
-    Double profitThisMonth(@Param("startOfMonth") LocalDateTime startOfMonth,
+    BigDecimal profitThisMonth(@Param("startOfMonth") LocalDateTime startOfMonth,
                            @Param("startOfNextMonth") LocalDateTime startOfNextMonth);
 
 
     @Query("""
     SELECT DATE(contr.dataStart),
-           COALESCE(SUM(contr.totalCost), 0)
+           COALESCE(SUM(contr.totalCost.amount), 0)
     FROM Contract contr
     WHERE contr.dataStart >= :start AND contr.dataStart < :end and contr.state = :completedState
     GROUP BY DATE(contr.dataStart)
@@ -253,7 +253,7 @@ AND contr.durationMinutes > 0
         car.model.carClass.name,
         car.id,
         car.model.model.name,
-        contr.totalCost,
+        contr.totalCost.amount,
         contr.durationMinutes,
         contr.dataStart,
         contr.dataEnd
@@ -273,57 +273,57 @@ AND contr.durationMinutes > 0
 
     // Car Analytics Queries
 //        c.imageUrl,
-    @Query("""
-    SELECT NEW org.example.carshering.dto.response.CarAnalyticsResponse(
-        c.id,
-        c.gosNumber,
-        c.vin,
-        c.model.brand.name,
-        c.model.model.name,
-        c.model.carClass.name,
-        c.yearOfIssue,
-
-        c.rent,
-        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
-        (SELECT COALESCE(AVG(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
-        (SELECT COUNT(DISTINCT co.client.id) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
-        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate),
-        (SELECT COALESCE(SUM(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate)
-    )
-    FROM Car c
-    ORDER BY (SELECT COALESCE(SUM(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate) DESC
-""")
-    Page<CarAnalyticsResponse> getTopCarsByProfit(
-            @Param("completedState") RentalState completedState,
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate,
-            Pageable pageable
-    );
-//        c.imageUrl,
-    @Query("""
-    SELECT NEW org.example.carshering.dto.response.CarAnalyticsResponse(
-        c.id,
-        c.gosNumber,
-        c.vin,
-        c.model.brand.name,
-        c.model.model.name,
-        c.model.carClass.name,
-        c.yearOfIssue,
-        
-        c.rent,
-        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
-        (SELECT COALESCE(AVG(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
-        (SELECT COUNT(DISTINCT co.client.id) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
-        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate),
-        (SELECT COALESCE(SUM(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate)
-    )
-    FROM Car c
-    ORDER BY c.id
-""")
-    Page<CarAnalyticsResponse> getAllCarsAnalytics(
-            @Param("completedState") RentalState completedState,
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate,
-            Pageable pageable
-    );
+//    @Query("""
+//    SELECT NEW org.example.carshering.dto.response.CarAnalyticsResponse(
+//        c.id,
+//        c.gosNumber,
+//        c.vin,
+//        c.model.brand.name,
+//        c.model.model.name,
+//        c.model.carClass.name,
+//        c.yearOfIssue,
+//
+//        c.dailyRate,
+//        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+//        (SELECT COALESCE(AVG(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+//        (SELECT COUNT(DISTINCT co.client.id) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+//        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate),
+//        (SELECT COALESCE(SUM(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate)
+//    )
+//    FROM Car c
+//    ORDER BY (SELECT COALESCE(SUM(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate) DESC
+//""")
+//    Page<CarAnalyticsResponse> getTopCarsByProfit(
+//            @Param("completedState") RentalState completedState,
+//            @Param("startDate") LocalDateTime startDate,
+//            @Param("endDate") LocalDateTime endDate,
+//            Pageable pageable
+//    );
+////        c.imageUrl,
+//    @Query("""
+//    SELECT NEW org.example.carshering.dto.response.CarAnalyticsResponse(
+//        c.id,
+//        c.gosNumber,
+//        c.vin,
+//        c.model.brand.name,
+//        c.model.model.name,
+//        c.model.carClass.name,
+//        c.yearOfIssue,
+//
+//        c.dailyRate,
+//        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+//        (SELECT COALESCE(AVG(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+//        (SELECT COUNT(DISTINCT co.client.id) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState),
+//        (SELECT COALESCE(SUM(co.durationMinutes), 0L) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate),
+//        (SELECT COALESCE(SUM(co.totalCost), 0.0) FROM Contract co WHERE co.car.id = c.id AND co.state = :completedState AND co.dataStart >= :startDate AND co.dataStart < :endDate)
+//    )
+//    FROM Car c
+//    ORDER BY c.id
+//""")
+//    Page<CarAnalyticsResponse> getAllCarsAnalytics(
+//            @Param("completedState") RentalState completedState,
+//            @Param("startDate") LocalDateTime startDate,
+//            @Param("endDate") LocalDateTime endDate,
+//            Pageable pageable
+//    );
 }

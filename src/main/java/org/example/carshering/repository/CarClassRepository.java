@@ -1,6 +1,6 @@
 package org.example.carshering.repository;
 
-import org.example.carshering.entity.CarClass;
+import org.example.carshering.domain.entity.CarClass;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

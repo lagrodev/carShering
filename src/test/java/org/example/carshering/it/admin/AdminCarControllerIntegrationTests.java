@@ -1,17 +1,16 @@
 package org.example.carshering.it.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.carshering.domain.entity.*;
 import org.example.carshering.dto.request.create.CreateCarRequest;
 import org.example.carshering.dto.request.update.UpdateCarRequest;
 import org.example.carshering.dto.request.update.UpdateCarStateRequest;
 import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
 import org.example.carshering.dto.response.CarStateResponse;
-import org.example.carshering.entity.*;
 import org.example.carshering.it.BaseWebIntegrateTest;
 import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;

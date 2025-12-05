@@ -1,8 +1,11 @@
 package org.example.carshering.mapper;
+import org.example.carshering.domain.entity.Brand;
+import org.example.carshering.domain.entity.CarClass;
+import org.example.carshering.domain.entity.CarModel;
+import org.example.carshering.domain.entity.Model;
 import org.example.carshering.dto.request.create.CreateCarModelRequest;
 import org.example.carshering.dto.request.update.UpdateCarModelRequest;
 import org.example.carshering.dto.response.CarModelResponse;
-import org.example.carshering.entity.*;
 import org.example.carshering.repository.BrandRepository;
 import org.example.carshering.repository.CarClassRepository;
 import org.example.carshering.repository.ModelNameRepository;

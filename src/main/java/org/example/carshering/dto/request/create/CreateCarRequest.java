@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
+import java.math.BigDecimal;
+
 @Builder
 @Schema(description = "Request to create a new car")
 public record CreateCarRequest(
@@ -18,7 +20,7 @@ public record CreateCarRequest(
         @Schema(description = "Vehicle Identification Number (VIN) of the car", example = "123")
         @NotBlank String vin,
         @Schema(description = "Rent price of the car", example = "463746394")
-        @NotNull Double rent,
+        @NotNull BigDecimal rent,
         @Schema(description = "ID of the car state", example = "1")
         @NotNull Long stateId
 /*

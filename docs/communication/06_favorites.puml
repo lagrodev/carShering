@@ -1,0 +1,40 @@
+@startuml Favorites Communication
+title Добавление/удаление из избранного - Communication Diagram
+
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+actor User as user
+rectangle "Frontend" as frontend #FFFACD
+rectangle "API" as api #ADD8E6
+database "Database" as db #E6E6FA
+
+note "Добавление в избранное" as n1
+
+user -right-> frontend : 1: Нажимает "В избранное"
+frontend -right-> api : 2: POST /api/favorites/{carId}
+api -> api : 3: Проверка токена
+api -right-> db : 4: Проверить авто
+db -left-> api : 5: Авто существует
+api -right-> db : 6: Проверить избранное
+db -left-> api : 7: Не в избранном
+api -right-> db : 8: Сохранить запись
+db -left-> api : 9: Запись создана
+api -left-> frontend : 10: 201 Created
+frontend -left-> user : 11: Сердечко заполнено
+
+note "Удаление из избранного" as n2
+
+user -right-> frontend : 12: Нажимает "Убрать"
+frontend -right-> api : 13: DELETE /api/favorites/{carId}
+api -> api : 14: Проверка токена
+api -right-> db : 15: Найти запись
+db -left-> api : 16: Запись найдена
+api -right-> db : 17: Удалить запись
+db -left-> api : 18: Удалено
+api -left-> frontend : 19: 204 No Content
+frontend -left-> user : 20: Сердечко пустое
+
+@enduml
+

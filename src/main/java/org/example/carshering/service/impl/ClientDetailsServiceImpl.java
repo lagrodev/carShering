@@ -2,7 +2,7 @@ package org.example.carshering.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.carshering.entity.Client;
+import org.example.carshering.domain.entity.Client;
 import org.example.carshering.repository.ClientRepository;
 import org.example.carshering.security.ClientDetails;
 import org.example.carshering.service.interfaces.ClientDetailsService;

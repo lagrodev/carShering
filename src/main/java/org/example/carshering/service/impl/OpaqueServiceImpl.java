@@ -1,12 +1,11 @@
 package org.example.carshering.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.entity.Client;
-import org.example.carshering.entity.RefreshToken;
+import org.example.carshering.domain.entity.Client;
+import org.example.carshering.domain.entity.RefreshToken;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.repository.RefreshTokenRepository;
 import org.example.carshering.security.ClientDetails;
-import org.example.carshering.security.SecurityConfig;
 import org.example.carshering.service.interfaces.ClientService;
 import org.example.carshering.service.interfaces.OpaqueService;
 import org.example.carshering.utils.VerificationToken;

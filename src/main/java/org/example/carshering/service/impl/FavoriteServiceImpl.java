@@ -2,9 +2,9 @@ package org.example.carshering.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.response.CarListItemResponse;
-import org.example.carshering.entity.Car;
-import org.example.carshering.entity.Client;
-import org.example.carshering.entity.Favorite;
+import org.example.carshering.domain.entity.Car;
+import org.example.carshering.domain.entity.Client;
+import org.example.carshering.domain.entity.Favorite;
 import org.example.carshering.exceptions.custom.AlreadyExistsException;
 import org.example.carshering.mapper.CarMapper;
 import org.example.carshering.repository.FavoriteRepository;

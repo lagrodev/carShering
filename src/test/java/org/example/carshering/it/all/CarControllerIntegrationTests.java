@@ -1,7 +1,7 @@
 package org.example.carshering.it.all;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.entity.*;
+import org.example.carshering.domain.entity.*;
 import org.example.carshering.it.BaseWebIntegrateTest;
 import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;

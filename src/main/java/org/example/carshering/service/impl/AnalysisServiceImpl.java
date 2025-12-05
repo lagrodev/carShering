@@ -2,9 +2,9 @@ package org.example.carshering.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.response.*;
-import org.example.carshering.entity.Car;
-import org.example.carshering.entity.CarState;
-import org.example.carshering.entity.RentalState;
+import org.example.carshering.domain.entity.Car;
+import org.example.carshering.domain.entity.CarState;
+import org.example.carshering.domain.entity.RentalState;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.repository.AnalysisRepository;
 import org.example.carshering.repository.RentalStateRepository;
@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -154,8 +155,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 
         CarState state = carStateService.getStateByName("AVAILABLE");
         Long totalAvailableCars = analysisRepository.findAllCarByState(state);
-        Double profit = analysisRepository.totalRevenue();
-        Double profitThisMonth = analysisRepository.profitThisMonth(startOfMonth,
+        BigDecimal profit = analysisRepository.totalRevenue();
+        BigDecimal profitThisMonth = analysisRepository.profitThisMonth(startOfMonth,
                 startOfNextMonth);
 
 
@@ -205,7 +206,7 @@ public class AnalysisServiceImpl implements AnalysisService {
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.plusDays(1).atStartOfDay();
 
-        return analysisRepository.getContractsByDay(completed, start, end);
+        return null;// analysisRepository.getContractsByDay(completed, start, end);
     }
 
     @Override
@@ -216,7 +217,7 @@ public class AnalysisServiceImpl implements AnalysisService {
         LocalDateTime startDate = from.atStartOfDay();
         LocalDateTime endDate = to.plusDays(1).atStartOfDay();
 
-        return analysisRepository.getTopCarsByProfit(completed, startDate, endDate, pageable);
+        return null;// analysisRepository.getTopCarsByProfit(completed, startDate, endDate, pageable);
     }
 
     @Override
@@ -227,7 +228,7 @@ public class AnalysisServiceImpl implements AnalysisService {
         LocalDateTime startDate = from.atStartOfDay();
         LocalDateTime endDate = to.plusDays(1).atStartOfDay();
 
-        return analysisRepository.getAllCarsAnalytics(completed, startDate, endDate, pageable);
+        return null;//  return analysisRepository.getAllCarsAnalytics(completed, startDate, endDate, pageable);
     }
 
     private final CarStateService carStateService;

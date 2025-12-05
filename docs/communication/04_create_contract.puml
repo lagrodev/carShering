@@ -1,0 +1,32 @@
+@startuml Create Contract Communication
+title Создание договора аренды - Communication Diagram
+
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+actor User as user
+rectangle "Frontend" as frontend #FFFACD
+rectangle "API" as api #ADD8E6
+database "Database" as db #E6E6FA
+
+user -right-> frontend : 1: Выбирает даты аренды
+frontend -> frontend : 2: Показать календарь
+user -right-> frontend : 3: Нажимает "Забронировать"
+frontend -right-> api : 4: POST /api/contracts
+api -> api : 5: Проверка токена
+api -right-> db : 6: Проверить клиента
+db -left-> api : 7: Клиент найден
+api -right-> db : 8: Проверить авто
+db -left-> api : 9: Авто найдено
+api -right-> db : 10: Проверить доступность
+db -left-> api : 11: Даты свободны
+api -> api : 12: Расчёт стоимости
+api -right-> db : 13: Сохранить договор
+db -left-> api : 14: Договор создан
+api -> api : 15: Отправить email
+api -left-> frontend : 16: 201 Created
+frontend -left-> user : 17: Мои бронирования
+
+@enduml
+

@@ -1,6 +1,6 @@
 package org.example.carshering.service.interfaces;
 
-import org.example.carshering.entity.Role;
+import org.example.carshering.domain.entity.Role;
 
 import java.util.Optional;
 

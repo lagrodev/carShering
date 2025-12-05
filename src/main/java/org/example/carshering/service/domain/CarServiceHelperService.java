@@ -2,9 +2,9 @@ package org.example.carshering.service.domain;
 
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.dto.response.CarStateResponse;
-import org.example.carshering.entity.Car;
-import org.example.carshering.entity.CarModel;
-import org.example.carshering.entity.CarState;
+import org.example.carshering.domain.entity.Car;
+import org.example.carshering.domain.entity.CarModel;
+import org.example.carshering.domain.entity.CarState;
 import org.example.carshering.exceptions.custom.CarNotFoundException;
 import org.example.carshering.repository.CarRepository;
 import org.example.carshering.repository.CarStateRepository;

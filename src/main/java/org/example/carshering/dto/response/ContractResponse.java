@@ -6,8 +6,9 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.aspectj.lang.annotation.After;
+import org.example.carshering.domain.valueobject.Money;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Schema(description = "Contract information response")
@@ -17,7 +18,7 @@ public record ContractResponse(
         @NotNull Long id,
         
         @Schema(description = "Total cost of the rental contract", example = "15000.0")
-        @NotNull Double totalCost,
+        @NotNull BigDecimal totalCost,
         
         @Schema(description = "Brand of the rented car", example = "Toyota")
         @NotBlank String brand,

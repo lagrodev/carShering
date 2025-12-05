@@ -2,6 +2,8 @@ package org.example.carshering.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.math.BigDecimal;
+
 @Schema(description = "Car analytics statistics response")
 public record CarAnalyticsResponse(
         @Schema(description = "Unique car identifier", example = "42")
@@ -29,7 +31,7 @@ public record CarAnalyticsResponse(
 //        String imageUrl,
 
         @Schema(description = "Hourly rental rate in rubles", example = "500.00")
-        Double rentPerHour,
+        BigDecimal rentPerHour,
 
         @Schema(description = "Total mileage in minutes (rental time)", example = "12000")
         Long totalMileageMinutes,
@@ -46,5 +48,6 @@ public record CarAnalyticsResponse(
         @Schema(description = "Total profit generated within the period in rubles", example = "45000.00")
         Double totalProfit
 ) {
+    public CarAnalyticsResponse {}
 }
 

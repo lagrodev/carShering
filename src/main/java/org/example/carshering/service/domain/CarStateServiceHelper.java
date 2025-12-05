@@ -2,12 +2,10 @@ package org.example.carshering.service.domain;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.entity.CarState;
+import org.example.carshering.domain.entity.CarState;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.repository.CarStateRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

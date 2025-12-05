@@ -1,0 +1,29 @@
+@startuml Browse Cars Communication
+title Просмотр каталога автомобилей - Communication Diagram
+
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+actor User as user
+rectangle "Frontend" as frontend #FFFACD
+rectangle "API" as api #ADD8E6
+database "Database" as db #E6E6FA
+
+user -right-> frontend : 1: Вводит фильтры поиска
+frontend -right-> api : 2: GET /api/car/catalogue
+api -right-> db : 3: Поиск по критериям
+db -left-> api : 4: Список автомобилей
+api -left-> frontend : 5: 200 OK + List<CarDto>
+frontend -> frontend : 6: Отобразить результаты
+frontend -left-> user : 7: Показать каталог
+
+user -right-> frontend : 8: Выбирает автомобиль
+frontend -right-> api : 9: GET /api/car/{id}
+api -right-> db : 10: Загрузить детали
+db -left-> api : 11: Данные авто
+api -left-> frontend : 12: 200 OK + CarDetailsDto
+frontend -left-> user : 13: Показать детали
+
+@enduml
+

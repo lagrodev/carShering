@@ -1,0 +1,35 @@
+@startuml Registration Communication
+title Регистрация и подтверждение email - Communication Diagram
+
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+actor User as user
+rectangle "Frontend" as frontend #FFFACD
+rectangle "API" as api #ADD8E6
+database "Database" as db #E6E6FA
+
+user -right-> frontend : 1: Заполняет форму
+frontend -right-> api : 2: POST /api/registration
+api -right-> db : 3: Проверить email
+db -left-> api : 4: Email свободен
+api -> api : 5: Хешировать пароль
+api -right-> db : 6: Сохранить клиента
+db -left-> api : 7: Клиент создан
+api -> api : 8: Генерация кода
+api -right-> db : 9: Сохранить код
+api -> api : 10: Отправить email
+api -left-> frontend : 11: 201 Created
+frontend -left-> user : 12: Форма ввода кода
+
+user -right-> frontend : 13: Вводит код
+frontend -right-> api : 14: POST /api/verify-email
+api -right-> db : 15: Найти код
+db -left-> api : 16: Код найден
+api -right-> db : 17: emailVerified = true
+api -left-> frontend : 18: 200 OK
+frontend -left-> user : 19: Перенаправление на вход
+
+@enduml
+

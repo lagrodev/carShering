@@ -1,0 +1,51 @@
+@startuml Token Refresh
+title Обновление токена доступа
+
+skinparam backgroundColor white
+skinparam sequenceArrowThickness 1
+skinparam participant {
+    BackgroundColor<<User>> #FFB6C1
+    BackgroundColor<<Frontend>> #FFFACD
+    BackgroundColor<<Server>> #ADD8E6
+    BackgroundColor<<Database>> #E6E6FA
+}
+
+actor User <<User>>
+participant "Frontend" as Frontend <<Frontend>>
+participant "API" as API <<Server>>
+database "Database" as DB <<Database>>
+
+User -> Frontend: Выполняет действие (токен истёк)
+Frontend -> Frontend: Обнаружена ошибка 401
+
+Frontend -> API: POST /api/auth/refresh {refreshToken}
+
+API -> API: Валидация refresh токена
+
+API -> DB: Проверить существование токена
+DB --> API: Результат проверки
+
+alt Токен не найден или истёк
+    API --> Frontend: 401 Unauthorized
+    Frontend -> Frontend: Очистить сессию
+    Frontend --> User: Перенаправить на страницу входа
+
+else Токен валиден
+    API -> API: Генерация нового access токена
+    API -> API: Генерация нового refresh токена
+
+    API -> DB: Удалить старый refresh токен
+    DB --> API: Удалено
+
+    API -> DB: Сохранить новый refresh токен
+    DB --> API: Сохранено
+
+    API --> Frontend: 200 OK + {accessToken, refreshToken}
+
+    Frontend -> Frontend: Обновить токены в cookies
+    Frontend -> Frontend: Повторить исходный запрос
+    Frontend --> User: Показать результат действия
+end
+
+@enduml
+

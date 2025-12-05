@@ -2,9 +2,8 @@ package org.example.carshering.repository;
 
 import jakarta.persistence.LockModeType;
 import jakarta.validation.constraints.NotBlank;
-import org.example.carshering.dto.request.CarFilterRequest;
 import org.example.carshering.dto.response.MinMaxCellForFilters;
-import org.example.carshering.entity.Car;
+import org.example.carshering.domain.entity.Car;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +12,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -40,8 +38,8 @@ public interface CarRepository extends JpaRepository<Car, Long> {
                      AND r.dataStart <= :dateEnd
                      AND r.dataEnd >= :dateStart
                )
-        AND (:minCell is null OR :minCell <= c.rent)
-        AND (:maxCell is null OR :maxCell >= c.rent)
+        AND (:minCell is null OR :minCell <= c.dailyRate)
+        AND (:maxCell is null OR :maxCell >= c.dailyRate)
       """)
   Page<Car> findByFilter(
       @Param("brands") List<String> brands,
@@ -64,8 +62,8 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
   @Query("""
               select new org.example.carshering.dto.response.MinMaxCellForFilters(
-                  MIN(c.rent),
-                  MAX(c.rent)
+                  MIN(c.dailyRate.amount),
+                  MAX(c.dailyRate.amount)
               )
               from Car c
               join c.model cm

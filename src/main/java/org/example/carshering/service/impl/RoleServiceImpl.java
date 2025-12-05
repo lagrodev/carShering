@@ -1,7 +1,7 @@
 package org.example.carshering.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.entity.Role;
+import org.example.carshering.domain.entity.Role;
 import org.example.carshering.repository.RoleRepository;
 import org.example.carshering.service.interfaces.RoleService;
 import org.springframework.stereotype.Service;

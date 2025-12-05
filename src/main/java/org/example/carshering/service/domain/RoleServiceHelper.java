@@ -1,7 +1,7 @@
 package org.example.carshering.service.domain;
 
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.entity.Role;
+import org.example.carshering.domain.entity.Role;
 import org.example.carshering.exceptions.custom.RoleNotFoundException;
 import org.example.carshering.repository.RoleRepository;
 import org.springframework.stereotype.Service;

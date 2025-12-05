@@ -1,0 +1,384 @@
+@startuml Entity_Dependencies_Graph
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FEFEFE
+skinparam roundcorner 10
+
+' Определение цветов для контекстов
+!define RENTAL_COLOR #FFE6E6
+!define FLEET_COLOR #E6F3FF
+!define CLIENT_COLOR #E6FFE6
+!define IDENTITY_COLOR #FFF9E6
+!define REFERENCE_COLOR #F0F0F0
+
+title Car Sharing Backend - Entity Dependencies Graph\nДата: 2025-12-04
+
+package "RENTAL CONTEXT" <<Rectangle>> RENTAL_COLOR {
+    entity Contract {
+        **id**: Long
+        --
+        dataStart: LocalDateTime
+        dataEnd: LocalDateTime
+        totalCost: Money <<VO>>
+        comment: String
+        durationMinutes: Long
+        --
+        **❌ client: Client** (ManyToOne)
+        **❌ car: Car** (ManyToOne)
+        **state: RentalState** (ManyToOne)
+        ==
+        ⚠️ Проблемы:
+        - Прямые ссылки на агрегаты
+        - Анемичная модель
+        ==
+        ✅ Должно быть:
+        - clientId: ClientId
+        - carId: CarId
+        + confirm()
+        + cancel()
+        + complete()
+    }
+
+    entity RentalState <<Reference Data>> {
+        **id**: Long
+        name: String
+        --
+        contracts: List<Contract> (OneToMany)
+    }
+}
+
+package "FLEET CONTEXT" <<Rectangle>> FLEET_COLOR {
+    entity Car {
+        **id**: Long
+        --
+        **❌ gosNumber: String**
+        **❌ vin: String**
+        dailyRate: Money <<VO>>
+        yearOfIssue: Integer
+        --
+        **model: CarModel** (ManyToOne)
+        **state: CarState** (ManyToOne)
+        **❌ contracts: List<Contract>** (OneToMany)
+        **❌ favorites: List<Favorite>** (OneToMany)
+        **✅ images: List<Image>** (OneToMany)
+        ==
+        ⚠️ Проблемы:
+        - Двунаправленные связи
+        - Примитивы вместо VO
+        ==
+        ✅ Должно быть:
+        - vin: VIN <<VO>>
+        - gosNumber: GosNumber <<VO>>
+        + markAsAvailable()
+        + markAsUnavailable()
+        + updateDailyRate()
+    }
+
+    entity CarModel {
+        **id**: Long
+        --
+        bodyType: String
+        deleted: boolean
+        --
+        **brand: Brand** (ManyToOne)
+        **model: Model** (ManyToOne)
+        **carClass: CarClass** (ManyToOne)
+        **❌ cars: List<Car>** (OneToMany)
+        ==
+        ⚠️ Проблемы:
+        - Смешение концептов
+        - TODO: "отделить брэнд и модель"
+        ==
+        ✅ Должно быть:
+        Разделить на:
+        - brandId: BrandId
+        - modelNameId: ModelNameId
+        - carClassId: CarClassId
+        - bodyType: BodyType <<Enum>>
+    }
+
+    entity Image {
+        **id**: Long
+        --
+        fileName: String
+        url: String
+        --
+        **car: Car** (ManyToOne)
+    }
+
+    entity Brand <<Reference Data>> {
+        **id**: Long
+        name: String
+        --
+        carSpecifications: List<CarModel>
+    }
+
+    entity Model <<Reference Data>> {
+        **id**: Long
+        name: String
+        --
+        carModels: List<CarModel>
+    }
+
+    entity CarClass <<Reference Data>> {
+        **id**: Long
+        name: String
+        --
+        carSpecifications: List<CarModel>
+    }
+
+    entity CarState <<Reference Data>> {
+        **id**: Long
+        status: String
+        --
+        cars: List<Car>
+    }
+}
+
+package "CLIENT CONTEXT" <<Rectangle>> CLIENT_COLOR {
+    entity Client {
+        **id**: Long
+        --
+        firstName: String
+        lastName: String
+        **❌ login: String**
+        **❌ phone: String**
+        **❌ email: String**
+        **❌ password: String**
+        **❌ deleted: boolean**
+        **❌ banned: boolean**
+        **❌ emailVerified: boolean**
+        createdAt: Instant
+        updatedAt: Instant
+        --
+        **role: Role** (ManyToOne)
+        **❌ contracts: List<Contract>** (OneToMany)
+        **❌ favorites: List<Favorite>** (OneToMany)
+        ==
+        ⚠️ Проблемы:
+        - Двунаправленные связи
+        - Примитивы вместо VO
+        - Флаги вместо статуса
+        ==
+        ✅ Должно быть:
+        - email: Email <<VO>>
+        - phone: Phone <<VO>>
+        - login: Login <<VO>>
+        - status: ClientStatus <<VO>>
+        + ban()
+        + verifyEmail()
+        + delete()
+    }
+
+    entity Document {
+        **id**: Long
+        --
+        verified: boolean
+        series: String
+        number: String
+        dateOfIssue: LocalDate
+        issuingAuthority: String
+        deleted: boolean
+        --
+        **❌ client: Client** (ManyToOne)
+        **documentType: DocumentType** (ManyToOne)
+        ==
+        ⚠️ Вопрос:
+        Часть агрегата Client
+        или отдельный агрегат?
+        ==
+        ✅ Рекомендация:
+        - clientId: ClientId
+        - status: DocumentStatus <<VO>>
+        + verify()
+        + reject()
+    }
+
+    entity Favorite {
+        **id**: Long
+        createdAt: Instant
+        --
+        **❌ client: Client** (ManyToOne)
+        **❌ car: Car** (ManyToOne)
+        ==
+        ⚠️ Проблемы:
+        - Связывает два агрегата
+        - Непонятная принадлежность
+        ==
+        ✅ Рекомендация:
+        Переместить в Client:
+        - clientId: ClientId
+        - carId: CarId
+        Или как метод:
+        Client.addToFavorites(CarId)
+    }
+
+    entity Role <<Reference Data>> {
+        **id**: Long
+        name: String
+    }
+
+    entity DocumentType <<Reference Data>> {
+        **id**: Long
+        name: String
+    }
+}
+
+package "IDENTITY CONTEXT" <<Rectangle>> IDENTITY_COLOR {
+    entity RefreshToken {
+        **id**: Long
+        --
+        tokenHash: String
+        expiryDate: Instant
+        createdAt: Instant
+        revoked: boolean
+        revokedAt: Instant
+        --
+        **❌ client: Client** (ManyToOne)
+        ==
+        ⚠️ Проблемы:
+        - Связь между контекстами
+        ==
+        ✅ Должно быть:
+        - clientId: ClientId
+        + revoke()
+        + isExpired()
+        + isValid()
+    }
+
+    entity VerificationCode {
+        **id**: Long
+        --
+        code: String
+        createdAt: Instant
+        type: VerificationCodeType <<Enum>>
+        --
+        **❌ client: Client** (ManyToOne)
+        ==
+        ⚠️ Проблемы:
+        - Связь между контекстами
+        ==
+        ✅ Должно быть:
+        - clientId: ClientId
+        + isExpired()
+        + verify()
+        + use()
+    }
+}
+
+' Связи между агрегатами (ПРОБЛЕМНЫЕ)
+Contract "N" -[#FF0000,thickness=3]-> "1" Client : ❌ client (ManyToOne)\n<color:red>**НАРУШЕНИЕ DDD**</color>
+Contract "N" -[#FF0000,thickness=3]-> "1" Car : ❌ car (ManyToOne)\n<color:red>**НАРУШЕНИЕ DDD**</color>
+Contract "N" --> "1" RentalState
+
+Car "N" --> "1" CarModel
+Car "N" --> "1" CarState
+Car "1" -[#FF6600,thickness=2]- "N" Contract : ❌ contracts\n<color:orange>**Двунаправленная**</color>
+Car "1" -[#FF6600,thickness=2]- "N" Favorite : ❌ favorites\n<color:orange>**Двунаправленная**</color>
+Car "1" -[#00AA00]- "N" Image : ✅ images (OneToMany)\n<color:green>**Часть агрегата**</color>
+
+CarModel "N" --> "1" Brand
+CarModel "N" --> "1" Model
+CarModel "N" --> "1" CarClass
+CarModel "1" -[#FF6600,thickness=2]- "N" Car : ❌ cars\n<color:orange>**Двунаправленная**</color>
+
+Client "N" --> "1" Role
+Client "1" -[#FF6600,thickness=2]- "N" Contract : ❌ contracts\n<color:orange>**Двунаправленная**</color>
+Client "1" -[#FF6600,thickness=2]- "N" Favorite : ❌ favorites\n<color:orange>**Двунаправленная**</color>
+
+Document "N" -[#FF9900]-> "1" Client : ⚠️ client\n<color:orange>**Граница агрегата?**</color>
+Document "N" --> "1" DocumentType
+
+Favorite "N" -[#FF0000,thickness=3]-> "1" Client : ❌ client\n<color:red>**Связывает агрегаты**</color>
+Favorite "N" -[#FF0000,thickness=3]-> "1" Car : ❌ car\n<color:red>**Связывает агрегаты**</color>
+
+RefreshToken "N" -[#FF0000,thickness=3]-> "1" Client : ❌ client (ManyToOne)\n<color:red>**Между контекстами**</color>
+VerificationCode "N" -[#FF0000,thickness=3]-> "1" Client : ❌ client (ManyToOne)\n<color:red>**Между контекстами**</color>
+
+legend right
+  |<#FF0000> ❌ | Критичные проблемы (прямые ссылки на агрегаты) |
+  |<#FF6600> ⚠️ | Двунаправленные связи (нужно удалить OneToMany) |
+  |<#FF9900> ? | Требует анализа (граница агрегата) |
+  |<#00AA00> ✅ | Корректные связи |
+
+  **Статистика:**
+  - Всего сущностей: 16
+  - Агрегатов: 3 (Contract, Car, Client)
+  - Справочников: 7
+  - Критичных проблем: 8
+  - Двунаправленных связей: 8
+
+  **Приоритеты рефакторинга:**
+  1. Заменить прямые ссылки на ID
+  2. Удалить @OneToMany связи
+  3. Создать Value Objects
+  4. Добавить бизнес-методы
+endlegend
+
+note as N1
+  **RENTAL CONTEXT**
+  Ядро системы - управление арендой
+
+  **Aggregate Root:** Contract
+  **Проблемы:**
+  • Contract -> Client (прямая ссылка)
+  • Contract -> Car (прямая ссылка)
+  • Анемичная модель
+
+  **Решение:**
+  • Использовать ClientId, CarId
+  • Добавить методы confirm(), cancel()
+end note
+
+note as N2
+  **FLEET CONTEXT**
+  Управление автопарком
+
+  **Aggregate Root:** Car
+  **Проблемы:**
+  • Двунаправленные связи
+  • CarModel смешивает концепты
+  • Примитивы вместо VO
+
+  **Решение:**
+  • Удалить @OneToMany (contracts, favorites)
+  • Создать VIN, GosNumber VO
+  • Разделить CarModel
+end note
+
+note as N3
+  **CLIENT CONTEXT**
+  Управление клиентами
+
+  **Aggregate Root:** Client
+  **Проблемы:**
+  • Двунаправленные связи
+  • Примитивы (email, phone, login)
+  • Флаги вместо статуса
+
+  **Решение:**
+  • Удалить @OneToMany
+  • Создать Email, Phone, Login VO
+  • ClientStatus вместо флагов
+end note
+
+note as N4
+  **IDENTITY CONTEXT**
+  Аутентификация и авторизация
+
+  **Проблемы:**
+  • Прямые ссылки на Client
+    из другого контекста
+
+  **Решение:**
+  • Использовать ClientId
+  • Добавить бизнес-методы
+end note
+
+N1 .. Contract
+N2 .. Car
+N3 .. Client
+N4 .. RefreshToken
+
+@enduml
+

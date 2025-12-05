@@ -1,7 +1,7 @@
 package org.example.carshering.service.domain;
 
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.entity.DocumentType;
+import org.example.carshering.domain.entity.DocumentType;
 import org.example.carshering.exceptions.custom.DocumentTypeException;
 import org.example.carshering.repository.DocumentTypeRepository;
 import org.springframework.stereotype.Service;

@@ -7,7 +7,7 @@ import org.example.carshering.dto.request.RegistrationRequest;
 import org.example.carshering.dto.request.ResetPasswordRequest;
 import org.example.carshering.dto.response.*;
 import org.example.carshering.dto.request.update.UpdateProfileRequest;
-import org.example.carshering.entity.Client;
+import org.example.carshering.domain.entity.Client;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;

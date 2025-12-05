@@ -3,6 +3,8 @@ package org.example.carshering.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+import java.math.BigDecimal;
+
 @Builder
 @Schema(description = "Car list item response")
 public record CarListItemResponse(
@@ -17,7 +19,7 @@ public record CarListItemResponse(
         @Schema(description = "Year of issue", example = "2020")
         Integer yearOfIssue,
         @Schema(description = "Rental price per day", example = "2500.0")
-        Double rent,
+        BigDecimal rent,
         @Schema(description = "Car status", example = "AVAILABLE")
         String status,
         @Schema(description = "Is the car in user's favorites", example = "true")

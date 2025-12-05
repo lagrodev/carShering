@@ -2,7 +2,7 @@ package org.example.carshering.service.impl;
 
 import org.example.carshering.dto.request.create.CreateCarModelName;
 import org.example.carshering.dto.response.ModelNameResponse;
-import org.example.carshering.entity.CarClass;
+import org.example.carshering.domain.entity.CarClass;
 import org.example.carshering.exceptions.custom.NotFoundException;
 import org.example.carshering.mapper.CarClassMapper;
 import org.example.carshering.repository.CarClassRepository;

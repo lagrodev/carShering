@@ -1,8 +1,8 @@
 package org.example.carshering.repository.impl;
 
-import org.example.carshering.entity.Client;
-import org.example.carshering.entity.Document;
-import org.example.carshering.entity.DocumentType;
+import org.example.carshering.domain.entity.Client;
+import org.example.carshering.domain.entity.Document;
+import org.example.carshering.domain.entity.DocumentType;
 import org.example.carshering.repository.AbstractRepositoryTest;
 import org.example.carshering.repository.ClientRepository;
 import org.example.carshering.repository.DocumentRepository;

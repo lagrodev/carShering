@@ -1,0 +1,55 @@
+@startuml Create Rental Contract
+title Создание договора аренды
+
+skinparam backgroundColor white
+skinparam sequenceArrowThickness 1
+skinparam participant {
+    BackgroundColor<<User>> #FFB6C1
+    BackgroundColor<<Frontend>> #FFFACD
+    BackgroundColor<<Server>> #ADD8E6
+    BackgroundColor<<Database>> #E6E6FA
+}
+
+actor User <<User>>
+participant "Frontend" as Frontend <<Frontend>>
+participant "API" as API <<Server>>
+database "Database" as DB <<Database>>
+
+User -> Frontend: Выбирает даты аренды
+Frontend -> Frontend: Показывает календарь с занятыми датами
+
+User -> Frontend: Нажимает "Забронировать"
+
+Frontend -> API: POST /api/contracts {carId, startDate, endDate}
+
+API -> API: Аутентификация (проверка токена)
+
+API -> DB: Проверить существование клиента
+DB --> API: Клиент найден
+
+API -> DB: Проверить существование авто
+DB --> API: Авто найдено
+
+API -> DB: Проверить доступность на выбранные даты
+DB --> API: Список пересечений
+
+alt Авто занято в эти даты
+    API --> Frontend: 409 Conflict
+    Frontend --> User: Показать ошибку "Даты заняты"
+
+else Авто доступно
+    API -> API: Расчёт стоимости аренды
+
+    API -> DB: Сохранить договор
+    DB --> API: Договор создан
+
+    API -> API: Отправить уведомление на email
+
+    API --> Frontend: 201 Created + данные договора
+
+    Frontend -> Frontend: Обновить интерфейс
+    Frontend --> User: Показать страницу "Мои бронирования"
+end
+
+@enduml
+

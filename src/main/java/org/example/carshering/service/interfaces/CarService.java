@@ -7,7 +7,7 @@ import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarListItemResponse;
 import org.example.carshering.dto.response.CarStateResponse;
 import org.example.carshering.dto.response.MinMaxCellForFilters;
-import org.example.carshering.entity.Car;
+import org.example.carshering.domain.entity.Car;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;

@@ -2,6 +2,7 @@ package org.example.carshering.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Schema(description = "Detailed contract information response")
@@ -25,7 +26,7 @@ public record ContractDetailResponse(
         String carModel,
 
         @Schema(description = "Total cost of the rental in rubles", example = "5500.00")
-        Double totalCost,
+        BigDecimal totalCost,
 
         @Schema(description = "Duration of rental in minutes", example = "480")
         Long durationMinutes,

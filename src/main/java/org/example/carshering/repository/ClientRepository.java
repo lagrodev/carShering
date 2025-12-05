@@ -2,7 +2,7 @@ package org.example.carshering.repository;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import org.example.carshering.entity.Client;
+import org.example.carshering.domain.entity.Client;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

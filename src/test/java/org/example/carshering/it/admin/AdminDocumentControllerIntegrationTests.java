@@ -1,10 +1,10 @@
 package org.example.carshering.it.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.entity.Client;
-import org.example.carshering.entity.Document;
-import org.example.carshering.entity.DocumentType;
-import org.example.carshering.entity.Role;
+import org.example.carshering.domain.entity.Client;
+import org.example.carshering.domain.entity.Document;
+import org.example.carshering.domain.entity.DocumentType;
+import org.example.carshering.domain.entity.Role;
 import org.example.carshering.it.BaseWebIntegrateTest;
 import org.example.carshering.repository.ClientRepository;
 import org.example.carshering.repository.DocumentRepository;

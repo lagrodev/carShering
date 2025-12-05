@@ -3,6 +3,8 @@ package org.example.carshering.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+import java.math.BigDecimal;
+
 @Schema(description = "Admin dashboard overview statistics")
 @Builder
 public record AdminOverview(
@@ -31,9 +33,9 @@ public record AdminOverview(
         Long totalAvailableCars,
 
         @Schema(description = "Total profit in rubles (all time)", example = "2500000.00")
-        Double profit,
+        BigDecimal profit,
 
         @Schema(description = "Total profit this month in rubles", example = "180000.00")
-        Double profitThisMonth
+        BigDecimal profitThisMonth
 ) {
 }

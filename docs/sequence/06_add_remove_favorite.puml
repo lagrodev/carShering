@@ -1,0 +1,70 @@
+@startuml Add Remove Favorite
+title Добавление/удаление из избранного
+
+skinparam backgroundColor white
+skinparam sequenceArrowThickness 1
+skinparam participant {
+    BackgroundColor<<User>> #FFB6C1
+    BackgroundColor<<Frontend>> #FFFACD
+    BackgroundColor<<Server>> #ADD8E6
+    BackgroundColor<<Database>> #E6E6FA
+}
+
+actor User <<User>>
+participant "Frontend" as Frontend <<Frontend>>
+participant "API" as API <<Server>>
+database "Database" as DB <<Database>>
+
+== Добавление в избранное ==
+
+User -> Frontend: Нажимает "Добавить в избранное"
+
+Frontend -> API: POST /api/favorites/{carId}
+
+API -> API: Аутентификация (проверка токена)
+
+API -> DB: Проверить существование авто
+DB --> API: Авто существует
+
+API -> DB: Проверить наличие в избранном
+DB --> API: Результат проверки
+
+alt Уже в избранном
+    API --> Frontend: 409 Conflict
+    Frontend --> User: Показать "Уже в избранном"
+
+else Ещё не в избранном
+    API -> DB: Сохранить запись избранного
+    DB --> API: Запись создана
+
+    API --> Frontend: 201 Created
+    Frontend -> Frontend: Обновить иконку избранного
+    Frontend --> User: Показать заполненное сердечко
+end
+
+== Удаление из избранного ==
+
+User -> Frontend: Нажимает "Удалить из избранного"
+
+Frontend -> API: DELETE /api/favorites/{carId}
+
+API -> API: Аутентификация (проверка токена)
+
+API -> DB: Найти запись избранного
+DB --> API: Результат поиска
+
+alt Запись не найдена
+    API --> Frontend: 404 Not Found
+    Frontend --> User: Показать ошибку
+
+else Запись найдена
+    API -> DB: Удалить запись
+    DB --> API: Удалено
+
+    API --> Frontend: 204 No Content
+    Frontend -> Frontend: Обновить иконку
+    Frontend --> User: Показать пустое сердечко
+end
+
+@enduml
+
