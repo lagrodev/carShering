@@ -148,8 +148,8 @@ org.example.carshering/
 │   ├── application/                 # APPLICATION LAYER
 │   │   ├── service/                 # Application Services
 │   │   │   └── ContractApplicationService.java
-│   │   ├── dto/                     # DTO для внутреннего использования
-│   │   └── mapper/                  # Мапперы Domain <-> DTO
+│   │   ├── dto/                    # DTO для внутреннего использования
+│   │   └── mapper/                 # Мапперы Domain <-> DTO
 │   │       └── ContractDtoMapper.java
 │   │
 │   ├── infrastructure/              # INFRASTRUCTURE LAYER
@@ -165,7 +165,7 @@ org.example.carshering/
 │       ├── rest/                    # REST контроллеры
 │       │   └── ContractController.java
 │       ├── dto/                     # API DTO (request/response)
-│       └── mapper/                  # Мапперы API DTO <-> Application DTO
+│       └── mapper/              # Мапперы API DTO <-> Application DTO
 │
 ├── fleet/                           # Bounded Context: Fleet
 │   ├── domain/
@@ -202,9 +202,9 @@ org.example.carshering/
 ### 1.3. Пошаговая миграция
 
 #### **Шаг 1.3.1: Создание новой структуры (1 день)**
-- [ ] Создать пакеты для каждого Bounded Context
-- [ ] Создать слои (domain/application/infrastructure/api)
-- [ ] **НЕ УДАЛЯТЬ** старый код — работать параллельно
+- [x] Создать пакеты для каждого Bounded Context
+- [x] Создать слои (domain/application/infrastructure/api)
+- [x] **НЕ УДАЛЯТЬ** старый код — работать параллельно
 
 #### **Шаг 1.3.2: Value Objects (1 день)**
 - [x] **Fleet Context**:
@@ -228,6 +228,7 @@ org.example.carshering/
 4. Нет сеттеров — только бизнес-методы
 
 **Пример: Contract (Rental Context)**
+ - [x] создать Contract
 ```java
 // rental/domain/model/Contract.java
 @Getter

@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.carshering.common.domain.valueobject.Money;
 import org.example.carshering.domain.valueobject.GosNumber;
-import org.example.carshering.domain.valueobject.Money;
 import org.example.carshering.domain.valueobject.Vin;
 import org.example.carshering.domain.valueobject.Year;
 
@@ -38,8 +38,6 @@ public class Car {
     private Vin vin;
 
 
-
-
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "amount", column = @Column(name = "rent")),
@@ -52,8 +50,8 @@ public class Car {
     @AttributeOverrides({
             @AttributeOverride(name = "value", column = @Column(name = "year_of_issue", nullable = false))
     })
-    private Year yearOfIssue;  
-    
+    private Year yearOfIssue;
+
     @ManyToOne
     @JoinColumn(name = "model_id", nullable = false)
     private CarModel model;
@@ -62,8 +60,8 @@ public class Car {
     @JoinColumn(name = "state_id", nullable = false)
     private CarState state;
 
-    @OneToMany(mappedBy = "car")
-    private List<Contract> contracts = new ArrayList<>();
+//    @OneToMany(mappedBy = "car")
+//    private List<Contract> contracts = new ArrayList<>();
 
     @OneToMany(mappedBy = "car")
     private List<Favorite> favorites = new ArrayList<>();

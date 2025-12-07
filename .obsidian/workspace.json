@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "refactor_plan.md",
+                "file": "FIXES_SUMMARY.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "refactor_plan"
+              "title": "FIXES_SUMMARY"
             }
           }
         ]
@@ -185,17 +185,23 @@
   },
   "active": "1cfffef2b8ee6e65",
   "lastOpenFiles": [
-    "target/generated-sources/annotations/org/example/carshering/mapper/CarMapperImpl.java",
-    "target/generated-sources/annotations/org/example/carshering/mapper/CarClassMapperImpl.java",
-    "target/generated-sources/annotations/org/example/carshering/mapper/ModelNameMapperImpl.java",
-    "target/generated-sources/annotations/org/example/carshering/mapper/CarStateMapperImpl.java",
-    "target/generated-sources/annotations/org/example/carshering/mapper/ModelMapperImpl.java",
-    "target/generated-sources/annotations/org/example/carshering/mapper/BrandMapperImpl.java",
-    "target/generated-sources/annotations/org/example/carshering/mapper",
-    "target/generated-sources/annotations/org/example/carshering",
-    "target/generated-sources/annotations/org/example",
-    "target/generated-sources/annotations/org",
-    "src/main/java/org/example/carshering/mapper/CarMapper.java~",
+    "src/main/java/org/example/carshering/rental/domain/repository/ContractDomainRepository.java~",
+    "HELP.md",
+    "RENTAL_MODULE_ANALYSIS.md",
+    "FIXES_SUMMARY.md",
+    "src/main/java/org/example/carshering/rental/infrastructure/mapper",
+    "src/main/java/org/example/carshering/rental/infrastructure/persistence/repository/ContractRepositoryAdapter.java~",
+    "DDD_QUICK_REFERENCE.md",
+    "RENTAL_MODULE_ANALYSIS.md~",
+    "src/main/java/org/example/carshering/rental/application/dto/ContractDetailsDto.java",
+    "src/main/java/org/example/carshering/rental/application/dto/UpdateContractDatesRequest.java",
+    "src/main/java/org/example/carshering/rental/application/dto/CreateContractRequest.java",
+    "src/main/java/org/example/carshering/rental/application/service/ContractApplicationService.java",
+    "refactor_plan.md",
+    "target/classes/org/example/carshering/service/impl/ContractServiceImpl.class",
+    "target/classes/org/example/carshering/service/domain/RentalDomainServiceOld.class",
+    "target/classes/static/image (2).png",
+    "DDD_QUESTIONS_ANSWERED.md",
     "PASSWORD_VALUE_OBJECT_COMPLETE.md",
     "VALUE_OBJECTS_ANALYSIS_AND_NEXT_STEPS.md",
     "VALUE_OBJECTS_ENGLISH_FIXED.md",
@@ -204,8 +210,6 @@
     "README.md",
     "PHONE_CLIENT_ANALYSIS.md",
     "ENTITY_DEPENDENCIES_ANALYSIS.md",
-    "refactor_plan.md",
-    "HELP.md",
     "docs/Entity_Dependencies_Graph-Car_Sharing_Backend___Entity_Dependencies_Graph____2025_12_04.png"
   ]
 }

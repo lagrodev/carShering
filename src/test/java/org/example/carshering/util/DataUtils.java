@@ -10,6 +10,8 @@ import org.example.carshering.dto.response.CarDetailResponse;
 import org.example.carshering.dto.response.CarStateResponse;
 import org.example.carshering.dto.response.ContractResponse;
 import org.example.carshering.dto.response.DocumentResponse;
+import org.example.carshering.rental.infrastructure.persistence.entity.ContractJpaEntity;
+import org.example.carshering.rental.infrastructure.persistence.entity.RentalState;
 import org.springframework.boot.test.context.TestConfiguration;
 
 import java.time.LocalDate;
@@ -422,10 +424,10 @@ public class DataUtils {
     }
 
     // ---- CONTRACT ----
-    public Contract createContract(Client client, Car car, RentalState stateName,
+    public ContractJpaEntity createContract(Client client, Car car, RentalState stateName,
                                    LocalDate start, LocalDate end) {
         long durationMinutes = java.time.Duration.between(start.atStartOfDay(), end.atStartOfDay()).toMinutes();
-        return Contract.builder()
+        return ContractJpaEntity.builder()
                 .client(client)
                 .car(car)
                 .state(stateName)
@@ -437,10 +439,10 @@ public class DataUtils {
                 .build();
     }
 
-    public Contract createContractWithDateTime(Client client, Car car, RentalState stateName,
+    public ContractJpaEntity createContractWithDateTime(Client client, Car car, RentalState stateName,
                                                LocalDateTime start, LocalDateTime end) {
         long durationMinutes = java.time.Duration.between(start, end).toMinutes();
-        return Contract.builder()
+        return ContractJpaEntity.builder()
                 .client(client)
                 .car(car)
                 .state(stateName)

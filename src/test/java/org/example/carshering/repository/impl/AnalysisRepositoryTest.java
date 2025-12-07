@@ -2,6 +2,10 @@ package org.example.carshering.repository.impl;
 
 import org.example.carshering.domain.entity.*;
 import org.example.carshering.dto.response.ContractDetailResponse;
+import org.example.carshering.rental.infrastructure.persistence.entity.Contract;
+import org.example.carshering.rental.infrastructure.persistence.entity.RentalState;
+import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
+import org.example.carshering.repository.RentalStateRepository;
 import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;

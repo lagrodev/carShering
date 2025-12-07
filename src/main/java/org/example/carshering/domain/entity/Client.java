@@ -20,6 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString(exclude = {"contracts", "favorites"})
 @Builder
+@Setter
 public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -80,8 +81,8 @@ public class Client {
     @JoinColumn(name = "role_id")
     private Role role;
 
-    @OneToMany(mappedBy = "client")
-    private List<Contract> contracts = new ArrayList<>();
+//    @OneToMany(mappedBy = "client")
+//    private List<Contract> contracts = new ArrayList<>();
 
     @OneToMany(mappedBy = "client")
     private List<Favorite> favorites = new ArrayList<>();

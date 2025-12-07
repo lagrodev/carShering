@@ -2,9 +2,9 @@ package org.example.carshering.service.domain;
 
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.domain.entity.Client;
-import org.example.carshering.domain.entity.Contract;
 import org.example.carshering.exceptions.custom.BusinessConflictException;
-import org.example.carshering.repository.ContractRepository;
+import org.example.carshering.rental.infrastructure.persistence.entity.ContractJpaEntity;
+import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,10 +19,10 @@ public class ContractServiceHelper {
     private final ContractRepository contractRepository;
 
     public void checkAndAllActiveContractsByClient(Client client) {
-        List<Contract> activeContracts = contractRepository.findAllByClientAndActiveStates(client, ACTIVE_STATES);
+        List<ContractJpaEntity> activeContracts = contractRepository.findAllByClientAndActiveStates(client, ACTIVE_STATES);
         if (!activeContracts.isEmpty()) {
-            Contract c = activeContracts.getFirst();
-            throw new BusinessConflictException("Active contract exists: ID " + c.getId() + ", state: " + c.getState().getName());
+            ContractJpaEntity c = activeContracts.getFirst();
+            throw new BusinessConflictException("Active contract exists: ID " + c.getId() + ", state: " + c.getState().name());
         }
 
     }

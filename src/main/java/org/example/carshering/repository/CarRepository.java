@@ -33,10 +33,10 @@ public interface CarRepository extends JpaRepository<Car, Long> {
         AND (:bodyType IS NULL OR cm.bodyType = :bodyType)
         AND (:carClasses IS NULL OR cc.name IN :carClasses)
         AND NOT EXISTS (
-                   SELECT 1 FROM Contract r
-                   WHERE r.car.id = c.id
-                     AND r.dataStart <= :dateEnd
-                     AND r.dataEnd >= :dateStart
+                   SELECT 1 FROM ContractJpaEntity rent
+                   WHERE rent.carId = c.id
+                     AND rent.period.startDate <= :dateEnd
+                     AND rent.period.endDate >= :dateStart
                )
         AND (:minCell is null OR :minCell <= c.dailyRate)
         AND (:maxCell is null OR :maxCell >= c.dailyRate)
@@ -78,10 +78,10 @@ public interface CarRepository extends JpaRepository<Car, Long> {
                 AND (:bodyType IS NULL OR cm.bodyType = :bodyType)
                 AND (:carClasses IS NULL OR cc.name IN :carClasses)
                 AND NOT EXISTS (
-                           SELECT 1 FROM Contract r
-                           WHERE r.car.id = c.id
-                             AND r.dataStart <= :dateEnd
-                             AND r.dataEnd >= :dateStart
+                           SELECT 1 FROM ContractJpaEntity r
+                           WHERE r.carId = c.id
+                             AND r.period.startDate <= :dateEnd
+                             AND r.period.endDate >= :dateStart
                        )
       """)
   MinMaxCellForFilters findMinMaxPriceByFilter(

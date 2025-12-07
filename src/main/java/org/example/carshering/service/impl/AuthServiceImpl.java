@@ -102,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
         Client client = opaqueService.getUserFromToken(tokenRequest.token());
         deleteRefreshToken(tokenRequest.token());
 
-        return generateTokens((ClientDetails) clientDetailsService.loadUserByUsername(client.getLogin()));
+        return generateTokens((ClientDetails) clientDetailsService.loadUserByUsername(client.getLogin().getValue()));
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.example.carshering.dto.response.ShortUserResponse;
 import org.example.carshering.domain.entity.Client;
 import org.example.carshering.domain.entity.Role;
 import org.example.carshering.it.BaseWebIntegrateTest;
+import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
 import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;

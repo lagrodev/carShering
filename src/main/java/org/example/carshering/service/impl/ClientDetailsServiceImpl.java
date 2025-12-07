@@ -39,9 +39,9 @@ public class ClientDetailsServiceImpl implements ClientDetailsService {
                 List.of(new SimpleGrantedAuthority("ROLE_" + client.getRole().getName()));
         return new ClientDetails(
                 client.getId(),
-                client.getLogin(),
-                client.getPassword(),
-                client.getEmail(),
+                client.getLogin().getValue(),
+                client.getPassword().getValue(),
+                client.getEmail().getValue(),
                 authorities,
                 client.isBanned(),
                 client.isDeleted()
@@ -51,7 +51,7 @@ public class ClientDetailsServiceImpl implements ClientDetailsService {
 
     @Override
     public void setEmailVerified(Client client) {
-        client.setEmailVerified(true);
+        client.verifyEmail();
 
         clientRepository.save(client);
     }

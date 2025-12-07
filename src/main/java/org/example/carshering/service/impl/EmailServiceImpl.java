@@ -73,7 +73,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendVerificationEmail(Client client, String verificationCode) {
         // TODO: customize email content from configuration/template
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(client.getEmail());
+        msg.setTo(client.getEmail().getValue());
         msg.setSubject("Email Verification");
         String url = "http://" + address + ":" + port + "/verify?code=" + verificationCode;
         msg.setText("Please verify your email by clicking the following link: " + url +
@@ -91,7 +91,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendPasswordResetConfirmationEmail(Client user) {
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(user.getEmail());
+        msg.setTo(user.getEmail().getValue());
         msg.setSubject("Password Reset Confirmation");
         msg.setText("Your password has been successfully reset.");
         mailSender.send(msg);
@@ -100,7 +100,7 @@ public class EmailServiceImpl implements EmailService {
     private void sendPasswordResetConfirmationEmail(Client client, String token) {
         // TODO: customize email content from configuration/template
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(client.getEmail());
+        msg.setTo(client.getEmail().getValue());
         msg.setSubject("Email Verification");
         String url = "http://" + address + ":" + port + "/reset?code=" + token;
         msg.setText("Please reset your password by clicking the following link: " + url);

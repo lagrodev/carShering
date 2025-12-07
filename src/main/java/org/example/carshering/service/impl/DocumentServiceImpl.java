@@ -96,13 +96,14 @@ public class DocumentServiceImpl implements DocumentService {
             throw new BannedClientAccessException("Document was banned");
         }
 
+        // todo проверить, что серия и номер уникальны при изменении, надо это?
         // если у типа есть series, но нет number, то надо провериьт, что серия и номер уникальны
         boolean seriesChanged = request.series() != null && !request.series().equals(document.getSeries());
         boolean numberChanged = request.number() != null && !request.number().equals(document.getNumber());
 
         if (seriesChanged || numberChanged) {
-            String newSeries = seriesChanged ? request.series() : document.getSeries();
-            String newNumber = numberChanged ? request.number() : document.getNumber();
+            String newSeries = seriesChanged ? request.series() : document.getSeries().getValue();
+            String newNumber = numberChanged ? request.number() : document.getNumber().getValue();
 
             boolean exists = documentRepository.existsBySeriesAndNumber(newSeries, newNumber);
 

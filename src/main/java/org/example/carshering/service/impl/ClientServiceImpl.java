@@ -1,6 +1,8 @@
 package org.example.carshering.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.example.carshering.domain.valueobject.Password;
+import org.example.carshering.domain.valueobject.Phone;
 import org.example.carshering.dto.request.ChangePasswordRequest;
 import org.example.carshering.dto.request.FilterUserRequest;
 import org.example.carshering.dto.request.RegistrationRequest;
@@ -52,7 +54,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public AllUserResponse banUser(Long userId) {
         Client client = getEntity(userId);
-        client.setBanned(true);
+        client.ban();
         clientRepository.save(client);
         return clientMapper.toDtoForAdmin(client);
 
@@ -70,14 +72,14 @@ public class ClientServiceImpl implements ClientService {
             throw new BusinessConflictException("It is not possible to delete an account while it exists " + e.getMessage());
         }
 
-        client.setDeleted(true);
+        client.delete();
         clientRepository.save(client);
     }
 
     @Override
     public AllUserResponse unbanUser(Long userId) {
         Client client = getEntity(userId);
-        client.setBanned(false);
+        client.unban();
         clientRepository.save(client);
         return clientMapper.toDtoForAdmin(client);
     }
@@ -155,7 +157,7 @@ public class ClientServiceImpl implements ClientService {
         }
 
         Client client = clientMapper.toEntity(request);
-        client.setPassword(passwordEncoder.encode(client.getPassword()));
+        client.setPassword(Password.ofEncoded(passwordEncoder.encode(client.getPassword().getValue())));
 
         client.setRole(roleService.getRoleByName("CLIENT"));
 
@@ -173,7 +175,7 @@ public class ClientServiceImpl implements ClientService {
     public void changePassword(Long userId, ChangePasswordRequest request) {
         Client client = getEntity(userId);
 
-        if (!passwordEncoder.matches(request.oldPassword(), client.getPassword())) {
+        if (!passwordEncoder.matches(request.oldPassword(), client.getPassword().getValue())) {
             throw new PasswordException("Incorrect password");
         }
         updatePassword(client, request.newPassword());
@@ -182,7 +184,7 @@ public class ClientServiceImpl implements ClientService {
     @Transactional
     @Override
     public void updatePassword(Client client, String password) {
-        client.setPassword(passwordEncoder.encode(password));
+        client.setPassword(Password.ofEncoded(passwordEncoder.encode(password)));
         clientRepository.save(client); // todo при смене пароля все сессии юзера должны быть инвалидированы, но это только после того, как появится рефреш токен
         emailService.sendPasswordResetConfirmationEmail(client);
     }
@@ -195,7 +197,7 @@ public class ClientServiceImpl implements ClientService {
         if (request.lastName() != null) client.setLastName(request.lastName());
         if (request.phone() != null) {
             if (!clientRepository.existsByPhoneAndIdNot(request.phone(), userId)) {
-                client.setPhone(request.phone());
+                client.setPhone(Phone.of( request.phone()));
             } else throw new AlreadyExistsException("This phone is assigned to another account");
         }
         clientRepository.save(client);

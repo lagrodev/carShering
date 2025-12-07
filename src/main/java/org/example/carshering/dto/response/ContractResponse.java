@@ -1,12 +1,10 @@
 package org.example.carshering.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.aspectj.lang.annotation.After;
-import org.example.carshering.domain.valueobject.Money;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

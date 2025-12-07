@@ -2,7 +2,7 @@
 //
 //import org.example.carshering.entity.Car;
 //import org.example.carshering.entity.Contract;
-//import org.example.carshering.repository.ContractRepository;
+//import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;

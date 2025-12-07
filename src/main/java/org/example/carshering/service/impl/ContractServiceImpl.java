@@ -8,16 +8,16 @@ import org.example.carshering.dto.request.update.UpdateContractRequest;
 import org.example.carshering.dto.response.ContractResponse;
 import org.example.carshering.domain.entity.Car;
 import org.example.carshering.domain.entity.Client;
-import org.example.carshering.domain.entity.Contract;
-import org.example.carshering.domain.entity.RentalState;
+import org.example.carshering.mapper.ContractMapperOld;
+import org.example.carshering.rental.domain.valueobject.RentalStateType;
+import org.example.carshering.rental.infrastructure.persistence.entity.ContractJpaEntity;
 import org.example.carshering.exceptions.custom.*;
-import org.example.carshering.mapper.ContractMapper;
-import org.example.carshering.repository.ContractRepository;
+import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
 import org.example.carshering.repository.RentalStateRepository;
 import org.example.carshering.service.domain.CarServiceHelperService;
 import org.example.carshering.service.domain.ClientServiceHelper;
 import org.example.carshering.service.domain.DocumentServiceHelper;
-import org.example.carshering.service.domain.RentalDomainService;
+import org.example.carshering.service.domain.RentalDomainServiceOld;
 import org.example.carshering.service.interfaces.ContractService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +25,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -38,21 +37,23 @@ public class ContractServiceImpl implements ContractService {
     private static final Set<String> ACTIVE_STATES = Set.of("ACTIVE", "PENDING", "CANCELLATION REQUESTED", "CONFIRMED");
     private final ContractRepository contractRepository;
     private final RentalStateRepository rentalStateRepository;
-    private final ContractMapper contractMapper;
+    private final ContractMapperOld contractMapper;
     private final ClientServiceHelper clientService;
     private final CarServiceHelperService carService;
     private final DocumentServiceHelper documentService;
-    private final RentalDomainService rentalDomainService;
+    private final RentalDomainServiceOld rentalDomainServiceOld;
 
-    private RentalState getStateByName(String name) {
-        return rentalStateRepository.findByNameIgnoreCase(name)
-                .orElseThrow(() -> new NotFoundException("State " + name + " not found"));
+    private RentalStateType getStateByName(String name) {
+        return null;
+
+//                rentalStateRepository.findByNameIgnoreCase(name)
+//                .orElseThrow(() -> new NotFoundException("State " + name + " not found"));
     }
 
-    private void ensureState(Contract contract, String expectedState) {
-        if (!expectedState.equals(contract.getState().getName())) {
+    private void ensureState(ContractJpaEntity contract, String expectedState) {
+        if (!expectedState.equals(contract.getState().name())) {
             throw new InvalidContractStateException("Status expected " + expectedState + "but current: "
-                    + contract.getState().getName());
+                    + contract.getState().name());
         }
     }
 
@@ -63,23 +64,27 @@ public class ContractServiceImpl implements ContractService {
         if (!request.dataEnd().isAfter(request.dataStart())) {
             throw new InvalidContractDateRangeException("The end date must be later than the start date");
         }
+
         Client client = clientService.getEntity(userId);
+
         if (!documentService.hasDocument(userId)) {
             throw new MissingClientDocumentException("The client must have a document uploaded");
         }
+
         if (!documentService.findDocument(userId).verified()) {
             throw new UnverifiedClientDocumentException("The document is not verified. Please wait for verification or attach the relevant document");
         }
 
         Car car = carService.getEntityWithLock(request.carId());
 
-        if (!rentalDomainService.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), null)) {
+        if (!rentalDomainServiceOld.isCarAvailable(request.dataStart(), request.dataEnd(), car.getId(), null)) {
             throw new CarUnavailableOnDatesException("The car is not available on the selected dates");
         }
-        Contract contract = contractMapper.toEntity(request);
-        contract.setClient(client);
-        contract.setCar(car);
-        contract.setTotalCost(rentalDomainService.calculateCost(car, request.dataStart(), request.dataEnd()));
+
+        ContractJpaEntity contract = contractMapper.toEntity(request);
+        contract.setClientId(client.getId());
+        contract.setCarId(car.getId());
+        contract.setTotalCost(rentalDomainServiceOld.calculateCost(car, request.dataStart(), request.dataEnd()));
         contract.setState(getStateByName("PENDING"));
         return contractMapper.toDto(contractRepository.save(contract));
     }
@@ -87,13 +92,13 @@ public class ContractServiceImpl implements ContractService {
     @Override
     @Transactional
     public void cancelContract(Long userId, Long contractId) {
-        Contract contract = contractRepository.findById(contractId)
+        ContractJpaEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         log.info("Contract client id = {}, Current user id = {}",
-                contract.getClient().getId(), userId);
+                contract.getClientId(), userId);
 
-        if (!contract.getClient().getId().equals(userId)) {
+        if (!contract.getClientId().equals(userId)) {
             throw new UnauthorizedContractAccessException("You can't terminate someone else's contract");
         }
 
@@ -104,7 +109,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     @Transactional
     public void cancelContractByAdmin(Long contractId) {
-        Contract contract = contractRepository.findById(contractId)
+        ContractJpaEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         cancelContract(contract, true);
@@ -114,10 +119,10 @@ public class ContractServiceImpl implements ContractService {
     @Override
     @Transactional
     public void confirmCancellationByAdmin(Long contractId) {
-        Contract contract = contractRepository.findById(contractId)
+        ContractJpaEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        if (!"CANCELLATION_REQUESTED".equals(contract.getState().getName())) {
+        if (!"CANCELLATION_REQUESTED".equals(contract.getState().name())) {
             throw new InvalidContractCancellationStateException("The contract is not at the cancellation request stage");
         }
 
@@ -129,7 +134,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     @Transactional
     public ContractResponse findContract(Long contractId, Long userId) {
-        Contract contract = contractRepository.findByIdAndUserId(contractId, userId)
+        ContractJpaEntity contract = contractRepository.findByIdAndUserId(contractId, userId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
         setActive(contract);
 
@@ -160,7 +165,7 @@ public class ContractServiceImpl implements ContractService {
     @Transactional
     public ContractResponse getContractById(Long contractId) {
 
-        Contract contract = contractRepository.findById(contractId)
+        ContractJpaEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         setActive(contract);
@@ -175,38 +180,37 @@ public class ContractServiceImpl implements ContractService {
     @Override
     @Transactional
     public ContractResponse confirmContract(Long contractId) {
-        Contract contract = contractRepository.findById(contractId)
+        ContractJpaEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         ensureState(contract, "PENDING");
 
         contract.setState(getStateByName("CONFIRMED"));
-        Duration duration = Duration.between(contract.getDataStart(), contract.getDataEnd());
-        long minutes = Math.max(0, duration.toMinutes());
-        contract.setDurationMinutes(minutes);
+
         contractRepository.save(contract);
+
         return contractMapper.toDto(contract);
     }
 
 
     @Override
     public void checkAndAllActiveContractsByClient(Client client) {
-        List<Contract> activeContracts = contractRepository.findAllByClientAndActiveStates(client, ACTIVE_STATES);
+        List<ContractJpaEntity> activeContracts = contractRepository.findAllByClientAndActiveStates(client, ACTIVE_STATES);
         if (!activeContracts.isEmpty()) {
-            Contract c = activeContracts.getFirst();
-            throw new BusinessConflictException("Active contract exists: ID " + c.getId() + ", state: " + c.getState().getName());
+            ContractJpaEntity c = activeContracts.getFirst();
+            throw new BusinessConflictException("Active contract exists: ID " + c.getId() + ", state: " + c.getState().name());
         }
 
     }
 
 
-    private ContractResponse activateIfDueForDto(Contract contract) {
+    private ContractResponse activateIfDueForDto(ContractJpaEntity contract) {
 
-        RentalState now = contract.getState();
+        RentalStateType now = contract.getState();
 
 
-        if ("CONFIRMED".equals(contract.getState().getName()) &&
-                !contract.getDataStart().isAfter(LocalDateTime.now())) {
+        if ("CONFIRMED".equals(contract.getState().name()) &&
+                !contract.getPeriod().getStartDate().isAfter(LocalDateTime.now())) {
             // В DTO временно меняем статус на ACTIVE (но не сохраняем в БД!)
 
 
@@ -221,8 +225,8 @@ public class ContractServiceImpl implements ContractService {
     // FIXME: продумать логику отмены контракта
     // FIXME: аккуратно
     @Transactional
-    protected void cancelContract(Contract contract, boolean isAdmin) {
-        String currentState = contract.getState().getName();
+    protected void cancelContract(ContractJpaEntity contract, boolean isAdmin) {
+        String currentState = contract.getState().name();
 
         if ("CANCELLED".equals(currentState)) {
             return;
@@ -241,7 +245,7 @@ public class ContractServiceImpl implements ContractService {
             // Пользователь: только PENDING или CONFIRMED -> запрос на отмену
             if ("PENDING".equals(currentState) || "CONFIRMED".equals(currentState)) {
                 // todo тут чет сложно надо момент с датой продумать Если сервер в UTC, а пользователь в Москве — возможны ошибки в расчёте daysUntilStart.
-                long daysUntilStart = ChronoUnit.DAYS.between(LocalDateTime.now(), contract.getDataStart());
+                long daysUntilStart = ChronoUnit.DAYS.between(LocalDateTime.now(), contract.getPeriod().getStartDate());
                 if (daysUntilStart > 5) {
                     // Отмена без подтверждения
                     contract.setState(getStateByName("CANCELLED"));
@@ -258,9 +262,9 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Transactional
-    void setActive(Contract contract) {
-        if ("CONFIRMED".equals(contract.getState().getName()) &&
-                !contract.getDataStart().isAfter(LocalDateTime.now())) {
+    void setActive(ContractJpaEntity contract) {
+        if ("CONFIRMED".equals(contract.getState().name()) &&
+                !contract.getPeriod().getStartDate().isAfter(LocalDateTime.now())) {
             contract.setState(getStateByName("ACTIVE"));
             contractRepository.save(contract);
         }
@@ -272,13 +276,13 @@ public class ContractServiceImpl implements ContractService {
         LocalDateTime now = LocalDateTime.now();
 
 
-        List<Contract> contractsToActivate = contractRepository
-                .findAllByStateNameAndDataStartBefore("CONFIRMED", now);
+        List<ContractJpaEntity> contractsToActivate = contractRepository
+                .findAllByStateNameAndStartDateBefore("CONFIRMED", now);
 
         if (contractsToActivate.isEmpty()) return;
 
-        RentalState activeState = getStateByName("ACTIVE");
-        for (Contract contract : contractsToActivate) {
+        RentalStateType activeState = getStateByName("ACTIVE");
+        for (ContractJpaEntity contract : contractsToActivate) {
             contract.setState(activeState);
         }
         contractRepository.saveAll(contractsToActivate);
@@ -290,18 +294,17 @@ public class ContractServiceImpl implements ContractService {
         LocalDateTime now = LocalDateTime.now();
 
 
-        List<Contract> contractsToComplete = contractRepository
+        List<ContractJpaEntity> contractsToComplete = contractRepository
                 .findAllByStateNameAndDataEndBefore("ACTIVE", now);
 
         if (contractsToComplete.isEmpty()) return;
 
-        RentalState completedState = getStateByName("COMPLETED");
-        for (Contract contract : contractsToComplete) {
+        RentalStateType completedState = getStateByName("COMPLETED");
+        for (ContractJpaEntity contract : contractsToComplete) {
             contract.setState(completedState);
         }
         contractRepository.saveAll(contractsToComplete);
     }
-
 
 
     @Override
@@ -311,22 +314,22 @@ public class ContractServiceImpl implements ContractService {
             throw new InvalidContractDateRangeException("The end date must be later than the start date");
         }
 
-        Contract contract = contractRepository.findById(contractId)
+        ContractJpaEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        if (!contract.getClient().getId().equals(userId)) {
+        if (!contract.getClientId().equals(userId)) {
             throw new UnauthorizedContractAccessException("You can't terminate someone else's contract");
         }
 
-        String currentState = contract.getState().getName();
+        String currentState = contract.getState().name();
         if (!"PENDING".equals(currentState) && !"CONFIRMED".equals(currentState)) {
             throw new CannotCancelCompletedContractException("The change is only available for contracts in the status PENDING or CONFIRMED");
         }
 
-        if (!rentalDomainService.isCarAvailable(
+        if (!rentalDomainServiceOld.isCarAvailable(
                 request.dataStart(),
                 request.dataEnd(),
-                contract.getCar().getId(),
+                contract.getCarId(),
                 contract.getId())) {
             throw new CarUnavailableOnDatesException("The car is not available on the selected dates");
         }
@@ -334,10 +337,12 @@ public class ContractServiceImpl implements ContractService {
         contractMapper.updateContractFromRequest(request, contract);
 
 
-        contract.setTotalCost(rentalDomainService.calculateCost(
-                contract.getCar(),
-                contract.getDataStart(),
-                contract.getDataEnd()
+        Car car = carService.getEntity(contract.getCarId());
+
+        contract.setTotalCost(rentalDomainServiceOld.calculateCost(
+                car,
+                contract.getPeriod().getStartDate(),
+                contract.getPeriod().getEndDate()
         ));
 
         return contractMapper.toDto(contractRepository.save(contract));

@@ -11,7 +11,7 @@
 //import org.example.carshering.entity.RentalState;
 //import org.example.carshering.exceptions.custom.*;
 //import org.example.carshering.mapper.ContractMapper;
-//import org.example.carshering.repository.ContractRepository;
+//import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
 //import org.example.carshering.repository.RentalStateRepository;
 //import org.example.carshering.service.domain.CarServiceHelperService;
 //import org.example.carshering.service.domain.ClientServiceHelper;

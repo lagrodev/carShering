@@ -1,7 +1,7 @@
 package org.example.carshering.mapper;
 
 import org.example.carshering.domain.valueobject.GosNumber;
-import org.example.carshering.domain.valueobject.Money;
+import org.example.carshering.common.domain.valueobject.Money;
 import org.example.carshering.domain.valueobject.Vin;
 import org.example.carshering.domain.valueobject.Year;
 import org.example.carshering.dto.request.create.CreateCarRequest;

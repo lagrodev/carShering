@@ -1,6 +1,7 @@
 package org.example.carshering.domain.valueobject;
 
 
+import org.example.carshering.common.domain.valueobject.Money;
 import org.example.carshering.exceptions.custom.InvalidArgumentException;
 import org.junit.jupiter. api.Test;
 import java. math.BigDecimal;

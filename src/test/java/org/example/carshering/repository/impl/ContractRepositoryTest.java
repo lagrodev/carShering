@@ -1,6 +1,10 @@
 package org.example.carshering.repository.impl;
 
 import org.example.carshering.domain.entity.*;
+import org.example.carshering.rental.infrastructure.persistence.entity.ContractJpaEntity;
+import org.example.carshering.rental.infrastructure.persistence.entity.RentalState;
+import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
+import org.example.carshering.repository.RentalStateRepository;
 import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -123,7 +127,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         Client client = clientRepository.findByEmailAndDeletedFalse(prefix + "_mail@example.com")
                 .orElseGet(() -> clientRepository.save(dataUtils.createUniqueClient(prefix)));
 
-        Contract contract = dataUtils.createContractWithDateTime(client, car, state, start, end);
+        ContractJpaEntity contract = dataUtils.createContractWithDateTime(client, car, state, start, end);
 
         return List.of(contract, client);
 
@@ -146,7 +150,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
 
         Client client = (Client) list.get(1);
-        Contract saved = contractRepository.save((Contract) list.get(0));
+        ContractJpaEntity saved = contractRepository.save((ContractJpaEntity) list.get(0));
 
 
         // then
@@ -171,14 +175,14 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         var list = saveContract("update", car, "BOOKED",
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3));
 
-        Contract saved = contractRepository.save((Contract) list.getFirst());
+        ContractJpaEntity saved = contractRepository.save((ContractJpaEntity) list.getFirst());
 
 
         // when
-        Contract loaded = contractRepository.findById(saved.getId()).orElse(null);
+        ContractJpaEntity loaded = contractRepository.findById(saved.getId()).orElse(null);
         assertThat(loaded).isNotNull();
         loaded.setComment("updated");
-        Contract updated = contractRepository.save(loaded);
+        ContractJpaEntity updated = contractRepository.save(loaded);
 
         // then
         assertThat(updated.getComment()).isEqualTo("updated");
@@ -188,7 +192,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
     @DisplayName("findById returns empty when not found")
     public void givenNoContract_whenFindById_thenEmpty() {
         // when
-        Contract obtained = contractRepository.findById(999L).orElse(null);
+        ContractJpaEntity obtained = contractRepository.findById(999L).orElse(null);
 
         // then
         assertThat(obtained).isNull();
@@ -213,11 +217,11 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
         Client client = (Client) list.get(1);
-        Contract saved = contractRepository.save((Contract) list.get(0));
+        ContractJpaEntity saved = contractRepository.save((ContractJpaEntity) list.get(0));
 
         // when
-        Optional<Contract> found = contractRepository.findByIdAndUserId(saved.getId(), client.getId());
-        Optional<Contract> notFound = contractRepository.findByIdAndUserId(saved.getId(), other.getId());
+        Optional<ContractJpaEntity> found = contractRepository.findByIdAndUserId(saved.getId(), client.getId());
+        Optional<ContractJpaEntity> notFound = contractRepository.findByIdAndUserId(saved.getId(), other.getId());
 
         // then
         assertThat(found).isPresent();
@@ -238,11 +242,11 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
 
         Client client = (Client)  list.get(1);
-        Contract contract = contractRepository.save((Contract) list.get(0));
+        ContractJpaEntity contract = contractRepository.save((ContractJpaEntity) list.get(0));
 
 
         // when
-        Optional<Contract> result = contractRepository.findByIdAndUserId(99999L, client.getId());
+        Optional<ContractJpaEntity> result = contractRepository.findByIdAndUserId(99999L, client.getId());
 
         // then
         assertThat(result).isEmpty();
@@ -267,13 +271,13 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         var list2 = saveContract("page", car2, "BOOKED", LocalDateTime.now().plusDays(3), LocalDateTime.now().plusDays(4));
 
         Client client = (Client) list.get(1);
-        contractRepository.save ((Contract) list.get(0));
+        contractRepository.save ((ContractJpaEntity) list.get(0));
 
-        contractRepository.save ((Contract) list2.getFirst());
+        contractRepository.save ((ContractJpaEntity) list2.getFirst());
 
         // when
-        Page<Contract> page = contractRepository.findByClientId(client.getId(), pageable);
-        Page<Contract> empty = contractRepository.findByClientId(9999L, pageable);
+        Page<ContractJpaEntity> page = contractRepository.findByClientId(client.getId(), pageable);
+        Page<ContractJpaEntity> empty = contractRepository.findByClientId(9999L, pageable);
 
         // then
         assertThat(page.getContent()).hasSize(2);
@@ -293,13 +297,13 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
 
-        Contract  saved = contractRepository.save((Contract) list.getFirst());
+        ContractJpaEntity  saved = contractRepository.save((ContractJpaEntity) list.getFirst());
 
         // when
         contractRepository.deleteById(saved.getId());
 
         // then
-        Contract obtained = contractRepository.findById(saved.getId()).orElse(null);
+        ContractJpaEntity obtained = contractRepository.findById(saved.getId()).orElse(null);
         assertThat(obtained).isNull();
     }
 
@@ -317,41 +321,41 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         LocalDate end = LocalDate.of(2025, 1, 20);
 
         // BOOKED, пересекается
-        Contract c1 = contractRepository.save((Contract) saveContract("overlap", car, "BOOKED",
+        ContractJpaEntity c1 = contractRepository.save((ContractJpaEntity) saveContract("overlap", car, "BOOKED",
                 LocalDateTime.of(2025, 1, 5, 0, 0), LocalDateTime.of(2025, 1, 15, 0, 0)).getFirst());
 
         // CANCELLED, игнорируется по статусу
-        Contract c2 = contractRepository.save((Contract) saveContract("overlap", car, "CANCELLED",
+        ContractJpaEntity c2 = contractRepository.save((ContractJpaEntity) saveContract("overlap", car, "CANCELLED",
                 LocalDateTime.of(2025, 1, 12, 0, 0), LocalDateTime.of(2025, 1, 18, 0, 0)).getFirst());
 
         // ACTIVE, начинается ровно в день окончания диапазона — не пересекается
-        contractRepository.save((Contract) saveContract("overlap", car, "ACTIVE",
+        contractRepository.save((ContractJpaEntity) saveContract("overlap", car, "ACTIVE",
                 LocalDateTime.of(2025, 1, 20, 0, 0), LocalDateTime.of(2025, 1, 25, 0, 0)).getFirst());
 
         // PENDING, заканчивается ровно в день начала диапазона — не пересекается
-        contractRepository.save((Contract) saveContract("overlap", car, "PENDING",
+        contractRepository.save((ContractJpaEntity) saveContract("overlap", car, "PENDING",
                 LocalDateTime.of(2025, 1, 1, 0, 0), LocalDateTime.of(2025, 1, 10, 0, 0)).getFirst());
 
         // ACTIVE, полностью внутри диапазона — пересекается
-        Contract c5 = contractRepository.save((Contract) saveContract("overlap", car, "ACTIVE",
+        ContractJpaEntity c5 = contractRepository.save((ContractJpaEntity) saveContract("overlap", car, "ACTIVE",
                 LocalDateTime.of(2025, 1, 11, 0, 0), LocalDateTime.of(2025, 1, 12, 0, 0)).getFirst());
 
         // when
         // передаём contractId = null → ничего не исключается
-        List<Contract> foundAll = contractRepository.findOverlappingContracts(start.atStartOfDay(), end.atStartOfDay(), car.getId(), null);
+        List<ContractJpaEntity> foundAll = contractRepository.findOverlappingContracts(start.atStartOfDay(), end.atStartOfDay(), car.getId(), null);
 
         // передаём contractId = c1 → исключаем c1 из выборки
-        List<Contract> foundExcludingC1 = contractRepository.findOverlappingContracts(start.atStartOfDay(), end.atStartOfDay(), car.getId(), c1.getId());
+        List<ContractJpaEntity> foundExcludingC1 = contractRepository.findOverlappingContracts(start.atStartOfDay(), end.atStartOfDay(), car.getId(), c1.getId());
 
         // then
         // без исключения должны вернуться c1 и c5
         assertThat(foundAll)
-                .extracting(Contract::getId)
+                .extracting(ContractJpaEntity::getId)
                 .containsExactlyInAnyOrder(c1.getId(), c5.getId());
 
         // при исключении c1 должен остаться только c5
         assertThat(foundExcludingC1)
-                .extracting(Contract::getId)
+                .extracting(ContractJpaEntity::getId)
                 .containsExactly(c5.getId());
 
         // проверяем, что CANCELLED не попал
@@ -378,26 +382,26 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         LocalDate end = LocalDate.of(2025, 3, 20);
 
         // ends exactly at start -> should NOT overlap
-        contractRepository.save ((Contract) saveContract("boundary", car, "BOOKED",
+        contractRepository.save ((ContractJpaEntity) saveContract("boundary", car, "BOOKED",
                 LocalDateTime.of(2025, 3, 1, 0, 0), LocalDateTime.of(2025, 3, 10, 0, 0)).getFirst());
         // starts exactly at end -> should NOT overlap
-        contractRepository.save ((Contract) saveContract("boundary", car, "BOOKED",
+        contractRepository.save ((ContractJpaEntity) saveContract("boundary", car, "BOOKED",
                 LocalDateTime.of(2025, 3, 20, 0, 0), LocalDateTime.of(2025, 3, 25, 0, 0)).getFirst());
         // fully inside -> should overlap
-        Contract inside = contractRepository.save ((Contract) saveContract("boundary", car, "ACTIVE",
+        ContractJpaEntity inside = contractRepository.save ((ContractJpaEntity) saveContract("boundary", car, "ACTIVE",
                 LocalDateTime.of(2025, 3, 12, 0, 0), LocalDateTime.of(2025, 3, 15, 0, 0)).getFirst());
         // covering entire range -> should overlap
-        Contract covering =contractRepository.save ((Contract) saveContract("boundary", car, "ACTIVE",
+        ContractJpaEntity covering =contractRepository.save ((ContractJpaEntity) saveContract("boundary", car, "ACTIVE",
                 LocalDateTime.of(2025, 3, 5, 0, 0), LocalDateTime.of(2025, 3, 25, 0, 0)).getFirst());
         // exact match -> should overlap
-        Contract exact = contractRepository.save ((Contract) saveContract("boundary", car, "BOOKED",
+        ContractJpaEntity exact = contractRepository.save ((ContractJpaEntity) saveContract("boundary", car, "BOOKED",
                 LocalDateTime.of(2025, 3, 10, 0, 0), LocalDateTime.of(2025, 3, 20, 0, 0)).getFirst());
 
         // when
-        List<Contract> found = contractRepository.findOverlappingContracts(start.atStartOfDay(), end.atStartOfDay(), car.getId(), null);
+        List<ContractJpaEntity> found = contractRepository.findOverlappingContracts(start.atStartOfDay(), end.atStartOfDay(), car.getId(), null);
 
         // then
-        assertThat(found).extracting(Contract::getId)
+        assertThat(found).extracting(ContractJpaEntity::getId)
                 .containsExactlyInAnyOrder(inside.getId(), covering.getId(), exact.getId());
     }
 
@@ -414,13 +418,13 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         LocalDateTime start = LocalDateTime.of(2025, 2, 1,1,1);
         LocalDateTime end = LocalDateTime.of(2025, 2, 10, 1,1);
 
-        contractRepository.save ((Contract) saveContract("nooverlap", car, "BOOKED",
+        contractRepository.save ((ContractJpaEntity) saveContract("nooverlap", car, "BOOKED",
                 LocalDateTime.of(2025, 1, 1, 0, 0), LocalDateTime.of(2025, 1, 5, 0, 0)).getFirst());
-        contractRepository.save ((Contract) saveContract("nooverlap", car, "ACTIVE",
+        contractRepository.save ((ContractJpaEntity) saveContract("nooverlap", car, "ACTIVE",
                 LocalDateTime.of(2025, 2, 10, 0, 0), LocalDateTime.of(2025, 2, 15, 0, 0)).getFirst()); // starts exactly at end -> should not overlap
 
         // when
-        List<Contract> found = contractRepository.findOverlappingContracts(start, end, car.getId(), null);
+        List<ContractJpaEntity> found = contractRepository.findOverlappingContracts(start, end, car.getId(), null);
 
         // then
         assertThat(found).isEmpty();
@@ -454,7 +458,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
                 (CarState) carBList.get(0),
                 (CarModel) carBList.get(1)));
 
-        // Contract status is likely a String field, so keep "ACTIVE", "BOOKED" as literals
+        // ContractJpaEntity status is likely a String field, so keep "ACTIVE", "BOOKED" as literals
 
 
         var list = saveContract("fA", carA, "ACTIVE", LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
@@ -465,53 +469,53 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         var list3 = saveContract("fB", carA, "ACTIVE", LocalDateTime.now().plusDays(5), LocalDateTime.now().plusDays(6));
 
 
-        Contract ca1 = contractRepository.save ((Contract) list .getFirst());
+        ContractJpaEntity ca1 = contractRepository.save ((ContractJpaEntity) list .getFirst());
 
-        Contract ca2 = contractRepository.save ((Contract) list2 .getFirst());
+        ContractJpaEntity ca2 = contractRepository.save ((ContractJpaEntity) list2 .getFirst());
 
-        Contract ca3 = contractRepository.save ((Contract) list3.getFirst());
+        ContractJpaEntity ca3 = contractRepository.save ((ContractJpaEntity) list3.getFirst());
         // После сохранения всех контрактов
         // После сохранения всех контрактов
-        List<Contract> all2 = contractRepository.findAll();
+        List<ContractJpaEntity> all2 = contractRepository.findAll();
         all2.forEach(c -> System.out.println("ID: " + c.getId() + "State:" + c.getState()));
 
 
         // when - filter by status
 
-        Page<Contract> byStatus = contractRepository.findAllByFilter
+        Page<ContractJpaEntity> byStatus = contractRepository.findAllByFilter
                 ("ACTIVE", null, null, null, null, null, pageable);
         assertThat(byStatus.getContent()).hasSize(2);
 
         Client clientA = (Client) list.get(1);
         // when - filter by user
-        Page<Contract> byUser = contractRepository.findAllByFilter(null, clientA.getId(), null, null, null, null, pageable);
+        Page<ContractJpaEntity> byUser = contractRepository.findAllByFilter(null, clientA.getId(), null, null, null, null, pageable);
         assertThat(byUser.getContent()).hasSize(2);
 
         // when - filter by car id
-        Page<Contract> byCar = contractRepository.findAllByFilter(null, null, carB.getId(), null, null, null, pageable);
+        Page<ContractJpaEntity> byCar = contractRepository.findAllByFilter(null, null, carB.getId(), null, null, null, pageable);
         assertThat(byCar.getContent()).hasSize(1);
         assertThat(byCar.getContent().get(0).getId()).isEqualTo(ca2.getId());
 
         // when - filter by bodyType
-        Page<Contract> byBody = contractRepository.findAllByFilter(null, null, null, null, "SEDAN", null, pageable);
+        Page<ContractJpaEntity> byBody = contractRepository.findAllByFilter(null, null, null, null, "SEDAN", null, pageable);
         assertThat(byBody.getContent()).hasSize(2); // ca1 and cb1 use carA with SEDAN
 
         // when - filter by carClass
-        Page<Contract> byClass = contractRepository.findAllByFilter(null, null, null, null, null, "CLASSB", pageable);
+        Page<ContractJpaEntity> byClass = contractRepository.findAllByFilter(null, null, null, null, null, "CLASSB", pageable);
         assertThat(byClass.getContent()).hasSize(1);
         assertThat(byClass.getContent().get(0).getId()).isEqualTo(ca2.getId());
 
         // when - combined filter: status and user
-        Page<Contract> combined = contractRepository.findAllByFilter("ACTIVE", clientA.getId(), null, null, null, null, pageable);
+        Page<ContractJpaEntity> combined = contractRepository.findAllByFilter("ACTIVE", clientA.getId(), null, null, null, null, pageable);
         assertThat(combined.getContent()).hasSize(1);
         assertThat(combined.getContent().get(0).getId()).isEqualTo(ca1.getId());
 
         // when - all params null should return all
-        Page<Contract> all = contractRepository.findAllByFilter(null, null, null, null, null, null, pageable);
+        Page<ContractJpaEntity> all = contractRepository.findAllByFilter(null, null, null, null, null, null, pageable);
         assertThat(all.getContent()).hasSize(3);
 
         // when - no matches
-        Page<Contract> nomatch = contractRepository.findAllByFilter("NONEXISTENT", null, null, null, null, null, pageable);
+        Page<ContractJpaEntity> nomatch = contractRepository.findAllByFilter("NONEXISTENT", null, null, null, null, null, pageable);
         assertThat(nomatch.getContent()).isEmpty();
     }
 
@@ -529,13 +533,13 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         ));
 
         for (int i = 0; i < 15; i++) {
-            contractRepository.save ((Contract)saveContract(
+            contractRepository.save ((ContractJpaEntity)saveContract(
                     "pg", car, "BOOKED", LocalDateTime.now().plusDays(i + 1), LocalDateTime.now().plusDays(i + 2)).getFirst());
         }
 
         // when
-        Page<Contract> first = contractRepository.findAllByFilter(null, null, null, null, null, null, pageable);
-        Page<Contract> second = contractRepository.findAllByFilter(null, null, null, null, null, null, PageRequest.of(1, 10));
+        Page<ContractJpaEntity> first = contractRepository.findAllByFilter(null, null, null, null, null, null, pageable);
+        Page<ContractJpaEntity> second = contractRepository.findAllByFilter(null, null, null, null, null, null, PageRequest.of(1, 10));
 
         // then
         assertThat(first.getContent()).hasSize(10);
@@ -558,20 +562,20 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         Client client = (Client) list.get(1);
 
         // Создаём несколько контрактов с разными состояниями
-        Contract active = contractRepository.save((Contract) saveContract("active_filter", car, "ACTIVE",
+        ContractJpaEntity active = contractRepository.save((ContractJpaEntity) saveContract("active_filter", car, "ACTIVE",
                 LocalDateTime.now().plusDays(3), LocalDateTime.now().plusDays(4)).getFirst());
-        Contract booked = contractRepository.save((Contract) saveContract("active_filter", car, "BOOKED",
+        ContractJpaEntity booked = contractRepository.save((ContractJpaEntity) saveContract("active_filter", car, "BOOKED",
                 LocalDateTime.now().plusDays(5), LocalDateTime.now().plusDays(6)).getFirst());
-        Contract pending = contractRepository.save((Contract) saveContract("active_filter", car, "PENDING",
+        ContractJpaEntity pending = contractRepository.save((ContractJpaEntity) saveContract("active_filter", car, "PENDING",
                 LocalDateTime.now().plusDays(7), LocalDateTime.now().plusDays(8)).getFirst());
 
         // Этот контракт не должен попасть в выборку — состояние отменено
-        contractRepository.save((Contract) saveContract("active_filter", car, "CANCELLED",
+        contractRepository.save((ContractJpaEntity) saveContract("active_filter", car, "CANCELLED",
                 LocalDateTime.now().plusDays(9), LocalDateTime.now().plusDays(10)).getFirst());
 
         // Другой клиент — его контракт тоже не должен попасть
         Client otherClient = clientRepository.save(dataUtils.createUniqueClient("other_for_active_filter"));
-        Contract otherActive = dataUtils.createContract(otherClient, car,
+        ContractJpaEntity otherActive = dataUtils.createContract(otherClient, car,
                 rentalStateRepository.findByNameIgnoreCase("ACTIVE")
                         .orElseGet(() -> rentalStateRepository.save(dataUtils.getRentalState("ACTIVE"))),
                 LocalDate.now().plusDays(11), LocalDate.now().plusDays(12));
@@ -579,7 +583,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
         // when
         // Передаём состояния в верхнем регистре — как ожидает запрос (UPPER(c.state) IN :activeStates)
-        List<Contract> resultList = contractRepository.findAllByClientAndActiveStates(
+        List<ContractJpaEntity> resultList = contractRepository.findAllByClientAndActiveStates(
                 client,
                 List.of("ACTIVE", "BOOKED", "PENDING") // все активные состояния
         );
@@ -588,7 +592,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
         assertThat(resultList)
                 .hasSize(3)
-                .extracting(Contract::getId)
+                .extracting(ContractJpaEntity::getId)
                 .containsExactlyInAnyOrder(active.getId(), booked.getId(), pending.getId());
 
         // Убеждаемся, что отменённый и чужой контракты не попали
@@ -609,10 +613,10 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         var list = saveContract("no_active", car, "CANCELLED",
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
         Client client = (Client) list.get(1);
-        contractRepository.save((Contract) list.getFirst());
+        contractRepository.save((ContractJpaEntity) list.getFirst());
 
         // when
-        List <Contract> resultList = contractRepository.findAllByClientAndActiveStates(
+        List <ContractJpaEntity> resultList = contractRepository.findAllByClientAndActiveStates(
                 client,
                 List.of("ACTIVE", "BOOKED")
         );
@@ -634,10 +638,10 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         var list = saveContract("empty_states", car, "ACTIVE",
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
         Client client = (Client) list.get(1);
-        contractRepository.save((Contract) list.getFirst());
+        contractRepository.save((ContractJpaEntity) list.getFirst());
 
         // when
-        List<Contract> resultList = contractRepository.findAllByClientAndActiveStates(client, List.of());
+        List<ContractJpaEntity> resultList = contractRepository.findAllByClientAndActiveStates(client, List.of());
 
         // then
         assertThat(resultList).isEmpty();
@@ -687,7 +691,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         var list = saveContract("id", car, "ACTIVE",
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
-        Contract legitimateContract = contractRepository.save((Contract) list.getFirst());
+        ContractJpaEntity legitimateContract = contractRepository.save((ContractJpaEntity) list.getFirst());
 
         List<String> injectionPayloads = Arrays.asList(
                 "' OR '1'='1",
@@ -707,28 +711,28 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
             // Test each vulnerable string parameter individually
 
             // 1. status
-            Page<Contract> byStatus = contractRepository.findAllByFilter(
+            Page<ContractJpaEntity> byStatus = contractRepository.findAllByFilter(
                     payload, null, null, null, null, null, pageable);
             assertThat(byStatus.getContent())
                     .as("findAllByFilter should return empty for status payload: %s", payload)
                     .isEmpty();
 
             // 2. brand
-            Page<Contract> byBrand = contractRepository.findAllByFilter(
+            Page<ContractJpaEntity> byBrand = contractRepository.findAllByFilter(
                     null, null, null, payload, null, null, pageable);
             assertThat(byBrand.getContent())
                     .as("findAllByFilter should return empty for brand payload: %s", payload)
                     .isEmpty();
 
             // 3. bodyType
-            Page<Contract> byBodyType = contractRepository.findAllByFilter(
+            Page<ContractJpaEntity> byBodyType = contractRepository.findAllByFilter(
                     null, null, null, null, payload, null, pageable);
             assertThat(byBodyType.getContent())
                     .as("findAllByFilter should return empty for bodyType payload: %s", payload)
                     .isEmpty();
 
             // 4. carClass
-            Page<Contract> byCarClass = contractRepository.findAllByFilter(
+            Page<ContractJpaEntity> byCarClass = contractRepository.findAllByFilter(
                     null, null, null, null, null, payload, pageable);
             assertThat(byCarClass.getContent())
                     .as("findAllByFilter should return empty for carClass payload: %s", payload)
@@ -736,16 +740,16 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         }
 
         // Убедимся, что легитимные значения всё ещё работают
-        Page<Contract> validStatus = contractRepository.findAllByFilter("ACTIVE", null, null, null, null, null, pageable);
+        Page<ContractJpaEntity> validStatus = contractRepository.findAllByFilter("ACTIVE", null, null, null, null, null, pageable);
         assertThat(validStatus.getContent()).contains(legitimateContract);
 
-        Page<Contract> validBrand = contractRepository.findAllByFilter(null, null, null, "SAFE_BRAND", null, null, pageable);
+        Page<ContractJpaEntity> validBrand = contractRepository.findAllByFilter(null, null, null, "SAFE_BRAND", null, null, pageable);
         assertThat(validBrand.getContent()).contains(legitimateContract);
 
-        Page<Contract> validBody = contractRepository.findAllByFilter(null, null, null, null, "SEDAN", null, pageable);
+        Page<ContractJpaEntity> validBody = contractRepository.findAllByFilter(null, null, null, null, "SEDAN", null, pageable);
         assertThat(validBody.getContent()).contains(legitimateContract);
 
-        Page<Contract> validClass = contractRepository.findAllByFilter(null, null, null, null, null, "LUXURY", pageable);
+        Page<ContractJpaEntity> validClass = contractRepository.findAllByFilter(null, null, null, null, null, "LUXURY", pageable);
         assertThat(validClass.getContent()).contains(legitimateContract);
     }
 
@@ -772,7 +776,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3));
 
         Client client = (Client) list.get(1);
-        Contract legit = contractRepository.save((Contract) list.get(0));
+        ContractJpaEntity legit = contractRepository.save((ContractJpaEntity) list.get(0));
 
         // список инъекционных нагрузок для проверки устойчивости метода
         List<String> injectionPayloads = Arrays.asList(
@@ -790,7 +794,7 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
 
         // when & then
         for (String payload : injectionPayloads) {
-            Iterable<Contract> result = contractRepository.findAllByClientAndActiveStates(
+            Iterable<ContractJpaEntity> result = contractRepository.findAllByClientAndActiveStates(
                     client,
                     List.of(payload)
             );
@@ -802,14 +806,14 @@ public class ContractRepositoryTest extends AbstractRepositoryTest {
         }
 
         // Проверяем, что легитимное значение всё ещё возвращает ожидаемый результат
-        List<Contract> validResult = contractRepository.findAllByClientAndActiveStates(
+        List<ContractJpaEntity> validResult = contractRepository.findAllByClientAndActiveStates(
                 client,
                 List.of("ACTIVE")
         );
 
         assertThat(validResult)
                 .as("findAllByClientAndActiveStates should return legitimate contracts for 'ACTIVE'")
-                .extracting(Contract::getId)
+                .extracting(ContractJpaEntity::getId)
                 .containsExactly(legit.getId());
 
         // и что инъекционные вызовы не повредили данные

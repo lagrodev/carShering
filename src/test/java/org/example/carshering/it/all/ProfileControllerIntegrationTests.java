@@ -13,6 +13,8 @@ import org.example.carshering.domain.entity.Document;
 import org.example.carshering.domain.entity.DocumentType;
 import org.example.carshering.domain.entity.Role;
 import org.example.carshering.it.BaseWebIntegrateTest;
+import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
+import org.example.carshering.repository.RentalStateRepository;
 import org.example.carshering.repository.*;
 import org.example.carshering.util.WithMockClientDetails;
 import org.junit.jupiter.api.BeforeEach;
