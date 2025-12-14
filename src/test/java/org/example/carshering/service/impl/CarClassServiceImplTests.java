@@ -1,11 +1,11 @@
 package org.example.carshering.service.impl;
 
 import org.example.carshering.dto.request.create.CreateCarModelName;
-import org.example.carshering.dto.response.ModelNameResponse;
-import org.example.carshering.domain.entity.CarClass;
-import org.example.carshering.exceptions.custom.NotFoundException;
+import org.example.carshering.fleet.api.dto.responce.ModelNameResponse;
+import org.example.carshering.fleet.infrastructure.persistence.entity.CarClass;
+import org.example.carshering.common.exceptions.custom.NotFoundException;
 import org.example.carshering.mapper.CarClassMapper;
-import org.example.carshering.repository.CarClassRepository;
+import org.example.carshering.fleet.infrastructure.persistence.repository.CarClassRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

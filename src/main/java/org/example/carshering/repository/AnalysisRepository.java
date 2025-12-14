@@ -1,6 +1,6 @@
 package org.example.carshering.repository;
 
-import org.example.carshering.domain.entity.Car;
+import org.example.carshering.fleet.infrastructure.persistence.entity.Car;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -199,7 +199,7 @@ public interface AnalysisRepository extends JpaRepository<Car, Long> {
 //        where car.state = :state
 //"""
 //    )
-//    Long findAllCarByState(@Param("state") CarState state);
+//    Long findAllCarByState(@Param("state") CarStateType state);
 //
 //    @Query(
 //            """

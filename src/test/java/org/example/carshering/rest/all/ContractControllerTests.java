@@ -1,12 +1,13 @@
 package org.example.carshering.rest.all;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.request.create.CreateContractRequest;
-import org.example.carshering.dto.request.update.UpdateContractRequest;
-import org.example.carshering.dto.response.ContractResponse;
-import org.example.carshering.exceptions.custom.CarNotFoundException;
-import org.example.carshering.exceptions.custom.NotFoundException;
-import org.example.carshering.exceptions.custom.UnauthorizedContractAccessException;
+import org.example.carshering.rental.api.dto.request.CreateContractRequest;
+import org.example.carshering.rental.api.dto.request.UpdateContractRequest;
+import org.example.carshering.rental.api.dto.response.ContractResponse;
+import org.example.carshering.common.exceptions.custom.CarNotFoundException;
+import org.example.carshering.common.exceptions.custom.NotFoundException;
+import org.example.carshering.common.exceptions.custom.UnauthorizedContractAccessException;
+import org.example.carshering.rental.api.rest.all.ContractController;
 import org.example.carshering.rest.BaseWebMvcTest;
 import org.example.carshering.security.ClientDetails;
 import org.example.carshering.service.interfaces.ContractService;

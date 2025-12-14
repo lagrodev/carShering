@@ -1,9 +1,10 @@
 package org.example.carshering.rest.all;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.response.CarDetailResponse;
-import org.example.carshering.dto.response.CarListItemResponse;
-import org.example.carshering.exceptions.custom.CarNotFoundException;
+import org.example.carshering.fleet.api.dto.responce.CarDetailResponse;
+import org.example.carshering.fleet.api.dto.responce.CarListItemResponse;
+import org.example.carshering.common.exceptions.custom.CarNotFoundException;
+import org.example.carshering.fleet.api.rest.all.CarController;
 import org.example.carshering.rest.BaseWebMvcTest;
 import org.example.carshering.service.interfaces.*;
 import org.example.carshering.util.DataUtils;

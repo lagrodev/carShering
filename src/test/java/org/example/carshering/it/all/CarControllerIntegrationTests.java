@@ -1,9 +1,9 @@
 package org.example.carshering.it.all;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.domain.entity.*;
+import org.example.carshering.fleet.infrastructure.persistence.entity.*;
+import org.example.carshering.fleet.infrastructure.persistence.repository.*;
 import org.example.carshering.it.BaseWebIntegrateTest;
-import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,13 +1,13 @@
 package org.example.carshering.rental.domain.repository;
 
+import org.example.carshering.common.domain.valueobject.CarId;
+import org.example.carshering.common.domain.valueobject.ClientId;
 import org.example.carshering.rental.domain.model.Contract;
-import org.example.carshering.rental.domain.valueobject.CarId;
-import org.example.carshering.rental.domain.valueobject.ClientId;
-import org.example.carshering.rental.domain.valueobject.ContractId;
-import org.example.carshering.rental.domain.valueobject.RentalPeriod;
+import org.example.carshering.rental.domain.valueobject.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +30,21 @@ public interface ContractDomainRepository {
 
     //    // Delete a contract by its ID
 //    void deleteById(ContractId contractId);
-    Optional<Contract> findByIdAndClientId(ContractId contractId, ClientId clientId);
+    Optional<Contract> getContractByIdAndClientId(ContractId contractId, ClientId clientId);
+
+    boolean isCarAvailable(CarId carId, RentalPeriod period);
+
+    List<Contract> findOverlappingContracts(
+            CarId carId,
+            RentalPeriod period
+    );
+
+    List<Contract> findConfirmedContractsWithStartDateBefore(LocalDateTime now);
+
+    List<Contract> saveAll(List<Contract> contractsToActivate);
+
+    List<Contract> findActiveContractsWithEndDateBefore(LocalDateTime now);
 
 
+    Page<Contract> findAllByFilter(RentalStateType status, ClientId carId, CarId clientId, String brand, String bodyType, String carClass, Pageable pageable);
 }

@@ -1,6 +1,7 @@
 package org.example.carshering.repository.impl;
 
-import org.example.carshering.domain.entity.*;
+import org.example.carshering.fleet.infrastructure.persistence.entity.*;
+import org.example.carshering.fleet.infrastructure.persistence.repository.*;
 import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.*;

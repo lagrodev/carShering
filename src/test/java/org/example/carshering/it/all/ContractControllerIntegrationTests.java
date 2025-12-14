@@ -4,8 +4,8 @@
 //import jakarta.servlet.FilterChain;
 //import jakarta.servlet.ServletException;
 //import lombok.extern.slf4j.Slf4j;
-//import org.example.carshering.dto.request.create.CreateContractRequest;
-//import org.example.carshering.dto.request.update.UpdateContractRequest;
+//import org.example.carshering.rental.api.dto.request.CreateContractRequest;
+//import org.example.carshering.rental.api.dto.request.UpdateContractRequest;
 //import org.example.carshering.entity.*;
 //import org.example.carshering.it.BaseWebIntegrateTest;
 //import org.example.carshering.repository.*;
@@ -150,7 +150,7 @@
 //                dataUtils.getCarModelSEDAN(brand, modelName, carClass)
 //        );
 //
-//        CarState carState = carStateRepository
+//        CarStateType carState = carStateRepository
 //                .findByStatusIgnoreCase(dataUtils.getCarStateTransient().getStatus())
 //                .orElseGet(() -> carStateRepository.save(dataUtils.getCarStateTransient()));
 //
@@ -176,7 +176,7 @@
 //                dataUtils.getCarModelBody(brand, modelName, carClass, bodyType)
 //        );
 //
-//        CarState carState = carStateRepository
+//        CarStateType carState = carStateRepository
 //                .findByStatusIgnoreCase(carStateStr)
 //                .orElseGet(() -> carStateRepository.save(dataUtils.getCarStateTransient(carStateStr)));
 //
@@ -229,7 +229,7 @@
 //    public void givenContractDto_whenCreateContract_thenSuccessResponse() throws Exception {
 //        // given
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
@@ -271,7 +271,7 @@
 //    @WithMockClientDetails(username = "testuser")
 //    public void givenInvalidContractDto_whenCreateContract_thenValidationErrorResponse() throws Exception {
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
@@ -311,7 +311,7 @@
 //    @WithMockClientDetails(username = "testuser")
 //    public void givenInvalidContractDto_whenCreateContract_thenValidationError() throws Exception {
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
@@ -350,7 +350,7 @@
 //    @DisplayName("Test create contract with non-existent car functionality")
 //    public void givenContractDtoWithNonExistentCar_whenCreateContract_thenErrorResponse() throws Exception {
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
@@ -438,7 +438,7 @@
 //        List<?> carAttributes2 = getCarWithSpecificAttributes("Honda", "Accord", "ECONOMY", "AVAILABLE", "SEDAN");
 //
 //        Car carEntity1 = dataUtils.getJohnDoeTransient(
-//                (CarState) carAttributes1.get(0),
+//                (CarStateType) carAttributes1.get(0),
 //                (CarModel) carAttributes1.get(1),
 //                "A123BC", "VIN123",
 //                2022, 100.0
@@ -446,7 +446,7 @@
 //        carRepository.save(carEntity1);
 //
 //        Car carEntity2 = dataUtils.getJohnDoeTransient(
-//                (CarState) carAttributes2.get(0),
+//                (CarStateType) carAttributes2.get(0),
 //                (CarModel) carAttributes2.get(1),
 //                "B456CD", "VIN456",
 //                2021, 150.0
@@ -484,7 +484,7 @@
 //    public void givenContractId_whenGetContract_thenSuccessResponse() throws Exception {
 //        // given
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //        HashMap<String, Object> hashMap = createAndSaveClientWithVerifiedDocument();
@@ -566,7 +566,7 @@
 //        document.setVerified(true);
 //
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //
@@ -625,7 +625,7 @@
 //
 //        // given
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //
@@ -660,7 +660,7 @@
 //        // given
 //
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //        var list = saveContract("user1", car, "PENDING",
@@ -701,7 +701,7 @@
 //
 //        // given
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //        var list = saveContract("user1", car, "PENDING",
@@ -738,7 +738,7 @@
 //
 //        // given
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //        var list = saveContract("user1", car, "PENDING",
@@ -778,7 +778,7 @@
 //
 //
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //

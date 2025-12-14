@@ -1,10 +1,10 @@
 //package org.example.carshering.service.impl;
 //
 //import org.example.carshering.dto.request.FilterContractRequest;
-//import org.example.carshering.dto.request.create.CreateContractRequest;
-//import org.example.carshering.dto.request.update.UpdateContractRequest;
-//import org.example.carshering.dto.response.ContractResponse;
-//import org.example.carshering.dto.response.DocumentResponse;
+//import org.example.carshering.rental.api.dto.request.CreateContractRequest;
+//import org.example.carshering.rental.api.dto.request.UpdateContractRequest;
+//import org.example.carshering.rental.api.dto.response.ContractResponse;
+//import org.example.carshering.identity.api.dto.response.DocumentResponse;
 //import org.example.carshering.entity.Car;
 //import org.example.carshering.entity.Client;
 //import org.example.carshering.entity.Contract;
@@ -647,7 +647,7 @@
 //        given(contractMapper.toDto(contract)).willReturn(response);
 //
 //        // when
-//        ContractResponse actual = serviceUnderTest.findContract(contractId, userId);
+//        ContractResponse actual = serviceUnderTest.getUserContract(contractId, userId);
 //
 //        // then
 //        assertThat(actual).isNotNull();
@@ -670,7 +670,7 @@
 //        // when + then
 //        assertThrows(
 //                NotFoundException.class,
-//                () -> serviceUnderTest.findContract(contractId, userId)
+//                () -> serviceUnderTest.getUserContract(contractId, userId)
 //        );
 //
 //        verify(contractMapper, never()).toDto(any(Contract.class));
@@ -709,7 +709,7 @@
 //        given(contractMapper.toDto(contract)).willReturn(response);
 //
 //        // when
-//        ContractResponse actual = serviceUnderTest.getContractById(contractId);
+//        ContractResponse actual = serviceUnderTest.getContractByIdForAdmin(contractId);
 //
 //        // then
 //        assertThat(actual).isNotNull();

@@ -1,8 +1,8 @@
 package org.example.carshering.repository.impl;
 
-import org.example.carshering.domain.entity.Brand;
+import org.example.carshering.fleet.infrastructure.persistence.entity.Brand;
 import org.example.carshering.repository.AbstractRepositoryTest;
-import org.example.carshering.repository.BrandRepository;
+import org.example.carshering.fleet.infrastructure.persistence.repository.BrandRepository;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

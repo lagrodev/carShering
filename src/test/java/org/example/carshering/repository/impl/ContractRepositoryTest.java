@@ -1,6 +1,9 @@
 package org.example.carshering.repository.impl;
 
-import org.example.carshering.domain.entity.*;
+import org.example.carshering.fleet.infrastructure.persistence.entity.*;
+import org.example.carshering.fleet.infrastructure.persistence.repository.*;
+import org.example.carshering.identity.infrastructure.persistence.entity.Client;
+import org.example.carshering.identity.infrastructure.persistence.repository.ClientRepository;
 import org.example.carshering.rental.infrastructure.persistence.entity.ContractJpaEntity;
 import org.example.carshering.rental.infrastructure.persistence.entity.RentalState;
 import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;

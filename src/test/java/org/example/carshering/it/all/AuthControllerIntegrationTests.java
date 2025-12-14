@@ -1,14 +1,18 @@
 package org.example.carshering.it.all;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.request.AuthRequest;
-import org.example.carshering.dto.request.RegistrationRequest;
-import org.example.carshering.domain.entity.Client;
-import org.example.carshering.domain.entity.Role;
+import org.example.carshering.fleet.infrastructure.persistence.repository.*;
+import org.example.carshering.identity.api.dto.request.AuthRequest;
+import org.example.carshering.identity.api.dto.request.RegistrationRequest;
+import org.example.carshering.identity.infrastructure.persistence.entity.Client;
+import org.example.carshering.identity.infrastructure.persistence.entity.Role;
+import org.example.carshering.identity.infrastructure.persistence.repository.ClientRepository;
+import org.example.carshering.identity.infrastructure.persistence.repository.DocumentRepository;
+import org.example.carshering.identity.infrastructure.persistence.repository.DocumentTypeRepository;
+import org.example.carshering.identity.infrastructure.persistence.repository.RoleRepository;
 import org.example.carshering.it.BaseWebIntegrateTest;
 import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
 import org.example.carshering.repository.RentalStateRepository;
-import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

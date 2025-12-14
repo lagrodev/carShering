@@ -2,8 +2,8 @@
 //
 //import lombok.RequiredArgsConstructor;
 //import org.example.carshering.dto.response.*;
-//import org.example.carshering.domain.entity.Car;
-//import org.example.carshering.domain.entity.CarState;
+//import org.example.carshering.fleet.infrastructure.persistence.entity.Car;
+//import org.example.carshering.fleet.infrastructure.persistence.entity.CarStateType;
 //import org.example.carshering.rental.infrastructure.persistence.entity.RentalState;
 //import org.example.carshering.exceptions.custom.NotFoundException;
 //import org.example.carshering.repository.AnalysisRepository;
@@ -153,7 +153,7 @@
 //
 //        Long totalCars = analysisRepository.getAllCar();
 //
-//        CarState state = carStateService.getStateByName("AVAILABLE");
+//        CarStateType state = carStateService.getStateByName("AVAILABLE");
 //        Long totalAvailableCars = analysisRepository.findAllCarByState(state);
 //        BigDecimal profit = analysisRepository.totalRevenue();
 //        BigDecimal profitThisMonth = analysisRepository.profitThisMonth(startOfMonth,

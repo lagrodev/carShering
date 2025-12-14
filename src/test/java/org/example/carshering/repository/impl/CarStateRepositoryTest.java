@@ -1,8 +1,8 @@
 package org.example.carshering.repository.impl;
 
-import org.example.carshering.domain.entity.CarState;
+import org.example.carshering.fleet.infrastructure.persistence.entity.CarState;
 import org.example.carshering.repository.AbstractRepositoryTest;
-import org.example.carshering.repository.CarStateRepository;
+import org.example.carshering.fleet.infrastructure.persistence.repository.CarStateRepository;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

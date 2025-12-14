@@ -1,10 +1,10 @@
 package org.example.carshering.service.impl;
 
 
-import org.example.carshering.dto.response.DocumentTypeResponse;
-import org.example.carshering.domain.entity.DocumentType;
-import org.example.carshering.exceptions.custom.DocumentTypeException;
-import org.example.carshering.repository.DocumentTypeRepository;
+import org.example.carshering.identity.api.dto.response.DocumentTypeResponse;
+import org.example.carshering.identity.infrastructure.persistence.entity.DocumentType;
+import org.example.carshering.common.exceptions.custom.DocumentTypeException;
+import org.example.carshering.identity.infrastructure.persistence.repository.DocumentTypeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

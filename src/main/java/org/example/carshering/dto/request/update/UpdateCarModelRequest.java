@@ -7,15 +7,15 @@ import jakarta.validation.constraints.NotBlank;
 public record UpdateCarModelRequest(
 
         @Schema(description = "Brand name", example = "Toyota")
-        @NotBlank String brand,
+        String brand,
 
         @Schema(description = "Model name", example = "Camry")
-        @NotBlank String model,
+        String model,
 
         @Schema(description = "Body type", example = "Sedan")
-        @NotBlank String bodyType,
+        String bodyType,
 
         @Schema(description = "Car class", example = "Business")
-        @NotBlank String carClass
+        String carClass
 ) {
 }

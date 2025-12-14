@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.carshering.common.exceptions.custom.BusinessConflictException;
+import org.example.carshering.common.exceptions.custom.NotFoundException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -48,14 +50,14 @@ public class RentalPeriod {
      */
     public static RentalPeriod of(LocalDateTime startDate, LocalDateTime endDate) {
         if (startDate == null) {
-            throw new IllegalArgumentException("Rental start date cannot be null");
+            throw new NotFoundException("Rental start date cannot be null");
         }
         if (endDate == null) {
-            throw new IllegalArgumentException("Rental end date cannot be null");
+            throw new NotFoundException("Rental end date cannot be null");
         }
 
         if (!endDate.isAfter(startDate)) {
-            throw new IllegalArgumentException(
+            throw new BusinessConflictException(
                 String.format("Rental end date (%s) must be after start date (%s)",
                     endDate, startDate)
             );
@@ -64,7 +66,7 @@ public class RentalPeriod {
         long durationMinutes = Duration.between(startDate, endDate).toMinutes();
 
         if (durationMinutes < MIN_RENTAL_MINUTES) {
-            throw new IllegalArgumentException(
+            throw new BusinessConflictException(
                 String.format("Minimum rental duration: %d minutes (1 hour). Got: %d minutes",
                     MIN_RENTAL_MINUTES, durationMinutes)
             );
@@ -72,7 +74,7 @@ public class RentalPeriod {
 
         long durationDays = Duration.between(startDate, endDate).toDays();
         if (durationDays > MAX_RENTAL_DAYS) {
-            throw new IllegalArgumentException(
+            throw new BusinessConflictException(
                 String.format("Maximum rental duration: %d days. Got: %d days",
                     MAX_RENTAL_DAYS, durationDays)
             );

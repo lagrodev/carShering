@@ -1,16 +1,21 @@
 package org.example.carshering.rental.domain.model;
 
 import lombok.Getter;
+import org.example.carshering.common.domain.valueobject.CarId;
+import org.example.carshering.common.domain.valueobject.ClientId;
 import org.example.carshering.common.domain.valueobject.Money;
-import org.example.carshering.exceptions.custom.InvalidContractStateException;
+import org.example.carshering.common.exceptions.custom.ContractNotYetStartedException;
+import org.example.carshering.common.exceptions.custom.InvalidContractStateException;
 import org.example.carshering.rental.domain.valueobject.*;
+
+import java.time.LocalDateTime;
 
 @Getter
 public class Contract {
     // Unique identifier for the contract
     // final fields
     private final ContractId id;
-    private final CarId cardId;
+    private final CarId carId;
     private final ClientId clientId;
 
     // mutable fields
@@ -26,12 +31,12 @@ public class Contract {
                 RentalStateType.PENDING, null);
     }
 
-    private Contract(ContractId id, ClientId clientId, CarId cardId,
+    private Contract(ContractId id, ClientId clientId, CarId carId,
                      RentalPeriod rentalPeriod, Money totalCost,
                      RentalStateType state, String comment) {
         this.id = id;
         this.clientId = clientId;
-        this.cardId = cardId;
+        this.carId = carId;
         this.rentalPeriod = rentalPeriod;
         this.totalCost = totalCost;
         this.state = state;
@@ -59,12 +64,6 @@ public class Contract {
         state = RentalStateType.CANCELLED;
     }
 
-    public void complete(){
-        if (!state.canTransitionTo(RentalStateType.COMPLETED)) {
-            throw new InvalidContractStateException("Cannot complete contract in state:" + state);
-        }
-        state = RentalStateType.COMPLETED;
-    }
 
 
     public void requestCancellation() {
@@ -84,5 +83,33 @@ public class Contract {
     }
 
 
+    public void activate() {
+        if (!state.canTransitionTo(RentalStateType.ACTIVE)) {
+            throw new InvalidContractStateException("Cannot activate contract in state: " + state);
+        }
 
+        if (rentalPeriod.getStartDate().isAfter(LocalDateTime.now())) {
+            throw new ContractNotYetStartedException(
+                    "Cannot activate contract before start date: " + rentalPeriod.getStartDate()
+            );
+        }
+
+        state = RentalStateType.ACTIVE;
+        // ивент в domain ivent
+    }
+
+    public void complete(){
+        if (!state.canTransitionTo(RentalStateType.COMPLETED)) {
+            throw new InvalidContractStateException("Cannot complete contract in state: " + state);
+        }
+
+        if (rentalPeriod.getEndDate().isAfter(LocalDateTime.now())) {
+            throw new InvalidContractStateException(
+                    "Cannot complete contract before end date: " + rentalPeriod.getEndDate()
+            );
+        }
+
+        state = RentalStateType.COMPLETED;
+        // ивент в domain ivent
+    }
 }

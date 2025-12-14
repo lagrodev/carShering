@@ -1,10 +1,10 @@
 package org.example.carshering.repository.impl;
 
-import org.example.carshering.domain.entity.Client;
-import org.example.carshering.domain.entity.Role;
+import org.example.carshering.identity.infrastructure.persistence.entity.Client;
+import org.example.carshering.identity.infrastructure.persistence.entity.Role;
 import org.example.carshering.repository.AbstractRepositoryTest;
-import org.example.carshering.repository.ClientRepository;
-import org.example.carshering.repository.RoleRepository;
+import org.example.carshering.identity.infrastructure.persistence.repository.ClientRepository;
+import org.example.carshering.identity.infrastructure.persistence.repository.RoleRepository;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

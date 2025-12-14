@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.carshering.exceptions.custom.InvalidArgumentException;
+import org.example.carshering.common.exceptions.custom.InvalidArgumentException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

@@ -1,8 +1,9 @@
 package org.example.carshering.service.impl;
 
-import org.example.carshering.domain.entity.Client;
-import org.example.carshering.domain.entity.Role;
-import org.example.carshering.repository.ClientRepository;
+import org.example.carshering.identity.application.service.auth.ClientDetailsServiceImpl;
+import org.example.carshering.identity.infrastructure.persistence.entity.Client;
+import org.example.carshering.identity.infrastructure.persistence.entity.Role;
+import org.example.carshering.identity.infrastructure.persistence.repository.ClientRepository;
 import org.example.carshering.security.ClientDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,11 +1,12 @@
 package org.example.carshering.rest.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.request.RoleRequested;
-import org.example.carshering.dto.response.AllUserResponse;
-import org.example.carshering.dto.response.ShortUserResponse;
-import org.example.carshering.exceptions.custom.NotFoundException;
-import org.example.carshering.exceptions.custom.RoleNotFoundException;
+import org.example.carshering.identity.api.dto.request.RoleRequested;
+import org.example.carshering.identity.api.dto.response.AllUserResponse;
+import org.example.carshering.identity.api.dto.response.ShortUserResponse;
+import org.example.carshering.common.exceptions.custom.NotFoundException;
+import org.example.carshering.common.exceptions.custom.RoleNotFoundException;
+import org.example.carshering.identity.api.rest.admin.AdminClientController;
 import org.example.carshering.rest.BaseWebMvcTest;
 import org.example.carshering.service.interfaces.ClientService;
 import org.example.carshering.util.DataUtils;

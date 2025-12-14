@@ -1,15 +1,16 @@
 package org.example.carshering.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.dto.response.CarListItemResponse;
-import org.example.carshering.domain.entity.Car;
-import org.example.carshering.domain.entity.Client;
-import org.example.carshering.domain.entity.Favorite;
-import org.example.carshering.exceptions.custom.AlreadyExistsException;
-import org.example.carshering.mapper.CarMapper;
-import org.example.carshering.repository.FavoriteRepository;
-import org.example.carshering.service.interfaces.CarService;
-import org.example.carshering.service.interfaces.ClientService;
+import org.example.carshering.common.domain.valueobject.CarId;
+import org.example.carshering.common.domain.valueobject.ClientId;
+import org.example.carshering.common.exceptions.custom.AlreadyExistsException;
+import org.example.carshering.fleet.api.dto.responce.CarListItemResponse;
+import org.example.carshering.fleet.application.dto.response.CarDto;
+import org.example.carshering.fleet.application.service.CarApplicationService;
+import org.example.carshering.fleet.infrastructure.persistence.entity.Favorite;
+import org.example.carshering.fleet.infrastructure.persistence.repository.FavoriteRepository;
+import org.example.carshering.identity.application.dto.response.ClientDto;
+import org.example.carshering.identity.application.service.ClientApplicationService;
 import org.example.carshering.service.interfaces.FavoriteService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,25 +25,31 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class FavoriteServiceImpl implements FavoriteService {
     private final FavoriteRepository favoriteRepository;
-    private final CarMapper carMapper;
-    private final ClientService clientService;
-    private final CarService carService;
+    private final ClientApplicationService clientService;
+    private final CarApplicationService carService;
 
     @Override
     public Page<CarListItemResponse> getAllFavorites(Long userId, Pageable pageable) {
-
-
         List<Favorite> list = favoriteRepository.findByClientId(userId);
         List<CarListItemResponse> carListItemResponses = list.stream()
-                .map(
-                        favorite -> {
-                            Car car = carService.getEntity(favorite.getCar().getId());
-                            return carMapper.toListItemDto(car, true);
-                        }
-                ).toList();
+                .map(favorite -> {
+                    CarDto car = carService.getCarById(favorite.getCar());
+                    // Маппинг напрямую без фасада
+                    return new CarListItemResponse(
+                            car.id(),
+                            car.model().brand(),
+                            car.model().carClass(),
+                            car.model().modelName(),
+                            car.year(),
+                            car.dailyRate(),
+                            car.state(),
+                            true  // в избранном всегда true
+                    );
+                })
+                .toList();
+
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), carListItemResponses.size());
-
         List<CarListItemResponse> paged = carListItemResponses.subList(start, end);
 
         return new PageImpl<>(paged, pageable, carListItemResponses.size());
@@ -56,45 +63,59 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     public CarListItemResponse addFavorite(Long userId, Long carId) {
+        ClientDto client = clientService.findUser(userId);
+        CarDto car = carService.getCarById(new CarId(carId));
 
-        Client client = clientService.getEntity(userId);
-        Car car = carService.getEntity(carId);
         favoriteRepository.findByClientIdAndCarId(userId, carId)
                 .ifPresent(favorite -> {
                     throw new AlreadyExistsException("Favorite already exists for userId: " + userId + " and carId: " + carId);
                 });
 
-
         favoriteRepository.save(
-                Favorite
-                        .builder()
-                        .client(client)
-                        .car(car)
+                Favorite.builder()
+                        .client(new ClientId(client.id()))
+                        .car(new CarId(car.id()))
                         .build()
         );
 
-        return carMapper.toListItemDto(car, true);
-
+        // Маппинг напрямую без фасада
+        return new CarListItemResponse(
+                car.id(),
+                car.model().brand(),
+                car.model().carClass(),
+                car.model().modelName(),
+                car.year(),
+                car.dailyRate(),
+                car.state(),
+                true  // только что добавили в избранное
+        );
     }
 
     @Override
     public CarListItemResponse getFavorite(Long userId, Long carId) {
-
-        return favoriteRepository.findByClientIdAndCarId(userId, carId).map(
-                favoriteResponse -> {
-                    Car car = carService.getEntity(favoriteResponse.getCar().getId());
-                    return carMapper.toListItemDto(car, true);
-                }
-        ).orElse(null);
+        return favoriteRepository.findByClientIdAndCarId(userId, carId)
+                .map(favoriteResponse -> {
+                    CarDto car = carService.getCarById(favoriteResponse.getCar());
+                    // Маппинг напрямую без фасада
+                    return new CarListItemResponse(
+                            car.id(),
+                            car.model().brand(),
+                            car.model().carClass(),
+                            car.model().modelName(),
+                            car.year(),
+                            car.dailyRate(),
+                            car.state(),
+                            true  // в избранном всегда true
+                    );
+                })
+                .orElse(null);
     }
 
     @Override
     public Set<Long> getAllFavoriteCarIds(Long clientId) {
         List<Favorite> list = favoriteRepository.findByClientId(clientId);
         return list.stream()
-                .map(favorite -> favorite.getCar().getId())
+                .map(favorite -> favorite.getCar().value())
                 .collect(java.util.stream.Collectors.toSet());
     }
-
-
 }

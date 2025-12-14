@@ -1,8 +1,8 @@
 package org.example.carshering.service.interfaces;
 
 import org.example.carshering.dto.request.create.CreateCarModelsBrand;
-import org.example.carshering.dto.response.BrandModelResponse;
-import org.example.carshering.domain.entity.Brand;
+import org.example.carshering.fleet.api.dto.responce.BrandModelResponse;
+import org.example.carshering.fleet.infrastructure.persistence.entity.Brand;
 
 import java.util.List;
 

@@ -1,7 +1,10 @@
 package org.example.carshering.repository.impl;
 
-import org.example.carshering.domain.entity.*;
 import org.example.carshering.dto.response.ContractDetailResponse;
+import org.example.carshering.fleet.infrastructure.persistence.entity.*;
+import org.example.carshering.fleet.infrastructure.persistence.repository.*;
+import org.example.carshering.identity.infrastructure.persistence.entity.Client;
+import org.example.carshering.identity.infrastructure.persistence.repository.ClientRepository;
 import org.example.carshering.rental.infrastructure.persistence.entity.Contract;
 import org.example.carshering.rental.infrastructure.persistence.entity.RentalState;
 import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
@@ -227,7 +230,7 @@ public class AnalysisRepositoryTest extends AbstractRepositoryTest {
 //    public void givenContractsInPeriod_whenGetDailyRevenueBetween_thenReturnsDailyRevenue() {
 //        // given
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //
@@ -353,7 +356,7 @@ public class AnalysisRepositoryTest extends AbstractRepositoryTest {
 //    public void givenSomeDaysWithoutContracts_whenGetDailyRevenueBetween_thenGroupsByDatesWithContracts() {
 //        // given
 //        Car car = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //

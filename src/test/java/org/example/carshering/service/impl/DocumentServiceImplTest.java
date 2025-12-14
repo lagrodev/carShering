@@ -1,17 +1,17 @@
 package org.example.carshering.service.impl;
 
 
-import org.example.carshering.dto.request.create.CreateDocumentRequest;
-import org.example.carshering.dto.request.update.UpdateDocumentRequest;
-import org.example.carshering.dto.response.DocumentResponse;
-import org.example.carshering.domain.entity.Client;
-import org.example.carshering.domain.entity.Document;
-import org.example.carshering.domain.entity.DocumentType;
-import org.example.carshering.exceptions.custom.AlreadyExistsException;
-import org.example.carshering.exceptions.custom.BannedClientAccessException;
-import org.example.carshering.exceptions.custom.NotFoundException;
-import org.example.carshering.mapper.DocumentMapper;
-import org.example.carshering.repository.DocumentRepository;
+import org.example.carshering.identity.api.dto.request.CreateDocumentRequest;
+import org.example.carshering.identity.api.dto.request.UpdateDocumentRequest;
+import org.example.carshering.identity.api.dto.response.DocumentResponse;
+import org.example.carshering.identity.infrastructure.persistence.entity.Client;
+import org.example.carshering.identity.infrastructure.persistence.entity.Document;
+import org.example.carshering.identity.infrastructure.persistence.entity.DocumentType;
+import org.example.carshering.common.exceptions.custom.AlreadyExistsException;
+import org.example.carshering.common.exceptions.custom.BannedClientAccessException;
+import org.example.carshering.common.exceptions.custom.NotFoundException;
+import org.example.carshering.identity.api.mapper.DocumentMapper;
+import org.example.carshering.identity.infrastructure.persistence.repository.DocumentRepository;
 import org.example.carshering.service.domain.ClientServiceHelper;
 import org.example.carshering.service.domain.DocumentTypeServiceHelper;
 import org.example.carshering.util.DataUtils;

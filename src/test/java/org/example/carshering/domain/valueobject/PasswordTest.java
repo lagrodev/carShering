@@ -1,5 +1,6 @@
 package org.example.carshering.domain.valueobject;
 
+import org.example.carshering.identity.domain.valueobject.user.Password;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum RentalStateType {
-    PENDING("Ожидает подтверждения"){
+    PENDING("Ожидает подтверждения") {
         @Override
         public boolean canTransitionTo(RentalStateType target) {
             return target == CONFIRMED || target == CANCELLATION_REQUESTED;
@@ -15,7 +15,7 @@ public enum RentalStateType {
             return true; // Можно изменять даты до подтверждения
         }
     },
-    CONFIRMED("Подтверждён"){
+    CONFIRMED("Подтверждён") {
         @Override
         public boolean canTransitionTo(RentalStateType target) {
             return target == ACTIVE || target == CANCELLATION_REQUESTED;
@@ -71,15 +71,15 @@ public enum RentalStateType {
         }
     };
 
-    public abstract boolean canTransitionTo(RentalStateType target);
-
-    public abstract boolean isUpdatable();
-
     private final String description;
 
     RentalStateType(String description) {
         this.description = description;
     }
+
+    public abstract boolean canTransitionTo(RentalStateType target);
+
+    public abstract boolean isUpdatable();
 
     public boolean isTerminal() {
         return this == COMPLETED || this == CANCELLED;

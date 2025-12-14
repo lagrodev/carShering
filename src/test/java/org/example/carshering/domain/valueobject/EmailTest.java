@@ -1,6 +1,7 @@
 package org.example.carshering.domain.valueobject;
 
-import org.example.carshering.exceptions.custom.InvalidArgumentException;
+import org.example.carshering.common.exceptions.custom.InvalidArgumentException;
+import org.example.carshering.identity.domain.valueobject.user.Email;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

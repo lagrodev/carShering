@@ -1,119 +1,119 @@
-package org.example.carshering.service.impl;
-
-import lombok.RequiredArgsConstructor;
-import org.example.carshering.dto.request.FilterCarModelRequest;
-import org.example.carshering.dto.request.create.CreateCarModelRequest;
-import org.example.carshering.dto.request.update.UpdateCarModelRequest;
-import org.example.carshering.dto.response.CarModelResponse;
-import org.example.carshering.domain.entity.Car;
-import org.example.carshering.domain.entity.CarModel;
-import org.example.carshering.exceptions.custom.AlreadyExistsException;
-import org.example.carshering.exceptions.custom.EntityNotFoundException;
-import org.example.carshering.exceptions.custom.InvalidQueryParameterException;
-import org.example.carshering.mapper.ModelMapper;
-import org.example.carshering.repository.CarModelRepository;
-import org.example.carshering.service.interfaces.CarModelService;
-import org.example.carshering.service.domain.CarServiceHelperService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Set;
-
-@Service
-@RequiredArgsConstructor
-public class CarModelServiceImpl implements CarModelService {
-
-    private static final Set<String> ALLOWED_SORT_PROPERTIES = Set.of(
-            "brand.name", "model.name", "bodyType", "carClass.name"
-            , "brand", "model", "carClass"
-    );
-    private final ModelMapper modelMapper;
-    private final CarModelRepository carModelRepository;
-    private final CarServiceHelperService carService;
-
-    @Override
-    @Transactional
-    public void deleteModel(Long modelId) {
-        CarModel model = carModelRepository.findByIdAndDeletedFalse(modelId)
-                .orElseThrow(() -> new EntityNotFoundException("Model not found"));
-
-        for (Car car : model.getCars()) {
-            carService.deleteCar(car.getId());
-        }
-
-        model.setDeleted(true);
-
-        carModelRepository.save(model);
-    }
-
-    @Override
-    public CarModelResponse createModel(CreateCarModelRequest request) {
-
-        if (carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
-                request.bodyType(),
-                request.brand(),
-                request.carClass(),
-                request.model()
-        ).isPresent()) {
-            throw new AlreadyExistsException("Model already exists");
-        }
-
-        CarModel saved = carModelRepository.save(modelMapper.toEntity(request));
-        return modelMapper.toDto(saved);
-    }
-
-    private void validateSortProperties(Sort sort) {
-        for (Sort.Order order : sort) {
-            if (!ALLOWED_SORT_PROPERTIES.contains(order.getProperty())) {
-                throw new InvalidQueryParameterException(order.getProperty());
-            }
-        }
-    }
-
-
-    @Override
-    public Page<CarModelResponse> getAllModelsIncludingDeleted(FilterCarModelRequest request,
-                                                               Pageable pageable
-    ) {
-        validateSortProperties(pageable.getSort());
-        return carModelRepository.findModelsByFilter(request.deleted(), request.brand(), request.bodyType(), request.carClass(), pageable)
-                .map(modelMapper::toDto);
-    }
-
-    @Override
-    public CarModelResponse getModelById(Long modelId) {
-        CarModel model = carModelRepository.findByIdAndDeletedFalse(modelId)
-                .orElseThrow(() -> new EntityNotFoundException("Model not found"));
-        return modelMapper.toDto(model);
-    }
-
-    // todo я более чем уверен, что он не правильно обновляет, проверить и исправить
-    @Override
-    public CarModelResponse updateModel(Long modelId, UpdateCarModelRequest request) {
-
-        CarModel model = carModelRepository.findById(modelId)
-                .orElseThrow(() -> new EntityNotFoundException("Model not found"));
-
-
-        modelMapper.updateCarFromDto(request, model);
-
-        return modelMapper.toDto(carModelRepository.save(model));
-    }
-
-    @Override
-    public List<String> findAllBodyTypes() {
-        return carModelRepository.findDistinctBodyTypes();
-    }
-
-    @Override
-    public CarModel getCarModelById(Long modelId) {
-        return carModelRepository.findByIdAndDeletedFalse(modelId)
-                .orElseThrow(() -> new EntityNotFoundException("Model not found"));
-    }
-
-
-}
+//package org.example.carshering.service.impl;
+//
+//import lombok.RequiredArgsConstructor;
+//import org.example.carshering.dto.request.FilterCarModelRequest;
+//import org.example.carshering.dto.request.create.CreateCarModelRequest;
+//import org.example.carshering.dto.request.update.UpdateCarModelRequest;
+//import org.example.carshering.fleet.api.dto.responce.CarModelResponse;
+//import org.example.carshering.fleet.infrastructure.persistence.entity.Car;
+//import org.example.carshering.fleet.infrastructure.persistence.entity.CarModel;
+//import org.example.carshering.common.exceptions.custom.AlreadyExistsException;
+//import org.example.carshering.common.exceptions.custom.EntityNotFoundException;
+//import org.example.carshering.common.exceptions.custom.InvalidQueryParameterException;
+//import org.example.carshering.mapper.ModelMapper;
+//import org.example.carshering.fleet.infrastructure.persistence.repository.CarModelRepository;
+//import org.example.carshering.service.interfaces.CarModelService;
+//import org.example.carshering.service.domain.CarServiceHelperService;
+//import org.springframework.data.domain.Page;
+//import org.springframework.data.domain.Pageable;
+//import org.springframework.data.domain.Sort;
+//import org.springframework.stereotype.Service;
+//import org.springframework.transaction.annotation.Transactional;
+//
+//import java.util.List;
+//import java.util.Set;
+//
+//@Service
+//@RequiredArgsConstructor
+//public class CarModelServiceImpl implements CarModelService {
+//
+//    private static final Set<String> ALLOWED_SORT_PROPERTIES = Set.of(
+//            "brand.name", "model.name", "bodyType", "carClass.name"
+//            , "brand", "model", "carClass"
+//    );
+//    private final ModelMapper modelMapper;
+//    private final CarModelRepository carModelRepository;
+//    private final CarServiceHelperService carService;
+//
+//    @Override
+//    @Transactional
+//    public void deleteModel(Long modelId) {
+//        CarModel model = carModelRepository.findByIdAndDeletedFalse(modelId)
+//                .orElseThrow(() -> new EntityNotFoundException("Model not found"));
+//
+//        for (Car car : model.getCars()) {
+//            carService.deleteCar(car.getId());
+//        }
+//
+//        model.setDeleted(true);
+//
+//        carModelRepository.save(model);
+//    }
+//
+//    @Override
+//    public CarModelResponse createModel(CreateCarModelRequest request) {
+//
+//        if (carModelRepository.findByBodyTypeAndBrand_NameAndCarClass_NameAndModel_Name(
+//                request.bodyType(),
+//                request.brand(),
+//                request.carClass(),
+//                request.model()
+//        ).isPresent()) {
+//            throw new AlreadyExistsException("Model already exists");
+//        }
+//
+//        CarModel saved = carModelRepository.save(modelMapper.toEntity(request));
+//        return modelMapper.toDto(saved);
+//    }
+//
+//    private void validateSortProperties(Sort sort) {
+//        for (Sort.Order order : sort) {
+//            if (!ALLOWED_SORT_PROPERTIES.contains(order.getProperty())) {
+//                throw new InvalidQueryParameterException(order.getProperty());
+//            }
+//        }
+//    }
+//
+//
+//    @Override
+//    public Page<CarModelResponse> getAllModelsIncludingDeleted(FilterCarModelRequest request,
+//                                                               Pageable pageable
+//    ) {
+//        validateSortProperties(pageable.getSort());
+//        return carModelRepository.findModelsByFilter(request.deleted(), request.brand(), request.bodyType(), request.carClass(), pageable)
+//                .map(modelMapper::toDto);
+//    }
+//
+//    @Override
+//    public CarModelResponse getModelById(Long modelId) {
+//        CarModel model = carModelRepository.findByIdAndDeletedFalse(modelId)
+//                .orElseThrow(() -> new EntityNotFoundException("Model not found"));
+//        return modelMapper.toDto(model);
+//    }
+//
+//    // todo я более чем уверен, что он не правильно обновляет, проверить и исправить
+//    @Override
+//    public CarModelResponse updateModel(Long modelId, UpdateCarModelRequest request) {
+//
+//        CarModel model = carModelRepository.findById(modelId)
+//                .orElseThrow(() -> new EntityNotFoundException("Model not found"));
+//
+//
+//        modelMapper.updateCarFromDto(request, model);
+//
+//        return modelMapper.toDto(carModelRepository.save(model));
+//    }
+//
+//    @Override
+//    public List<String> findAllBodyTypes() {
+//        return carModelRepository.findDistinctBodyTypes();
+//    }
+//
+//    @Override
+//    public CarModel getCarModelById(Long modelId) {
+//        return carModelRepository.findByIdAndDeletedFalse(modelId)
+//                .orElseThrow(() -> new EntityNotFoundException("Model not found"));
+//    }
+//
+//
+//}

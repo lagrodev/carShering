@@ -1,15 +1,15 @@
 package org.example.carshering.it.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.domain.entity.*;
 import org.example.carshering.dto.request.create.CreateCarRequest;
 import org.example.carshering.dto.request.update.UpdateCarRequest;
 import org.example.carshering.dto.request.update.UpdateCarStateRequest;
-import org.example.carshering.dto.response.CarDetailResponse;
-import org.example.carshering.dto.response.CarListItemResponse;
-import org.example.carshering.dto.response.CarStateResponse;
+import org.example.carshering.fleet.api.dto.responce.CarDetailResponse;
+import org.example.carshering.fleet.api.dto.responce.CarListItemResponse;
+import org.example.carshering.fleet.api.dto.responce.CarStateResponse;
+import org.example.carshering.fleet.infrastructure.persistence.entity.*;
+import org.example.carshering.fleet.infrastructure.persistence.repository.*;
 import org.example.carshering.it.BaseWebIntegrateTest;
-import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

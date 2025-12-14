@@ -1,15 +1,19 @@
 package org.example.carshering.util;
 
-import org.example.carshering.domain.entity.*;
 import org.example.carshering.dto.request.create.CreateCarRequest;
-import org.example.carshering.dto.request.create.CreateDocumentRequest;
+import org.example.carshering.fleet.infrastructure.persistence.entity.*;
+import org.example.carshering.identity.api.dto.request.CreateDocumentRequest;
 import org.example.carshering.dto.request.update.UpdateCarRequest;
 import org.example.carshering.dto.request.update.UpdateCarStateRequest;
-import org.example.carshering.dto.request.update.UpdateDocumentRequest;
-import org.example.carshering.dto.response.CarDetailResponse;
-import org.example.carshering.dto.response.CarStateResponse;
-import org.example.carshering.dto.response.ContractResponse;
-import org.example.carshering.dto.response.DocumentResponse;
+import org.example.carshering.identity.api.dto.request.UpdateDocumentRequest;
+import org.example.carshering.fleet.api.dto.responce.CarDetailResponse;
+import org.example.carshering.fleet.api.dto.responce.CarStateResponse;
+import org.example.carshering.identity.infrastructure.persistence.entity.Client;
+import org.example.carshering.identity.infrastructure.persistence.entity.Document;
+import org.example.carshering.identity.infrastructure.persistence.entity.DocumentType;
+import org.example.carshering.identity.infrastructure.persistence.entity.Role;
+import org.example.carshering.rental.api.dto.response.ContractResponse;
+import org.example.carshering.identity.api.dto.response.DocumentResponse;
 import org.example.carshering.rental.infrastructure.persistence.entity.ContractJpaEntity;
 import org.example.carshering.rental.infrastructure.persistence.entity.RentalState;
 import org.springframework.boot.test.context.TestConfiguration;

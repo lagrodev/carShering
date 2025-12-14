@@ -1,8 +1,9 @@
 package org.example.carshering.rest.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.response.DocumentResponse;
-import org.example.carshering.exceptions.custom.NotFoundException;
+import org.example.carshering.identity.api.dto.response.DocumentResponse;
+import org.example.carshering.common.exceptions.custom.NotFoundException;
+import org.example.carshering.identity.api.rest.admin.AdminDocumentController;
 import org.example.carshering.rest.BaseWebMvcTest;
 import org.example.carshering.service.interfaces.DocumentService;
 import org.example.carshering.util.DataUtils;

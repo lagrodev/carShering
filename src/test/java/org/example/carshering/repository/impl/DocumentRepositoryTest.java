@@ -1,12 +1,12 @@
 package org.example.carshering.repository.impl;
 
-import org.example.carshering.domain.entity.Client;
-import org.example.carshering.domain.entity.Document;
-import org.example.carshering.domain.entity.DocumentType;
+import org.example.carshering.identity.infrastructure.persistence.entity.Client;
+import org.example.carshering.identity.infrastructure.persistence.entity.Document;
+import org.example.carshering.identity.infrastructure.persistence.entity.DocumentType;
 import org.example.carshering.repository.AbstractRepositoryTest;
-import org.example.carshering.repository.ClientRepository;
-import org.example.carshering.repository.DocumentRepository;
-import org.example.carshering.repository.DocumentTypeRepository;
+import org.example.carshering.identity.infrastructure.persistence.repository.ClientRepository;
+import org.example.carshering.identity.infrastructure.persistence.repository.DocumentRepository;
+import org.example.carshering.identity.infrastructure.persistence.repository.DocumentTypeRepository;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

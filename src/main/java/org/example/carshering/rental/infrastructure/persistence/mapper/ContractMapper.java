@@ -1,5 +1,7 @@
 package org.example.carshering.rental.infrastructure.persistence.mapper;
 
+import org.example.carshering.common.domain.valueobject.CarId;
+import org.example.carshering.common.domain.valueobject.ClientId;
 import org.example.carshering.rental.domain.model.Contract;
 import org.example.carshering.rental.domain.valueobject.*;
 import org.example.carshering.rental.infrastructure.persistence.entity.ContractJpaEntity;
@@ -11,7 +13,7 @@ public abstract class ContractMapper {
     // Domain -> JPA Entity
     @Mapping(source = "id.value", target = "id")
     @Mapping(source = "clientId.value", target = "clientId")
-    @Mapping(source = "cardId.value", target = "carId")
+    @Mapping(source = "carId.value", target = "carId")
     @Mapping(source = "rentalPeriod", target = "period")
     @Mapping(source = "totalCost", target = "totalCost")
     @Mapping(source = "state", target = "state")

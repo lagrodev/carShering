@@ -1,10 +1,11 @@
 package org.example.carshering.service.impl;
 
-import org.example.carshering.dto.request.AuthRequest;
+import org.example.carshering.identity.api.dto.request.AuthRequest;
+import org.example.carshering.identity.application.service.auth.AuthServiceImpl;
 import org.example.carshering.security.ClientDetails;
-import org.example.carshering.service.interfaces.ClientDetailsService;
-import org.example.carshering.service.interfaces.JwtService;
-import org.example.carshering.service.interfaces.OpaqueService;
+import org.example.carshering.identity.application.service.auth.ClientDetailsService;
+import org.example.carshering.identity.infrastructure.tokens.JwtService;
+import org.example.carshering.identity.infrastructure.tokens.OpaqueService;
 import org.example.carshering.utils.JwtTokenUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

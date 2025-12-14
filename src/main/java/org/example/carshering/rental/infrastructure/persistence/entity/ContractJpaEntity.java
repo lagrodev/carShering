@@ -3,8 +3,6 @@ package org.example.carshering.rental.infrastructure.persistence.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.carshering.common.domain.valueobject.Money;
-import org.example.carshering.domain.entity.Car;
-import org.example.carshering.domain.entity.Client;
 import org.example.carshering.rental.domain.valueobject.RentalPeriod;
 import org.example.carshering.rental.domain.valueobject.RentalStateType;
 

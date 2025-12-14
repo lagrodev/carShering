@@ -1,10 +1,11 @@
 package org.example.carshering.rest.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.response.ContractResponse;
-import org.example.carshering.exceptions.custom.EntityNotFoundException;
-import org.example.carshering.exceptions.custom.InvalidContractStateException;
-import org.example.carshering.exceptions.custom.InvalidContractCancellationStateException;
+import org.example.carshering.rental.api.dto.response.ContractResponse;
+import org.example.carshering.common.exceptions.custom.EntityNotFoundException;
+import org.example.carshering.common.exceptions.custom.InvalidContractStateException;
+import org.example.carshering.common.exceptions.custom.InvalidContractCancellationStateException;
+import org.example.carshering.rental.api.rest.admin.AdminContractController;
 import org.example.carshering.rest.BaseWebMvcTest;
 import org.example.carshering.service.interfaces.ContractService;
 import org.example.carshering.util.DataUtils;

@@ -3,8 +3,8 @@ package org.example.carshering.service.interfaces;
 import org.example.carshering.dto.request.FilterCarModelRequest;
 import org.example.carshering.dto.request.create.CreateCarModelRequest;
 import org.example.carshering.dto.request.update.UpdateCarModelRequest;
-import org.example.carshering.dto.response.CarModelResponse;
-import org.example.carshering.domain.entity.CarModel;
+import org.example.carshering.fleet.api.dto.responce.CarModelResponse;
+import org.example.carshering.fleet.infrastructure.persistence.entity.CarModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

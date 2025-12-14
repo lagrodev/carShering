@@ -2,6 +2,7 @@ package org.example.carshering.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,9 +37,9 @@ public record CarFilterRequest(
         LocalDateTime dateEnd,
         
         @Schema(description = "Minimum rental price per day", example = "1000.0")
-        Double minCell,
+        BigDecimal minCell,
         
         @Schema(description = "Maximum rental price per day", example = "5000.0")
-        Double maxCell
+        BigDecimal maxCell
 ) {
 }

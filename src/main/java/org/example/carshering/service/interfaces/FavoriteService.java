@@ -1,6 +1,6 @@
 package org.example.carshering.service.interfaces;
 
-import org.example.carshering.dto.response.CarListItemResponse;
+import org.example.carshering.fleet.api.dto.responce.CarListItemResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

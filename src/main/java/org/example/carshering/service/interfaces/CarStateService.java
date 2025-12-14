@@ -1,7 +1,7 @@
 package org.example.carshering.service.interfaces;
 
-import org.example.carshering.dto.response.CarStateResponse;
-import org.example.carshering.domain.entity.CarState;
+import org.example.carshering.fleet.api.dto.responce.CarStateResponse;
+import org.example.carshering.fleet.infrastructure.persistence.entity.CarState;
 
 import java.util.List;
 

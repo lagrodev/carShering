@@ -3,13 +3,13 @@
 //import org.example.carshering.dto.request.CarFilterRequest;
 //import org.example.carshering.dto.request.create.CreateCarRequest;
 //import org.example.carshering.dto.request.update.UpdateCarRequest;
-//import org.example.carshering.dto.response.CarDetailResponse;
-//import org.example.carshering.dto.response.CarListItemResponse;
-//import org.example.carshering.dto.response.CarStateResponse;
+//import org.example.carshering.fleet.api.dto.responce.CarDetailResponse;
+//import org.example.carshering.fleet.api.dto.responce.CarListItemResponse;
+//import org.example.carshering.fleet.api.dto.responce.CarStateResponse;
 //import org.example.carshering.entity.*;
 //import org.example.carshering.exceptions.custom.*;
 //import org.example.carshering.mapper.CarMapper;
-//import org.example.carshering.repository.CarRepository;
+//import org.example.carshering.fleet.infrastructure.persistence.repository.CarRepository;
 //import org.example.carshering.service.domain.CarModelHelperService;
 //import org.example.carshering.service.domain.CarStateServiceHelper;
 //import org.example.carshering.util.DataUtils;
@@ -66,7 +66,7 @@
 //
 //        CarModel carModel = dataUtils.getCarModelSEDAN(brand, modelName, carClass);
 //
-//        CarState carState = dataUtils.getCarStateTransient(state);
+//        CarStateType carState = dataUtils.getCarStateTransient(state);
 //
 //        return List.of(carState, carModel);
 //    }
@@ -81,7 +81,7 @@
 //
 //        CarModel carModel = dataUtils.getCarModelSEDAN(brand, modelName, carClass);
 //
-//        CarState carState = dataUtils.getCarStatePersisted(state);
+//        CarStateType carState = dataUtils.getCarStatePersisted(state);
 //
 //        return List.of(carState, carModel);
 //    }
@@ -93,12 +93,12 @@
 //        // given
 //        CreateCarRequest request = dataUtils.createCarRequestTransient();
 //
-//        CarState state = DataUtils.getCarStateNEWSTATEPersisted("AVAILABLE");
+//        CarStateType state = DataUtils.getCarStateNEWSTATEPersisted("AVAILABLE");
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        Car carEntity = dataUtils.getJohnDoeTransient((CarState) list.get(0), (CarModel) list.get(1));
+//        Car carEntity = dataUtils.getJohnDoeTransient((CarStateType) list.get(0), (CarModel) list.get(1));
 //
 //
-//        Car savedCar = dataUtils.getJohnDoePersisted((CarState) list.get(0), (CarModel) list.get(1));
+//        Car savedCar = dataUtils.getJohnDoePersisted((CarStateType) list.get(0), (CarModel) list.get(1));
 //
 //        CarDetailResponse response = DataUtils.carDetailResponsePersisted();
 //
@@ -196,7 +196,7 @@
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
 //
 //        UpdateCarRequest request = dataUtils.updateCarRequestTransient();
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
@@ -229,7 +229,7 @@
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
 //
 //        UpdateCarRequest request = dataUtils.updateCarRequestTransient();
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getMikeSmithPersisted(state, model);
@@ -264,7 +264,7 @@
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
 //
 //        UpdateCarRequest request = dataUtils.updateCarRequestTransient();
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getFrankJonesPersisted(state, model);
@@ -299,7 +299,7 @@
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
 //
 //        UpdateCarRequest request = dataUtils.updateCarRequestNeverUsedTransient();
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getFrankJonesPersisted(state, model);
@@ -358,7 +358,7 @@
 //
 //
 //        given(carRepository.existsByVin(request.vin())).willReturn(true);
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //        Car existingCar = dataUtils.getFrankJonesPersisted(state, model);
 //        given(carRepository.findById(anyLong())).willReturn(Optional.of(existingCar));
@@ -386,7 +386,7 @@
 //        UpdateCarRequest request = dataUtils.updateCarRequestNeverUsedTransient();
 //
 //        given(carRepository.existsByGosNumber(request.gosNumber())).willReturn(true);
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //        Car existingCar = dataUtils.getFrankJonesPersisted(state, model);
 //        given(carRepository.findById(anyLong())).willReturn(Optional.of(existingCar));
@@ -408,7 +408,7 @@
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
 //
 //        UpdateCarRequest request = dataUtils.updateCarRequestNeverUsedTransient();
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getFrankJonesPersisted(state, model);
@@ -432,7 +432,7 @@
 //    public void givenNewModel_whenUpdateCar_thenModelIsChangedAndSaved() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel oldModel = (CarModel) list.get(1);
 //        Car existingCar = dataUtils.getFrankJonesTransient(state, oldModel);
 //        Car carSpy = spy(existingCar);
@@ -465,7 +465,7 @@
 //    public void givenUpdateRequestWithoutModelId_whenUpdateCar_thenModelIsNotChangedAndCarIsSaved() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
@@ -498,7 +498,7 @@
 //    public void givenUpdateRequestWithoutModelIdAndChangedVin_whenUpdateCar_thenChecksVinUniquenessAndSaves() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getMikeSmithPersisted(state, model);
@@ -532,7 +532,7 @@
 //    public void givenUpdateRequestWithoutModelIdAndChangedGosNomer_whenUpdateCar_thenChecksGosNumberUniquenessAndSaves() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getFrankJonesPersisted(state, model);
@@ -566,7 +566,7 @@
 //    public void givenUpdateRequestWithDuplicateVinAndSameGosNomer_whenUpdateCar_thenThrowException() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getMikeSmithPersisted(state, model);
@@ -593,7 +593,7 @@
 //    public void givenUpdateRequestWithSameVinAndDuplicateGosNomer_whenUpdateCar_thenThrowException() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getFrankJonesPersisted(state, model);
@@ -620,7 +620,7 @@
 //    public void givenValidUpdateRequest_whenUpdateCar_thenMapperIsInvokedBeforeSave() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
@@ -647,7 +647,7 @@
 //    public void givenUpdateRequestWithBlankVin_whenUpdateCar_thenThrowException() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
@@ -673,7 +673,7 @@
 //    public void givenUpdateRequestWithEmptyVin_whenUpdateCar_thenThrowException() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
@@ -699,7 +699,7 @@
 //    public void givenUpdateRequestWithBlankGosNomer_whenUpdateCar_thenThrowException() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
@@ -725,7 +725,7 @@
 //    public void givenUpdateRequestWithEmptyGosNomer_whenUpdateCar_thenThrowException() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
@@ -751,7 +751,7 @@
 //    public void givenUpdateRequestWithNullVin_whenUpdateCar_thenSkipsVinCheckAndUpdatesSuccessfully() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
@@ -787,7 +787,7 @@
 //    public void givenUpdateRequestWithBlankVinAndBlankGosNomer_whenUpdateCar_thenThrowException() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoePersisted(state, model);
@@ -813,7 +813,7 @@
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
 //
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoeTransient(state, model);
@@ -824,7 +824,7 @@
 //        given(carMapper.toDetailDto(existingCar)).willReturn(response);
 //
 //        // when
-//        CarDetailResponse actual = serviceUnderTest.getCarById(1L);
+//        CarDetailResponse actual = serviceUnderTest.findById(1L);
 //
 //        // then
 //        assertThat(actual).isNotNull();
@@ -845,7 +845,7 @@
 //                new CarNotFoundException("Car not found with id: 1")
 //        );
 //
-//        assertThrows(CarNotFoundException.class, () -> serviceUnderTest.getCarById(1L));
+//        assertThrows(CarNotFoundException.class, () -> serviceUnderTest.findById(1L));
 //
 //        // then
 //        verify(carMapper, never()).toDetailDto(any(Car.class));
@@ -857,7 +857,7 @@
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
 //
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoeTransient(state, model);
@@ -896,7 +896,7 @@
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
 //
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoeTransient(state, model);
@@ -926,7 +926,7 @@
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("BOOKED");
 //
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getJohnDoeTransient(state, model);
@@ -966,7 +966,7 @@
 //    public void updateCarState_whenUpdateCarState_thenStateIsChangedAndSaved() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //
 //        CarModel model = (CarModel) list.get(1);
 //        model.setDeleted(true);
@@ -975,7 +975,7 @@
 //
 //        Car carSpy = spy(existingCar);
 //
-//        CarState newState = dataUtils.getCarStatePersisted("RENTED");
+//        CarStateType newState = dataUtils.getCarStatePersisted("RENTED");
 //
 //        given(carRepository.findById(1L)).willReturn(Optional.of(carSpy));
 //        given(carStateService.getStateByName("RENTED")).willReturn((newState));
@@ -998,7 +998,7 @@
 //    public void updateCarStateIncorrectState_whenUpdateCarState_thenThrowException() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState state = (CarState) list.get(0);
+//        CarStateType state = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //
 //        Car existingCar = dataUtils.getFrankJonesTransient(state, model);
@@ -1038,14 +1038,14 @@
 //    public void updateCarState_whenModelDeletedAndNewStateNotUnavailable_thenModelSetDeletedFalse() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("UNAVAILABLE");
-//        CarState oldState = (CarState) list.get(0);
+//        CarStateType oldState = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //        model.setDeleted(true);
 //
 //        Car existingCar = dataUtils.getFrankJonesTransient(oldState, model);
 //        Car carSpy = spy(existingCar);
 //
-//        CarState newState = dataUtils.getCarStatePersisted("AVAILABLE");
+//        CarStateType newState = dataUtils.getCarStatePersisted("AVAILABLE");
 //
 //        given(carRepository.findById(1L)).willReturn(Optional.of(carSpy));
 //        given(carStateService.getStateByName("AVAILABLE")).willReturn(newState);
@@ -1068,14 +1068,14 @@
 //    public void updateCarState_whenModelDeletedAndNewStateUnavailable_thenModelDeletedStaysTrue() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("RENTED");
-//        CarState oldState = (CarState) list.get(0);
+//        CarStateType oldState = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //        model.setDeleted(true);
 //
 //        Car existingCar = dataUtils.getFrankJonesTransient(oldState, model);
 //        Car carSpy = spy(existingCar);
 //
-//        CarState newState = dataUtils.getCarStatePersisted("UNAVAILABLE");
+//        CarStateType newState = dataUtils.getCarStatePersisted("UNAVAILABLE");
 //
 //        given(carRepository.findById(1L)).willReturn(Optional.of(carSpy));
 //        given(carStateService.getStateByName("UNAVAILABLE")).willReturn(newState);
@@ -1096,14 +1096,14 @@
 //    public void updateCarState_whenModelNotDeleted_thenOnlyStateChanges() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState oldState = (CarState) list.get(0);
+//        CarStateType oldState = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //        model.setDeleted(false);
 //
 //        Car existingCar = dataUtils.getFrankJonesTransient(oldState, model);
 //        Car carSpy = spy(existingCar);
 //
-//        CarState newState = dataUtils.getCarStatePersisted("BOOKED");
+//        CarStateType newState = dataUtils.getCarStatePersisted("BOOKED");
 //
 //        given(carRepository.findById(1L)).willReturn(Optional.of(carSpy));
 //        given(carStateService.getStateByName("BOOKED")).willReturn(newState);
@@ -1142,14 +1142,14 @@
 //    public void deleteCar_whenDeleteCar_thenStateIsUnavailableAndSaved() {
 //        // given
 //        var list = getCarStateAndCarModelAndSaveAllDependencies("AVAILABLE");
-//        CarState availableState = (CarState) list.get(0);
+//        CarStateType availableState = (CarStateType) list.get(0);
 //        CarModel model = (CarModel) list.get(1);
 //        model.setDeleted(true); // имитируем удалённую модель, чтобы проверить что она не восстановится
 //
 //        Car existingCar = dataUtils.getFrankJonesTransient(availableState, model);
 //        Car carSpy = spy(existingCar);
 //
-//        CarState unavailableState = dataUtils.getCarStateTransient("UNAVAILABLE");
+//        CarStateType unavailableState = dataUtils.getCarStateTransient("UNAVAILABLE");
 //
 //        given(carRepository.findById(1L)).willReturn(Optional.of(carSpy));
 //        given(carStateService.getStateByName("UNAVAILABLE")).willReturn(unavailableState);

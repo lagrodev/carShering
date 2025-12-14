@@ -76,7 +76,7 @@
 //                dataUtils.getCarModelSEDAN(brand, modelName, carClass)
 //        );
 //
-//        CarState carState = carStateRepository
+//        CarStateType carState = carStateRepository
 //                .findByStatusIgnoreCase(dataUtils.getCarStateTransient().getStatus())
 //                .orElseGet(() -> carStateRepository.save(dataUtils.getCarStateTransient()));
 //
@@ -102,7 +102,7 @@
 //                dataUtils.getCarModelBody(brand, modelName, carClass, bodyType)
 //        );
 //
-//        CarState carState = carStateRepository
+//        CarStateType carState = carStateRepository
 //                .findByStatusIgnoreCase(carStateStr) // или findByNameIgnoreCase(carStateStr), если status хранится в name
 //                .orElseGet(() -> carStateRepository.save(dataUtils.getCarStateTransient(carStateStr)));
 //
@@ -118,7 +118,7 @@
 //
 //        //given
 //        Car carToSave = dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //
 //
@@ -144,7 +144,7 @@
 //
 //        //given
 //        Car carToSave = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) );
 //        // when
 //
@@ -165,7 +165,7 @@
 //
 //        // given
 //        Car carToSave = dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //
 //        carRepository.save(carToSave);
@@ -205,14 +205,14 @@
 //
 //        // given
 //        Car car1 = dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //        Car car2 = dataUtils.getFrankJonesTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //
 //        Car car3 = dataUtils.getMikeSmithTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //
 //
@@ -245,7 +245,7 @@
 //    public void givenCarIsSaved_whenDeleteById_thenCarIsRemoved() {
 //        // given
 //        Car carToSave = dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //        carRepository.save(carToSave);
 //
@@ -263,7 +263,7 @@
 //
 //        // given
 //        Car carToSave = dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //
 //        carRepository.save(carToSave);
@@ -280,7 +280,7 @@
 //    public void existsCarByVin_ReturnsTrueWhenCarExists() {
 //        // given
 //        Car carToSave = dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //
 //        carRepository.save(carToSave);
@@ -298,14 +298,14 @@
 //    void givenAllParamsNull_whenFindByFilter_thenAllCarsReturned() {
 //        // given
 //        Car car1 = carRepository.save (dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) );
 //        Car car2 = carRepository.save (dataUtils.getFrankJonesTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1))) ;
 //
 //        Car car3 = carRepository.save (dataUtils.getMikeSmithTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1))) ;
 //
 //        // when
@@ -326,7 +326,7 @@
 //        // given
 //        var car1 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V1", "G1", 2020,
-//                        (CarState) getCarWithSpecificAttributes
+//                        (CarStateType) getCarWithSpecificAttributes
 //                                ("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes
 //                                ("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(1)));
@@ -335,14 +335,14 @@
 //
 //
 //        var car2 = carRepository.save(dataUtils.getCarWithSpecificAttributes("V2", "G2", 2021,
-//                (CarState) getCarWithSpecificAttributes
+//                (CarStateType) getCarWithSpecificAttributes
 //                        ("BMW", "X3", "SUV", "LUXURY", "ACTIVE").get(0),
 //                (CarModel) getCarWithSpecificAttributes
 //                        ("BMW", "X3", "SUV", "LUXURY", "ACTIVE").get(1)));
 //
 //
 //        var car3 = carRepository.save(dataUtils.getCarWithSpecificAttributes("V3", "G3", 2022,
-//                (CarState) getCarWithSpecificAttributes
+//                (CarStateType) getCarWithSpecificAttributes
 //                        ("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(0),
 //                (CarModel) getCarWithSpecificAttributes
 //                        ("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(1)));
@@ -365,7 +365,7 @@
 //        // given
 //        var matchingCar = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V1", "G1", 2020,
-//                        (CarState) getCarWithSpecificAttributes
+//                        (CarStateType) getCarWithSpecificAttributes
 //                                ("TOYOTA", "CAMRY", "SEDAN", "STANDARD", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes
 //                                ("TOYOTA", "CAMRY", "SEDAN", "STANDARD", "ACTIVE").get(1)
@@ -373,7 +373,7 @@
 //
 //        var nonMatchingCar = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V2", "G2", 2021,
-//                        (CarState) getCarWithSpecificAttributes
+//                        (CarStateType) getCarWithSpecificAttributes
 //                                ("TOYOTA", "COROLLA", "SEDAN", "STANDARD", "ACTIVE").get(0),
 //
 //                        (CarModel) getCarWithSpecificAttributes
@@ -396,19 +396,19 @@
 //        // given
 //        var car2020 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V1", "G1", 2020,
-//                        (CarState) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
 //        var car2022 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V2", "G2", 2022,
-//                        (CarState) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(1)
 //                )
 //        );
 //        var car2025 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V3", "G3", 2025,
-//                        (CarState) getCarWithSpecificAttributes("MERCEDES", "E", "SEDAN", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("MERCEDES", "E", "SEDAN", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("MERCEDES", "E", "SEDAN", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
@@ -433,7 +433,7 @@
 //
 //        var sedan = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V1", "G1", 2020,
-//                        (CarState) list .get(0),
+//                        (CarStateType) list .get(0),
 //                        (CarModel) list.get(1)
 //                )
 //        );
@@ -442,7 +442,7 @@
 //
 //                var suv = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V2", "G2", 2021,
-//                        (CarState) list .get(0),
+//                        (CarStateType) list .get(0),
 //                        (CarModel) list.get(1)
 //                )
 //        );
@@ -467,20 +467,20 @@
 //
 //        var luxury1 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V1", "G1", 2020,
-//                        (CarState) list.get(0),
+//                        (CarStateType) list.get(0),
 //                        (CarModel) list.get(1)
 //                )
 //        );
 //        list = getCarWithSpecificAttributes("MERCEDES", "E", "LUXURY", "ACTIVE", "SEDAN");
 //                var luxury2 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V2", "G2", 2021,
-//                        (CarState) list.get(0),
+//                        (CarStateType) list.get(0),
 //                        (CarModel)  list.get(1)
 //                )
 //        );
 //        var standard = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V3", "G3", 2022,
-//                        (CarState) getCarWithSpecificAttributes("TOYOTA", "COROLLA", "SEDAN", "STANDARD", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("TOYOTA", "COROLLA", "SEDAN", "STANDARD", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("TOYOTA", "COROLLA", "SEDAN", "STANDARD", "ACTIVE").get(1)
 //                )
 //        );
@@ -505,7 +505,7 @@
 //    void givenNoMatchingParams_whenFindByFilter_thenEmptyResultReturned() {
 //        // given
 //        var existingCar = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) );
 //
 //        // when
@@ -535,13 +535,13 @@
 //        // given
 //        var car2021 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("VIN2021", "G2021", 2021,
-//                        (CarState) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
 //        var car2020 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("VIN2020", "G2020", 2020,
-//                        (CarState) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(1)
 //                )
 //        );
@@ -560,7 +560,7 @@
 //        // given
 //        carRepository.save(
 //                dataUtils.getJohnDoeTransient(
-//                        (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                        (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                        (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) );
 //
 //        // when
@@ -577,14 +577,14 @@
 //        Pageable smallPage = PageRequest.of(0, 2);
 //        // given
 //        Car car1 = dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //        Car car2 = dataUtils.getFrankJonesTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //
 //        Car car3 = dataUtils.getMikeSmithTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //
 //        carRepository.saveAll(List.of(car1, car2, car3));
@@ -604,7 +604,7 @@
 //    void givenNonMatchingBodyType_whenFindByFilter_thenEmptyResult() {
 //        // given
 //        carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ); // bodyType = "SEDAN"
 //
 //        // when
@@ -620,7 +620,7 @@
 //    void givenEmptyStringInList_whenFindByFilter_thenEmptyResultReturned() {
 //        // given
 //        carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) );
 //
 //        // when
@@ -637,7 +637,7 @@
 //    void givenExactMinYearMatch_whenFindByFilter_thenCarReturned() {
 //        // given
 //        var car2020 = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ); // year = 2020
 //
 //        // when
@@ -653,7 +653,7 @@
 //    void givenExactMaxYearMatch_whenFindByFilter_thenCarReturned() {
 //        // given
 //        var car2020 = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) );
 //
 //        // when
@@ -671,13 +671,13 @@
 //        // given
 //        var matchingCar = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V1", "G1", 2020,
-//                        (CarState) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
 //        var nonMatchingBrand = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V2", "G2", 2020,
-//                        (CarState) getCarWithSpecificAttributes("AUDI", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("AUDI", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("AUDI", "X5", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
@@ -705,16 +705,16 @@
 //    void givenYearBoundaries_whenFindByFilter_thenOnlyInRangeReturned() {
 //        // given
 //        var oldCar = carRepository.save(dataUtils.getOldCarTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //
 //        ));      // 1999
 //        var validCar = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));   // 2020
 //        var futureCar = carRepository.save(dataUtils.getFutureCarTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1))
 //        ); // 2030
 //
@@ -732,7 +732,7 @@
 //    void givenPageExceedsResults_whenFindByFilter_thenEmptyPageReturned() {
 //        // given
 //        carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1))
 //        );
 //
@@ -751,7 +751,7 @@
 //        // given
 //        carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V1", "G1", 2020,
-//                        (CarState) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
@@ -775,14 +775,14 @@
 //        // given
 //        // given
 //        Car car1 = dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //        Car car2 = dataUtils.getFrankJonesTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //
 //        Car car3 = dataUtils.getMikeSmithTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)) ;
 //
 //        carRepository.saveAll(List.of(car1, car2, car3));
@@ -804,11 +804,11 @@
 //    void givenYearRangeOutsideAllCars_whenFindByFilter_thenEmptyResultReturned() {
 //        // given
 //        carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //        carRepository.save(dataUtils.getFrankJonesTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //
@@ -825,11 +825,11 @@
 //    void givenDifferentBodyTypes_whenFindByFilter_thenOnlyMatchingReturned() {
 //        // given
 //        var sedan = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        )); // SEDAN
 //        var hatchback = carRepository.save(dataUtils.getOldCarTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        )); // HATCHBACK
 //
@@ -847,7 +847,7 @@
 //    void givenPageExceedsTotalCars_whenFindByFilter_thenEmptyPageReturned() {
 //        // given
 //        carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //        Pageable pageRequest = PageRequest.of(5, 10); // за пределами диапазона
@@ -867,7 +867,7 @@
 //    void givenAllParamsNonMatching_whenFindByFilter_thenEmptyResultReturned() {
 //        // given
 //        carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        ));
 //
@@ -887,13 +887,13 @@
 //        // given
 //        var bmw2020 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("JOHNDOE", "G1", 2020,
-//                        (CarState) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
 //        var audi2019 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("OLD", "G2", 2019,
-//                        (CarState) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(1)
 //                )
 //        );
@@ -915,13 +915,13 @@
 //        // given
 //        var targetCar = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("JOHNDOE", "G1", 2020,
-//                        (CarState) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
 //        var wrongYear = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("OLD", "G2", 2018,
-//                        (CarState) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
@@ -945,19 +945,19 @@
 //        // given
 //        var bmw1 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V1", "G1", 2020,
-//                        (CarState) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
 //        var bmw2 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V2", "G2", 2021,
-//                        (CarState) getCarWithSpecificAttributes("BMW", "X3", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("BMW", "X3", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("BMW", "X3", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
 //        var audi = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V3", "G3", 2022,
-//                        (CarState) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(1)
 //                )
 //        );
@@ -987,19 +987,19 @@
 //        // given
 //        var bmwX5 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V1", "G1", 2020,
-//                        (CarState) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("BMW", "X5", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
 //        var bmwX3 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V2", "G2", 2021,
-//                        (CarState) getCarWithSpecificAttributes("BMW", "X3", "SUV", "LUXURY", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("BMW", "X3", "SUV", "LUXURY", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("BMW", "X3", "SUV", "LUXURY", "ACTIVE").get(1)
 //                )
 //        );
 //        var audiA4 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V3", "G3", 2022,
-//                        (CarState) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(0),
+//                        (CarStateType) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(0),
 //                        (CarModel) getCarWithSpecificAttributes("AUDI", "A4", "SEDAN", "STANDARD", "ACTIVE").get(1)
 //                )
 //        );
@@ -1027,7 +1027,7 @@
 //        var activeList = getCarWithSpecificAttributes("BMW", "X5", "LUXURY", "ACTIVE", "SUV");
 //        var activeCar = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V1", "G1", 2020,
-//                        (CarState) activeList.get(0),
+//                        (CarStateType) activeList.get(0),
 //                        (CarModel) activeList.get(1)
 //                )
 //        );
@@ -1035,7 +1035,7 @@
 //        var inactiveList = getCarWithSpecificAttributes("AUDI", "A4", "STANDARD", "INACTIVE", "SEDAN");
 //        var inactiveCar = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V2", "G2", 2021,
-//                        (CarState) inactiveList.get(0),
+//                        (CarStateType) inactiveList.get(0),
 //                        (CarModel) inactiveList.get(1)
 //                )
 //        );
@@ -1059,7 +1059,7 @@
 //        var targetList = getCarWithSpecificAttributes("brand", "nameModel", "carClass", "NEWSTATE", "SEDAN");
 //        var targetCar = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("JOHNDOE", "G1", 2020,
-//                        (CarState) targetList.get(0),
+//                        (CarStateType) targetList.get(0),
 //                        (CarModel) targetList.get(1)
 //                )
 //        );
@@ -1067,7 +1067,7 @@
 //        var differentBrandList = getCarWithSpecificAttributes("otherBrand", "nameModel", "carClass", "NEWSTATE", "SEDAN");
 //        var differentBrand = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("OTHER1", "G2", 2020,
-//                        (CarState) differentBrandList.get(0),
+//                        (CarStateType) differentBrandList.get(0),
 //                        (CarModel) differentBrandList.get(1)
 //                )
 //        );
@@ -1075,7 +1075,7 @@
 //        var differentYearList = getCarWithSpecificAttributes("brand", "nameModel", "carClass", "NEWSTATE", "SEDAN");
 //        var differentYear = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("OTHER2", "G3", 2025,
-//                        (CarState) differentYearList.get(0),
+//                        (CarStateType) differentYearList.get(0),
 //                        (CarModel) differentYearList.get(1)
 //                )
 //        );
@@ -1108,7 +1108,7 @@
 //        var luxury1List = getCarWithSpecificAttributes("BMW", "X5", "LUXURY", "ACTIVE", "SUV");
 //        var luxury1 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V1", "G1", 2020,
-//                        (CarState) luxury1List.get(0),
+//                        (CarStateType) luxury1List.get(0),
 //                        (CarModel) luxury1List.get(1)
 //                )
 //        );
@@ -1116,7 +1116,7 @@
 //        var luxury2List = getCarWithSpecificAttributes("MERCEDES", "E", "LUXURY", "ACTIVE", "SEDAN");
 //        var luxury2 = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V2", "G2", 2021,
-//                        (CarState) luxury2List.get(0),
+//                        (CarStateType) luxury2List.get(0),
 //                        (CarModel) luxury2List.get(1)
 //                )
 //        );
@@ -1124,7 +1124,7 @@
 //        var standardList = getCarWithSpecificAttributes("TOYOTA", "COROLLA", "STANDARD", "ACTIVE", "SEDAN");
 //        var standard = carRepository.save(
 //                dataUtils.getCarWithSpecificAttributes("V3", "G3", 2022,
-//                        (CarState) standardList.get(0),
+//                        (CarStateType) standardList.get(0),
 //                        (CarModel) standardList.get(1)
 //                )
 //        );
@@ -1173,7 +1173,7 @@
 //    void findByFilter_sqlInjectionAttempts_returnEmptyAndDoNotExposeData() {
 //        // given
 //        Car legitimateCar = carRepository.save(dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        )); // has brand="brand", model="nameModel", bodyType="SEDAN", etc.
 //
@@ -1256,7 +1256,7 @@
 //    void existsByGosNumber_sqlInjectionAttempts_returnFalseAndDoNotLeakData() {
 //        // given
 //        Car legitimateCar = dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        );
 //        carRepository.save(legitimateCar); // gosNumber = "1123"
@@ -1312,7 +1312,7 @@
 //    void existsByVin_sqlInjectionAttempts_returnFalseAndDoNotLeakData() {
 //        // given
 //        Car legitimateCar = dataUtils.getJohnDoeTransient(
-//                (CarState) getCarStateAndCarModelAndSaveAllDependencies().get(0),
+//                (CarStateType) getCarStateAndCarModelAndSaveAllDependencies().get(0),
 //                (CarModel) getCarStateAndCarModelAndSaveAllDependencies().get(1)
 //        );
 //        carRepository.save(legitimateCar); // vin = "JOHNDOE"

@@ -1,13 +1,14 @@
 package org.example.carshering.rest.all;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.request.AuthRequest;
-import org.example.carshering.dto.request.RegistrationRequest;
-import org.example.carshering.dto.response.AuthResponse;
-import org.example.carshering.dto.response.UserResponse;
-import org.example.carshering.exceptions.custom.AlreadyExistsException;
+import org.example.carshering.identity.api.dto.request.AuthRequest;
+import org.example.carshering.identity.api.dto.request.RegistrationRequest;
+import org.example.carshering.identity.api.dto.response.AuthResponse;
+import org.example.carshering.identity.api.dto.response.UserResponse;
+import org.example.carshering.common.exceptions.custom.AlreadyExistsException;
+import org.example.carshering.identity.api.rest.all.AuthController;
 import org.example.carshering.rest.BaseWebMvcTest;
-import org.example.carshering.service.interfaces.AuthService;
+import org.example.carshering.identity.application.service.auth.AuthService;
 import org.example.carshering.service.interfaces.ClientService;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +18,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
