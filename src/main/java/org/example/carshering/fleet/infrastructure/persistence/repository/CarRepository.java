@@ -151,7 +151,7 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     @Query("""
         SELECT c FROM Car c
-        WHERE c.id = :id AND c.state = 'ACTIVE'
+        WHERE c.id = :id AND c.state = "AVAILABLE"
     """
 )
     Car findByIdAndState_Active(Long id);

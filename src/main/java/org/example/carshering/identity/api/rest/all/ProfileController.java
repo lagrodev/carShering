@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.dto.request.ChangePasswordRequest;
 import org.example.carshering.identity.api.dto.request.CreateDocumentRequest;
 import org.example.carshering.identity.api.dto.request.UpdateDocumentRequest;
@@ -31,6 +32,7 @@ import java.util.Map;
 @Tag(name = "User Profile", description = "Endpoints for user profile and document management")
 @RequestMapping("api/profile")
 @RequiredArgsConstructor
+@Slf4j
 public class ProfileController {
 
     private final ClientResponseFacade clientResponseFacade;
@@ -198,6 +200,7 @@ public class ProfileController {
             UriComponentsBuilder uriComponentsBuilder
     ) {
         Long userId = getCurrentUserId(auth);
+        log.info("Creating document for user ID: {}", userId);
         DocumentResponse doc = clientResponseFacade.getDocumentResponse(clientService.createDocument(request, userId));
         URI location = uriComponentsBuilder.path("/api/profile/document").build().toUri();
         return ResponseEntity.created(location).body(doc);
@@ -231,7 +234,11 @@ public class ProfileController {
             Authentication auth
     ) {
         Long userId = getCurrentUserId(auth);
+
+        log.info("Updating document for user ID: {}", userId);
+
         DocumentResponse doc = clientResponseFacade.getDocumentResponse(clientService.updateDocument(userId, request));
+
         return ResponseEntity.ok(doc);
     }
 

@@ -1,6 +1,7 @@
 package org.example.carshering.identity.application.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.common.exceptions.custom.BusinessException;
 import org.example.carshering.common.exceptions.custom.EmailNotVerifiedException;
 import org.example.carshering.common.exceptions.custom.NotFoundException;
@@ -45,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClientApplicationServiceImpl implements ClientApplicationService {
@@ -64,6 +66,8 @@ public class ClientApplicationServiceImpl implements ClientApplicationService {
         Email email = Email.of(createUserRequest.email());
 
         clientUniquenessService.ensureUnique(email, login);
+
+
 
         Password password = Password.ofEncoded(createUserRequest.password());
         Client client = (Client.create(
@@ -259,28 +263,56 @@ public class ClientApplicationServiceImpl implements ClientApplicationService {
 
     @Override
     public DocumentDto createDocument(CreateDocumentRequest request, Long userId) {
+        log.info("Creating document for user ID {}: {}", userId, request);
+
         Client client = clientRepository.findById(new ClientId(userId)).orElseThrow(
                 () -> new NotFoundException("User not found")
         );
+
         if (client.getActiveDocument() != null) {
             throw new BusinessException("Client already has an active document. Delete it first.");
         }
+        log.info("Creating document for user ID {}: {}", userId, request);
+
         DocumentTypeModel docType = documentTypeRepository.findById(new DocumentTypeId(request.documentTypeId()))
                 .orElseThrow(() -> new NotFoundException("Document type not found"));
 
+        log.info("Document type found: {}", docType);
+
+        log.info("Creating document for user ID {}: {}", userId, request);
+
         DocumentSeries series = DocumentSeries.of(request.series());
+
+        log.info("Document series set to: {}", series);
+
         DocumentNumber number = DocumentNumber.of(request.number());
+
+        log.info("Document number set to: {}", number);
+
         DateOfIssue dateOfIssue = DateOfIssue.of(request.dateOfIssue());
+
+        log.info("Document date of issue set to: {}", dateOfIssue);
+
         IssuingAuthority authority = IssuingAuthority.of(request.issuingAuthority());
+
+        log.info("Document issuing authority set to: {}", authority);
+
 
         client.addDocument(new DocumentTypeId(request.documentTypeId()), series, number, dateOfIssue, authority);
 
+        log.info("он зашел?");
+        log.info("Adding document for client ID {}: {}, document = {} ", userId, request, client.getActiveDocument() == null ? "null" : client.getActiveDocument().toString());
+
         Client savedClient = clientRepository.save(client);
+
+        log.info("Document added to client ID {}: {}", userId, savedClient.getActiveDocument());
 
         Document createdDocument = savedClient.getActiveDocument();
         if (createdDocument == null) {
             throw new BusinessException("Failed to create document");
         }
+
+        log.info("Document created successfully for user ID {}: {}", userId, createdDocument);
 
         return clientMapper.toDto(createdDocument);
     }
@@ -304,19 +336,35 @@ public class ClientApplicationServiceImpl implements ClientApplicationService {
     }
 
     @Override
+    public DocumentDto findValidDocument(Long userId) {
+        return clientMapper.toDto(clientRepository.findById(
+                new ClientId(userId)
+        ).orElseThrow(
+                () -> new NotFoundException("User not found")
+        ).getActiveAndValidDocument());
+    }
+
+
+    @Override
     public DocumentDto updateDocument(Long userId, UpdateDocumentRequest request) {
         Client client = clientRepository.findById(new ClientId(userId)).orElseThrow(
                 () -> new NotFoundException("User not found")
         );
 
+        log.info("Updating document for client ID {}: {}", userId, request);
+
         if (client.getActiveDocument() == null) {
             throw new BusinessException("Client has no document to update");
         }
+
+        log.info("active document found: {}, client has document: {}", client.getActiveDocument(), client.getActiveDocument() == null);
+
         DocumentId oldDocId = client.getActiveDocument().getDocumentId();
 
 
         DocumentTypeId documentTypeId = client.getActiveDocument().getDocumentType();
 
+        log.info("Current document type ID: {}", documentTypeId);
 
         if (request.documentTypeId() != null) {
             documentTypeRepository.findById(new DocumentTypeId(request.documentTypeId())).orElseThrow(
@@ -329,23 +377,29 @@ public class ClientApplicationServiceImpl implements ClientApplicationService {
         DocumentSeries series = request.series() != null
                 ? DocumentSeries.of(request.series())
                 : client.getActiveDocument().getDocumentSeries();
+        log.info("Series set to: {}", series);
 
         DocumentNumber number = request.number() != null
                 ? DocumentNumber.of(request.number())
                 : client.getActiveDocument().getDocumentNumber();
+        log.info("Number set to: {}", number);
 
         DateOfIssue dateOfIssue = request.dateOfIssue() != null
                 ? DateOfIssue.of(request.dateOfIssue())
                 : client.getActiveDocument().getDateOfIssue();
 
+        log.info("Date set to: {}", dateOfIssue);
+
         IssuingAuthority authority = request.issuingAuthority() != null
                 ? IssuingAuthority.of(request.issuingAuthority())
                 : client.getActiveDocument().getIssuingAuthority();
-
+        log.info("Issuing authority set to: {}", authority);
 
         client.removeDocument(oldDocId);
-
+        log.info("Removing document for client ID {}: {}", userId, request);
         client.addDocument(documentTypeId, series, number, dateOfIssue, authority);
+
+        log.info("Adding document for client ID {}: {}, document = {} ", userId, request, client.getActiveDocument());
 
         Client savedClient = clientRepository.save(client);
 

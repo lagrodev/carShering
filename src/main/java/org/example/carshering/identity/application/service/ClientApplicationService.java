@@ -68,6 +68,8 @@ public interface ClientApplicationService {
 
     DocumentDto findDocument(Long userId);
 
+    DocumentDto findValidDocument(Long userId);
+
     DocumentDto updateDocument(Long userId, UpdateDocumentRequest request);
 
 

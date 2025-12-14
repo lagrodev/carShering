@@ -1,6 +1,7 @@
 package org.example.carshering.identity.domain.model;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.common.exceptions.custom.BusinessException;
 import org.example.carshering.common.exceptions.custom.InvalidPasswordException;
 import org.example.carshering.fleet.domain.valueobject.DateOfIssue;
@@ -17,6 +18,7 @@ import org.example.carshering.identity.domain.valueobject.user.Phone;
 import org.example.carshering.common.domain.valueobject.ClientId;
 
 @Getter
+@Slf4j
 public class Client {
     // final fields
     private final ClientId clientId;
@@ -94,9 +96,23 @@ public class Client {
                             DocumentNumber number, DateOfIssue dateOfIssue,
                             IssuingAuthority issuingAuthority) {
 
+        log.info("Adding document {}", documentType.value());
+        log.info("activeDocument is null: {}", this.activeDocument == null);
+
+        if (this.activeDocument != null && this.activeDocument.isValid()) {
+            throw new BusinessException("Active document already exists");
+        }
+
+
+
+
 
         this.activeDocument = Document.create(documentType, series, number, dateOfIssue, issuingAuthority);
+        log.info("activeDocument is null: {}", this.activeDocument == null);
+        log.info("Document added with ID: {}", this.activeDocument.getDocumentId());
+
     }
+
 
 
     public void verifyDocument(DocumentId documentId) {
@@ -125,7 +141,15 @@ public class Client {
     }
 
     public Document getActiveDocument() {
-        return activeDocument != null && activeDocument.isValid() ? activeDocument : null;
+
+        return activeDocument != null ? activeDocument : null;
+    }
+
+    public Document getActiveAndValidDocument() {
+        if (activeDocument != null && activeDocument.isValid()) {
+            return activeDocument;
+        }
+        return null;
     }
 
     void setActiveDocument(Document doc) {

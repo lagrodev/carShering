@@ -2,6 +2,7 @@ package org.example.carshering.identity.domain.repository.adapter;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.common.exceptions.custom.BusinessException;
 import org.example.carshering.identity.api.dto.request.FilterUserRequest;
 import org.example.carshering.identity.domain.model.Client;
@@ -31,6 +32,7 @@ import static java.util.stream.Collectors.toMap;
 
 @RequiredArgsConstructor
 @Repository
+@Slf4j
 public class ClientRepositoryAdapter implements ClientDomainRepository {
 
     private final DocumentRepository documentRepository;
@@ -52,12 +54,6 @@ public class ClientRepositoryAdapter implements ClientDomainRepository {
             ClientJpaEntity savedEntity = clientRepository.save(entity);
             resultId = new ClientId(savedEntity.getId());
 
-            if (client.getActiveDocument() != null) {
-                // Сохранение активного документа, если он есть
-                DocumentJpaEntity doc = documentMapper.toEntity(client.getActiveDocument());
-                doc.setClientId(savedEntity.getId());
-                documentRepository.save(doc);
-            }
         } else {
             resultId = client.getClientId();
             Long clientId = client.getClientId().value();
@@ -68,6 +64,7 @@ public class ClientRepositoryAdapter implements ClientDomainRepository {
 
             clientMapper.updateEntity(entity, client);
             clientRepository.save(entity);
+
             handleDocumentUpdate(clientId, client.getActiveDocument());
         }
 
@@ -77,24 +74,42 @@ public class ClientRepositoryAdapter implements ClientDomainRepository {
     }
 
     private void handleDocumentUpdate(Long clientId, Document activeDocument) {
-        Optional<DocumentJpaEntity> existingDoc = documentRepository.findByClientId(clientId);
+        Optional<DocumentJpaEntity> existingDoc = documentRepository.findByClientIdAndDeletedFalse(clientId);
 
         if (activeDocument == null) {
             existingDoc.ifPresent(doc -> {
+                log.info("Soft deleting existing document for client: {}", clientId);
                 doc.setDeleted(true);
                 documentRepository.save(doc);
             });
         } else if (activeDocument.getDocumentId() == null) {
-            // Новый документ - создаем
+            // New document being added - first soft delete any existing active document
+            if (existingDoc.isPresent()) {
+                DocumentJpaEntity doc = existingDoc.get();
+                log.info("Soft deleting old document {} before creating new one for client: {}", doc.getId(), clientId);
+                doc.setDeleted(true);
+                documentRepository.save(doc);
+                log.info("Document {} marked as deleted, flushing to database...", doc.getId());
+            }
+
+            // Принудительно сбрасываем все изменения в БД перед созданием нового документа
+            documentRepository.flush();
+            log.info("Flushed all pending changes to database");
+
+            // Now create the new document
+            log.info("Creating new document for client: {}", clientId);
             DocumentJpaEntity newDoc = documentMapper.toEntity(activeDocument);
             newDoc.setClientId(clientId);
-            documentRepository.save(newDoc);
+            DocumentJpaEntity saved = documentRepository.save(newDoc);
+            log.info("Saved new document with id: {}", saved.getId());
         } else {
-            // Обновляем существующий документ
-            existingDoc.ifPresent(doc -> {
-                documentMapper.updateEntity(doc, activeDocument);
-                documentRepository.save(doc);
-            });
+            // Updating existing document
+            DocumentJpaEntity docToUpdate = existingDoc.orElseThrow(
+                () -> new BusinessException("Document not found for update: " + activeDocument.getDocumentId().value())
+            );
+            log.info("Updating existing document {} for client: {}", docToUpdate.getId(), clientId);
+            documentMapper.updateEntity(docToUpdate, activeDocument);
+            documentRepository.save(docToUpdate);
         }
     }
 

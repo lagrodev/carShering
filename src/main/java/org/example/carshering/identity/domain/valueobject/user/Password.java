@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static org.example.carshering.main.passwordEncoder;
+
 /**
  * Value Object representing an encoded password.
  *
@@ -42,6 +44,7 @@ public class Password {
         if (encodedPassword == null || encodedPassword.isBlank()) {
             throw new IllegalArgumentException("Encoded password cannot be null or blank");
         }
+        encodedPassword = passwordEncoder.encode(encodedPassword);
 
         String trimmed = encodedPassword.trim();
 

@@ -17,7 +17,7 @@ public class IdentityAdapter implements IdentityPort {
     public boolean isClientVerified(ClientId clientId) {
         try {
             ClientDto client = clientService.findUser(clientId.value());
-            DocumentDto documentDto = clientService.findDocument(clientId.value());
+            DocumentDto documentDto = clientService.findValidDocument(clientId.value());
 
             return client.emailVerified() &&
                     documentDto != null &&

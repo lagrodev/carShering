@@ -1,6 +1,7 @@
 package org.example.carshering.identity.domain.model;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.fleet.domain.valueobject.DateOfIssue;
 import org.example.carshering.fleet.domain.valueobject.IssuingAuthority;
 import org.example.carshering.identity.domain.valueobject.document.DocumentId;
@@ -11,6 +12,7 @@ import org.example.carshering.identity.domain.valueobject.document.DocumentTypeI
 import java.time.LocalDate;
 
 @Getter
+@Slf4j
 public class Document {
     // final fields
     private final DocumentId documentId;
@@ -47,6 +49,7 @@ public class Document {
                            DocumentNumber documentNumber,
                            DateOfIssue dateOfIssue,
                            IssuingAuthority issuingAuthority) {
+        log.info("Creating document with ID {}: {}", documentType, documentSeries);
         return new Document(null, documentType, documentSeries, documentNumber, dateOfIssue, issuingAuthority, false, false);
     }
 

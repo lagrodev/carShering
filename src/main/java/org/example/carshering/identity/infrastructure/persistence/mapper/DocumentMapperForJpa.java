@@ -4,9 +4,7 @@ import org.example.carshering.identity.domain.model.Document;
 import org.example.carshering.identity.domain.valueobject.document.DocumentId;
 import org.example.carshering.identity.infrastructure.persistence.entity.DocumentJpaEntity;
 import org.mapstruct.*;
-import org.springframework.stereotype.Component;
 
-@Component
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class DocumentMapperForJpa {
 
