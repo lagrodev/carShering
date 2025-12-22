@@ -68,7 +68,7 @@ public interface DocumentRepository extends JpaRepository<DocumentJpaEntity, Lon
     @Query(
             """
         SELECT d FROM DocumentJpaEntity d
-        WHERE (:onlyUnverified = false OR d.verified = false)
+        WHERE ((:onlyUnverified = false OR d.verified = false) and d.deleted = false)
 """
     )
     Page<DocumentJpaEntity> findAllForFilter(boolean onlyUnverified, Pageable pageable);

@@ -37,7 +37,7 @@ public interface CarModelRepository extends JpaRepository<CarModel, Long> {
     );
 
 
-    @Query("SELECT DISTINCT m.bodyType FROM CarModel m WHERE m.deleted = false AND m.bodyType IS NOT NULL")
+    @Query("SELECT DISTINCT m.bodyType.value FROM CarModel m WHERE m.deleted = false AND m.bodyType IS NOT NULL")
     List<String> findDistinctBodyTypes();
 
     @Query("SELECT c FROM CarModel c WHERE c.idModel = :id AND c.deleted = false")

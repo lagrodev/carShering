@@ -408,10 +408,13 @@ public class ClientApplicationServiceImpl implements ClientApplicationService {
 
     @Override
     public void verifyDocument(Long documentId) {
+        log.info("Verifying document with ID: {}", documentId);
         Client client = clientRepository.findByDocumentId(new DocumentId(documentId)).orElseThrow(
                 () -> new NotFoundException("Document not found")
         );
+        log.info(client.getActiveDocument().toString());
         client.verifyDocument(new DocumentId(documentId));
+        clientRepository.save(client);
 
     }
 

@@ -1,6 +1,7 @@
 package org.example.carshering.rental.domain.model;
 
 import lombok.Getter;
+import lombok.ToString;
 import org.example.carshering.common.domain.valueobject.CarId;
 import org.example.carshering.common.domain.valueobject.ClientId;
 import org.example.carshering.common.domain.valueobject.Money;
@@ -11,6 +12,7 @@ import org.example.carshering.rental.domain.valueobject.*;
 import java.time.LocalDateTime;
 
 @Getter
+@ToString
 public class Contract {
     // Unique identifier for the contract
     // final fields
@@ -112,4 +114,6 @@ public class Contract {
         state = RentalStateType.COMPLETED;
         // ивент в domain ivent
     }
+
+
 }

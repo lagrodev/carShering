@@ -23,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.math.BigDecimal;
 import java.net.URI;
 
 @RestController
@@ -68,7 +69,9 @@ public class ContractController {
     ) {
         Long userId = getCurrentUserId(auth);
 
-        var contractDto = contractService.createContract(userId, request);
+        BigDecimal money = responseFacade.getCarPricePerHour(request.carId());
+
+        var contractDto = contractService.createContract(userId, request, money);
 
         ContractResponse response = responseFacade.getContractResponse(contractDto);
 

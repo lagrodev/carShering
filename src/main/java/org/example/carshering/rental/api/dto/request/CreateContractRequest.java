@@ -16,9 +16,5 @@ public record CreateContractRequest(
         @FutureOrPresent @NotNull LocalDateTime dataStart,
         
         @Schema(description = "End date and time of the rental period (must be after start date)", example = "2025-12-15T10:00:00")
-        @FutureOrPresent @NotNull LocalDateTime dataEnd,
-
-        @Schema(description = "Daily rental rate for the car", example = "49.99")
-        @NotNull
-        BigDecimal dailyRate
+        @FutureOrPresent @NotNull LocalDateTime dataEnd
 ) {}

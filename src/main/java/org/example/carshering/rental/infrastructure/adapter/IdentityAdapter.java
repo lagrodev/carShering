@@ -19,8 +19,7 @@ public class IdentityAdapter implements IdentityPort {
             ClientDto client = clientService.findUser(clientId.value());
             DocumentDto documentDto = clientService.findValidDocument(clientId.value());
 
-            return client.emailVerified() &&
-                    documentDto != null &&
+            return documentDto != null &&
                     documentDto.verified();
         } catch (Exception e) {
             return false;

@@ -2,6 +2,7 @@ package org.example.carshering.rental.application.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.common.domain.valueobject.CarId;
 import org.example.carshering.common.domain.valueobject.ClientId;
 import org.example.carshering.common.domain.valueobject.Money;
@@ -23,10 +24,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ContractApplicationServiceImpl implements ContractApplicationService {
     private final ContractDomainRepository contractRepository;
@@ -153,34 +156,54 @@ public class ContractApplicationServiceImpl implements ContractApplicationServic
 
     @Transactional
     @Override
-    public ContractDto createContract(Long userId, @NotNull CreateContractRequest request) {
+    public ContractDto createContract(Long userId, @NotNull CreateContractRequest request, BigDecimal dailyRate) {
 
         ClientId clientId = new ClientId(userId);
-
+        log.info("Creating contract for clientId: {}", clientId.value());
 
         // Проверяем через ACL
         if (!identityPort.isClientVerified(clientId)) {
             throw new EmailNotVerifiedException("Client must verify email and documents");
         }
 
+        log.info("Creating contract for clientId: {}", clientId.value());
+
         if (!identityPort.isClientActive(clientId)) {
             throw new BannedClientAccessException("Client account is not active");
         }
 
+        log.info("Client {} is verified and active", clientId.value());
+
         CarId carId = new CarId(request.carId());
 
+
+
         RentalPeriod period = RentalPeriod.of(request.dataStart(), request.dataEnd());
+
+        log.info("Creating contract for carId: {}", carId.value());
+        log.info("Period from {} to {}", period.getStartDate(), period.getEndDate());
 
         if (!rentalDomainService.isCarAvailableForRental(carId, period, null)) {
             throw new CarUnavailableOnDatesException("Car is not available for selected dates");
         }
 
-        Money money = Money.rubles(request.dailyRate());
+        Money money = Money.rubles(dailyRate);
+
+        money.multiply(period.getDurationInHours());
+
+        log.info("Daily rate for carId {}: {}", carId.value(), money.getAmount());
 
         Contract contract = Contract.create(clientId, carId, period, money);
+        log.info("Creating contract for carId: {}", carId.value());
+        log.info("All information validated, saving contract. ClientId: {}, CarId: {}, Contract: {}", clientId.value(), carId.value(), contract);
+
 
         Contract saved = contractRepository.save(contract);
-        return getUserContract(userId, saved.getId().value());
+        log.info("Saved contract with id: {}", saved.getId() == null ? "null" : saved.getId().value());
+        log.info("Saved contract details: {}", saved.toString());
+
+        log.info("Created contract for carId: {}", carId.value());
+        return getUserContract(saved.getId().value(), userId);
     }
 
     // getters

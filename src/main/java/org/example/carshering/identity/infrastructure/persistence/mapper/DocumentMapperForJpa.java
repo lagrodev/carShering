@@ -6,7 +6,7 @@ import org.example.carshering.identity.infrastructure.persistence.entity.Documen
 import org.mapstruct.*;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public abstract class DocumentMapperForJpa {
+public interface DocumentMapperForJpa {
 
     // Domain -> JPA Entity
     @Mapping(source = "documentId.value", target = "id")
@@ -18,10 +18,10 @@ public abstract class DocumentMapperForJpa {
     @Mapping(source = "verified", target = "verified")
     @Mapping(source = "deleted", target = "deleted")
     @Mapping(target = "clientId", ignore = true) // Устанавливается в Repository!
-    public abstract DocumentJpaEntity toEntity(Document document);
+    DocumentJpaEntity toEntity(Document document);
 
     // JPA Entity -> Domain
-    public Document toDomain(DocumentJpaEntity entity) {
+    default Document toDomain(DocumentJpaEntity entity) {
         if (entity == null) {
             return null;
         }
@@ -38,7 +38,7 @@ public abstract class DocumentMapperForJpa {
         );
     }
 
-    public void updateEntity(DocumentJpaEntity entity, Document document) {
+    default void updateEntity(DocumentJpaEntity entity, Document document) {
         // Immutable поля не обновляются!
         entity.setDateOfIssue(document.getDateOfIssue());
         entity.setIssuingAuthority(document.getIssuingAuthority());

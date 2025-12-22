@@ -91,7 +91,7 @@ public class ClientRepositoryAdapter implements ClientDomainRepository {
                 documentRepository.save(doc);
                 log.info("Document {} marked as deleted, flushing to database...", doc.getId());
             }
-
+            
             // Принудительно сбрасываем все изменения в БД перед созданием нового документа
             documentRepository.flush();
             log.info("Flushed all pending changes to database");

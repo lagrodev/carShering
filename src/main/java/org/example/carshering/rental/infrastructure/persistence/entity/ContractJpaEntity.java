@@ -13,6 +13,7 @@ import org.example.carshering.rental.domain.valueobject.RentalStateType;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class ContractJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

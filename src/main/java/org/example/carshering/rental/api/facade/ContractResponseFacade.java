@@ -15,6 +15,8 @@ import org.example.carshering.service.interfaces.CarService;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 /**
  * Facade для сборки ContractResponse из нескольких контекстов
  * (Rental + Car + Client)
@@ -44,6 +46,11 @@ public class ContractResponseFacade {
 
         // Собираем Response через mapper
         return responseMapper.toResponse(contract, car, client);
+    }
+
+    public BigDecimal getCarPricePerHour(Long carId) {
+        CarDto carDto = carService.getCarById(new CarId(carId));
+        return carDto.dailyRate();
     }
 
     /**

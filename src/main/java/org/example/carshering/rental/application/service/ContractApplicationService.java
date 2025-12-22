@@ -10,11 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 public interface ContractApplicationService {
 
     // User methods
     @Transactional
-    ContractDto createContract(Long userId, CreateContractRequest request);
+    ContractDto createContract(Long userId, CreateContractRequest request, BigDecimal money);
 
     @Transactional
     ContractDto updateContract(Long userId, Long contractId, UpdateContractRequest request);

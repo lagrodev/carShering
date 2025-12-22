@@ -1,6 +1,7 @@
 package org.example.carshering.rental.domain.repository.adapter;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carshering.common.domain.valueobject.CarId;
 import org.example.carshering.common.domain.valueobject.ClientId;
 import org.example.carshering.rental.domain.model.Contract;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Slf4j
 @RequiredArgsConstructor
 public class ContractRepositoryAdapter implements ContractDomainRepository {
     private final ContractMapper mapper;
@@ -28,8 +30,10 @@ public class ContractRepositoryAdapter implements ContractDomainRepository {
     public Contract save(Contract contract) {
         // домен -> джпа ентити
         ContractJpaEntity contractJpaEntity = mapper.toEntity(contract);
+        log.info("Saving contract entity: {}", contractJpaEntity);
         // сайва
         ContractJpaEntity savedEntity = jpaRepository.save(contractJpaEntity);
+        log.info("Saved contract entity: {}", savedEntity);
         // джпа ентити -> домен
         return mapper.toDomain(savedEntity);
     }
