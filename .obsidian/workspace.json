@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "a69d644c3d5465b6",
+        "id": "8abfc04ef9cd6d60",
         "type": "tabs",
         "children": [
           {
-            "id": "1cfffef2b8ee6e65",
+            "id": "a5d07b1bc36ae273",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OPTIMIZED_IMAGE_SYNC_EXAMPLE.md",
+                "file": "phase1_architecture.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "OPTIMIZED_IMAGE_SYNC_EXAMPLE"
+              "title": "phase1_architecture"
             }
           }
         ]
@@ -183,19 +183,32 @@
       "bases:Создать новую базу": false
     }
   },
-  "active": "1cfffef2b8ee6e65",
+  "active": "a5d07b1bc36ae273",
   "lastOpenFiles": [
-    "target/classes/org/example/carshering/fleet/infrastructure/persistence/repository/CarRepository.class",
-    "src/main/java/org/example/carshering/fleet/infrastructure/persistence/repository/CarRepository.java~",
-    "target/classes/org/example/carshering/identity/domain/valueobject/user/Password.class",
-    "target/classes/org/example/carshering/identity/application/service/impl/ClientApplicationServiceImpl.class",
-    "target/classes/org/example/carshering/identity/application/service/impl",
-    "target/classes/org/example/carshering/main.class",
-    "src/main/java/org/example/carshering/identity/domain/valueobject/user/Password.java~",
-    "target/classes/org/example/carshering/identity/application/mapper/ClientMapperForRepoImpl.class",
-    "target/classes/org/example/carshering/identity/application/mapper/ClientMapperForRepo.class",
-    "target/classes/org/example/carshering/identity/application/mapper",
-    "target/classes/org/example/carshering/service/interfaces/CarBrandService.class",
+    "target/classes/org/example/carshering/favorites/api/facade/FavoriteFacade.class",
+    "target/classes/org/example/carshering/favorites/api/facade",
+    "target/classes/org/example/carshering/fleet/api/mapper/CarClassApiMapperImpl.class",
+    "target/classes/org/example/carshering/rental/application/dto/response/ContractDto.class",
+    "target/classes/org/example/carshering/rental/application/dto/response",
+    "target/classes/org/example/carshering/identity/infrastructure/persistence/repository/DocumentTypeRepository.class",
+    "target/classes/org/example/carshering/fleet/infrastructure/persistence/entity/CarState$CarStateBuilder.class",
+    "target/classes/org/example/carshering/fleet/application/service/ModelNameApplicationService.class",
+    "target/classes/org/example/carshering/fleet/application/service/CarModelApplicationService.class",
+    "target/classes/org/example/carshering/fleet/application/service/CarImageApplicationService.class",
+    "target/classes/org/example/carshering/common/exceptions/custom/CarNotFoundException.class",
+    "microservice_geolocation.md",
+    "phase7_observability.md",
+    "phase6_ci_cd.md",
+    "phase5_security.md",
+    "phase4_infrastructure.md",
+    "phase3_testing.md",
+    "phase2_code_quality.md",
+    "phase1_architecture.md",
+    "overview.md",
+    "PHASE1_UPDATED.md",
+    "architecture.md",
+    "README.md",
+    "deep_dive.md",
     "target/classes/static/image (2).png",
     "IMAGE_SERVICE_DONE.md",
     "CAR_CONTROLLERS_DDD_MIGRATION.md",
@@ -209,19 +222,6 @@
     "FAVORITE_AND_SERVICES_PLACEMENT.md",
     "APPLICATION_DTOS_AND_MAPPERS_CREATED.md",
     "DDD_LAYERS_FIX.md",
-    "IMAGE_DATA_VS_IMAGE_ENTITY.md",
-    "IMAGE_DTO_EXPLANATION.md",
-    "FIND_BY_PARAMETERS_VS_FILTER.md",
-    "INFRASTRUCTURE_COMPLETE_AND_NEXT_STEPS.md",
-    "CARCLASS_ADAPTER_CREATED.md",
-    "CACHING_EXPLAINED_SIMPLE.md",
-    "REFERENCES_COMPLETE_SUMMARY.md",
-    "README.md",
-    "CACHING_GUIDE.md",
-    "DDD_MIGRATION_GUIDE.md",
-    "ADAPTERS_MAPPERS_SUMMARY.md",
-    "OPTIMIZED_IMAGE_SYNC_EXAMPLE.md",
-    "FLEET_DOMAIN_REPOSITORIES_ALL.md",
     "docs/Entity_Dependencies_Graph-Car_Sharing_Backend___Entity_Dependencies_Graph____2025_12_04.png"
   ]
 }

@@ -1,10 +1,10 @@
 package org.example.carshering.util;
 
-import org.example.carshering.dto.request.create.CreateCarRequest;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarRequest;
 import org.example.carshering.fleet.infrastructure.persistence.entity.*;
 import org.example.carshering.identity.api.dto.request.CreateDocumentRequest;
-import org.example.carshering.dto.request.update.UpdateCarRequest;
-import org.example.carshering.dto.request.update.UpdateCarStateRequest;
+import org.example.carshering.fleet.api.dto.request.update.UpdateCarRequest;
+import org.example.carshering.fleet.api.dto.request.update.UpdateCarStateRequest;
 import org.example.carshering.identity.api.dto.request.UpdateDocumentRequest;
 import org.example.carshering.fleet.api.dto.responce.CarDetailResponse;
 import org.example.carshering.fleet.api.dto.responce.CarStateResponse;

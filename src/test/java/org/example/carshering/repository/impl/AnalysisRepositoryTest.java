@@ -1,14 +1,14 @@
 package org.example.carshering.repository.impl;
 
-import org.example.carshering.dto.response.ContractDetailResponse;
+import org.example.carshering.legacy.dto.response.ContractDetailResponse;
 import org.example.carshering.fleet.infrastructure.persistence.entity.*;
 import org.example.carshering.fleet.infrastructure.persistence.repository.*;
 import org.example.carshering.identity.infrastructure.persistence.entity.Client;
 import org.example.carshering.identity.infrastructure.persistence.repository.ClientRepository;
+import org.example.carshering.legacy.repository.AnalysisRepository;
 import org.example.carshering.rental.infrastructure.persistence.entity.Contract;
 import org.example.carshering.rental.infrastructure.persistence.entity.RentalState;
 import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
-import org.example.carshering.repository.RentalStateRepository;
 import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;

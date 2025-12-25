@@ -1,7 +1,7 @@
 package org.example.carshering.identity.application.service;
 
 import jakarta.validation.Valid;
-import org.example.carshering.dto.request.ChangePasswordRequest;
+import org.example.carshering.identity.api.dto.request.ChangePasswordRequest;
 import org.example.carshering.identity.api.dto.response.ResetPasswordResponse;
 import org.example.carshering.identity.api.dto.request.*;
 import org.example.carshering.identity.api.dto.response.VerifyStatusResponse;

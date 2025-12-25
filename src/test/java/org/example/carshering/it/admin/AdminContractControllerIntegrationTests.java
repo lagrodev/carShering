@@ -13,7 +13,6 @@ import org.example.carshering.it.BaseWebIntegrateTest;
 import org.example.carshering.rental.infrastructure.persistence.entity.Contract;
 import org.example.carshering.rental.infrastructure.persistence.entity.RentalState;
 import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
-import org.example.carshering.repository.RentalStateRepository;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

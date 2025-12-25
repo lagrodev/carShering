@@ -7,7 +7,7 @@ import org.example.carshering.common.domain.valueobject.CarId;
 import org.example.carshering.common.domain.valueobject.ClientId;
 import org.example.carshering.common.domain.valueobject.Money;
 import org.example.carshering.common.exceptions.custom.*;
-import org.example.carshering.dto.request.FilterContractRequest;
+import org.example.carshering.rental.api.dto.request.FilterContractRequest;
 import org.example.carshering.rental.api.dto.request.CreateContractRequest;
 import org.example.carshering.rental.api.dto.request.UpdateContractRequest;
 import org.example.carshering.rental.application.dto.response.ContractDto;

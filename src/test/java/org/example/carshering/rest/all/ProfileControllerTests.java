@@ -1,7 +1,7 @@
 package org.example.carshering.rest.all;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.request.ChangePasswordRequest;
+import org.example.carshering.identity.api.dto.request.ChangePasswordRequest;
 import org.example.carshering.identity.api.dto.request.CreateDocumentRequest;
 import org.example.carshering.identity.api.dto.request.UpdateDocumentRequest;
 import org.example.carshering.identity.api.dto.request.UpdateProfileRequest;

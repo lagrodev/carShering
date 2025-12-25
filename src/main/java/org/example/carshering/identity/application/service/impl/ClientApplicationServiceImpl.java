@@ -7,7 +7,7 @@ import org.example.carshering.common.exceptions.custom.EmailNotVerifiedException
 import org.example.carshering.common.exceptions.custom.NotFoundException;
 import org.example.carshering.fleet.domain.valueobject.DateOfIssue;
 import org.example.carshering.fleet.domain.valueobject.IssuingAuthority;
-import org.example.carshering.dto.request.ChangePasswordRequest;
+import org.example.carshering.identity.api.dto.request.ChangePasswordRequest;
 import org.example.carshering.identity.api.dto.response.ResetPasswordResponse;
 import org.example.carshering.identity.api.dto.request.*;
 import org.example.carshering.identity.api.dto.response.VerifyStatusResponse;

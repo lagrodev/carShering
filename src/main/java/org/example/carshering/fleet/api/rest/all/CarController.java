@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.carshering.dto.request.CarFilterRequest;
+import org.example.carshering.fleet.api.dto.request.CarFilterRequest;
 import org.example.carshering.fleet.api.dto.responce.CarDetailResponse;
 import org.example.carshering.fleet.api.dto.responce.CarListItemResponse;
 import org.example.carshering.fleet.api.dto.responce.MinMaxCellForFilters;

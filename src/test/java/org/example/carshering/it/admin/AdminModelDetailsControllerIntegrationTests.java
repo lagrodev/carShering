@@ -1,10 +1,10 @@
 package org.example.carshering.it.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.request.create.CreateCarModelName;
-import org.example.carshering.dto.request.create.CreateCarModelRequest;
-import org.example.carshering.dto.request.create.CreateCarModelsBrand;
-import org.example.carshering.dto.request.update.UpdateCarModelRequest;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarModelName;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarModelRequest;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarModelsBrand;
+import org.example.carshering.fleet.api.dto.request.update.UpdateCarModelRequest;
 import org.example.carshering.fleet.api.dto.responce.BrandModelResponse;
 import org.example.carshering.fleet.api.dto.responce.CarModelResponse;
 import org.example.carshering.fleet.api.dto.responce.ModelNameResponse;

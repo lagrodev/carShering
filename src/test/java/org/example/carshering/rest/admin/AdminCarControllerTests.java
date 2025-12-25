@@ -1,9 +1,9 @@
 package org.example.carshering.rest.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.request.create.CreateCarRequest;
-import org.example.carshering.dto.request.update.UpdateCarRequest;
-import org.example.carshering.dto.request.update.UpdateCarStateRequest;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarRequest;
+import org.example.carshering.fleet.api.dto.request.update.UpdateCarRequest;
+import org.example.carshering.fleet.api.dto.request.update.UpdateCarStateRequest;
 import org.example.carshering.fleet.api.dto.responce.CarDetailResponse;
 import org.example.carshering.fleet.api.dto.responce.CarListItemResponse;
 import org.example.carshering.fleet.api.dto.responce.CarStateResponse;
@@ -11,8 +11,6 @@ import org.example.carshering.common.exceptions.custom.AlreadyExistsException;
 import org.example.carshering.common.exceptions.custom.CarNotFoundException;
 import org.example.carshering.fleet.api.rest.admin.AdminCarController;
 import org.example.carshering.rest.BaseWebMvcTest;
-import org.example.carshering.service.interfaces.CarService;
-import org.example.carshering.service.interfaces.CarStateService;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

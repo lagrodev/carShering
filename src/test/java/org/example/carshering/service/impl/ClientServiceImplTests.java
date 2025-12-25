@@ -1,7 +1,7 @@
 package org.example.carshering.service.impl;
 
 import org.example.carshering.common.exceptions.custom.*;
-import org.example.carshering.dto.request.ChangePasswordRequest;
+import org.example.carshering.identity.api.dto.request.ChangePasswordRequest;
 import org.example.carshering.identity.api.dto.request.FilterUserRequest;
 import org.example.carshering.identity.api.dto.request.RegistrationRequest;
 import org.example.carshering.identity.api.dto.request.UpdateProfileRequest;

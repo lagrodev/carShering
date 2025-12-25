@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.carshering.dto.request.ChangePasswordRequest;
+import org.example.carshering.identity.api.dto.request.ChangePasswordRequest;
 import org.example.carshering.identity.api.dto.request.CreateDocumentRequest;
 import org.example.carshering.identity.api.dto.request.UpdateDocumentRequest;
 import org.example.carshering.identity.api.dto.request.UpdateProfileRequest;

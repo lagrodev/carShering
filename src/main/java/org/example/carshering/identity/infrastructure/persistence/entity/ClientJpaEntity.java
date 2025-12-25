@@ -2,7 +2,7 @@ package org.example.carshering.identity.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.carshering.fleet.infrastructure.persistence.entity.Favorite;
+import org.example.carshering.favorites.infrastructure.persistence.entity.Favorite;
 import org.example.carshering.identity.domain.valueobject.role.RoleId;
 import org.example.carshering.identity.domain.valueobject.user.Email;
 import org.example.carshering.identity.domain.valueobject.user.Login;
@@ -79,10 +79,6 @@ public class ClientJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-
-
-    @OneToMany(mappedBy = "client")
-    private List<Favorite> favorites = new ArrayList<>();
 
 
     @Embedded

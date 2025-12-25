@@ -2,8 +2,7 @@ package org.example.carshering.fleet.application.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.common.exceptions.custom.BusinessException;
-import org.example.carshering.dto.request.create.CreateCarModelsBrand;
-import org.example.carshering.fleet.api.dto.request.CreateBrandRequest;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarModelsBrand;
 import org.example.carshering.fleet.application.dto.response.BrandDto;
 import org.example.carshering.fleet.application.mapper.BrandDtoMapper;
 import org.example.carshering.fleet.application.service.BrandApplicationService;

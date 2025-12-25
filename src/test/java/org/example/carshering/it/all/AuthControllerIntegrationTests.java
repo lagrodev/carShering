@@ -12,7 +12,6 @@ import org.example.carshering.identity.infrastructure.persistence.repository.Doc
 import org.example.carshering.identity.infrastructure.persistence.repository.RoleRepository;
 import org.example.carshering.it.BaseWebIntegrateTest;
 import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
-import org.example.carshering.repository.RentalStateRepository;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.example.carshering.common.domain.valueobject.CarId;
 import org.example.carshering.common.domain.valueobject.Money;
 import org.example.carshering.common.exceptions.custom.NotFoundException;
-import org.example.carshering.dto.request.CarFilterRequest;
-import org.example.carshering.dto.request.create.CreateCarRequest;
-import org.example.carshering.dto.request.update.UpdateCarRequest;
+import org.example.carshering.fleet.api.dto.request.CarFilterRequest;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarRequest;
+import org.example.carshering.fleet.api.dto.request.update.UpdateCarRequest;
 import org.example.carshering.fleet.api.dto.responce.MinMaxCellForFilters;
 import org.example.carshering.fleet.application.dto.response.CarDto;
 import org.example.carshering.fleet.application.mapper.CarDtoMapper;
@@ -71,52 +71,7 @@ public class CarApplicationServiceImpl implements CarApplicationService {
         return carDtoMapper.toDto(savedCar);
     }
 
-    @Override
-    public Page<CarDto> getAllCars(Pageable pageable, CarFilterRequest filter) {
-        // Преобразуем фильтры в Value Objects
-        List<BrandName> brands = filter.brands() != null && !filter.brands().isEmpty()
-                ? filter.brands().stream().map(BrandName::new).toList()
-                : null;
 
-        List<ModelName> models = filter.models() != null && !filter.models().isEmpty()
-                ? filter.models().stream().map(ModelName::new).toList()
-                : null;
-
-        Year minYear = filter.minYear() != null ? Year.of(filter.minYear()) : null;
-        Year maxYear = filter.maxYear() != null ? Year.of(filter.maxYear()) : null;
-
-        BodyType bodyType = filter.bodyType() != null ? new BodyType(filter.bodyType()) : null;
-
-        List<CarClassName> carClasses = filter.carClasses() != null && !filter.carClasses().isEmpty()
-                ? filter.carClasses().stream().map(CarClassName::new).toList()
-                : null;
-
-        List<CarStateType> carStates = filter.carState() != null && !filter.carState().isEmpty()
-                ? filter.carState().stream().map(CarStateType::valueOf).toList()
-                : null;
-
-        Money minPrice = filter.minCell() != null ? Money.of((filter.minCell()), "RUB") : null;
-        Money maxPrice = filter.maxCell() != null ? Money.of((filter.maxCell()), "RUB") : null;
-
-        // Получаем данные из репозитория
-        Page<CarDomain> carPage = carRepository.findAll(
-                pageable,
-                brands,
-                models,
-                minYear,
-                maxYear,
-                bodyType,
-                carClasses,
-                carStates,
-                filter.dateStart(),
-                filter.dateEnd(),
-                minPrice,
-                maxPrice
-        );
-
-        // Преобразуем в DTO
-        return carPage.map(carDtoMapper::toDto);
-    }
 
     @Override
     public CarDto getCarById(CarId carId) {
@@ -233,39 +188,77 @@ public class CarApplicationServiceImpl implements CarApplicationService {
 
     @Override
     public MinMaxCellForFilters getMinMaxCell(CarFilterRequest filter) {
-        // Преобразуем фильтры в Value Objects
-        List<BrandName> brands = filter.brands() != null && !filter.brands().isEmpty()
-                ? filter.brands().stream().map(BrandName::new).toList()
-                : null;
-
-        List<ModelName> models = filter.models() != null && !filter.models().isEmpty()
-                ? filter.models().stream().map(ModelName::new).toList()
-                : null;
-
-        Year minYear = filter.minYear() != null ? Year.of(filter.minYear()) : null;
-        Year maxYear = filter.maxYear() != null ? Year.of(filter.maxYear()) : null;
-
-        BodyType bodyType = filter.bodyType() != null ? new BodyType(filter.bodyType()) : null;
-
-        List<CarClassName> carClasses = filter.carClasses() != null && !filter.carClasses().isEmpty()
-                ? filter.carClasses().stream().map(CarClassName::new).toList()
-                : null;
-
-        List<CarStateType> carStates = filter.carState() != null && !filter.carState().isEmpty()
-                ? filter.carState().stream().map(CarStateType::valueOf).toList()
-                : null;
-
         return carRepository.getMinMaxCell(
-                brands,
-                models,
-                minYear,
-                maxYear,
-                bodyType,
-                carClasses,
-                carStates,
+                normalizeBrand(filter.brands()),
+                normalizeModelNames(filter.models()),
+                normalizeYear(filter.minYear()),
+                normalizeYear(filter.maxYear()),
+                normalizeBodyType(filter.bodyType()),
+                normalizeCarClasses(filter.carClasses()),
+                normalizeCarState(filter.carState()),
                 filter.dateStart(),
                 filter.dateEnd()
         );
+    }
+
+
+    @Override
+    public Page<CarDto> getAllCars(Pageable pageable, CarFilterRequest filter) {
+        // Получаем данные из репозитория
+        Page<CarDomain> carPage = carRepository.findAll(
+                pageable,
+                normalizeBrand(filter.brands()),
+                normalizeModelNames(filter.models()),
+                normalizeYear(filter.minYear()),
+                normalizeYear(filter.maxYear()),
+                normalizeBodyType(filter.bodyType()),
+                normalizeCarClasses(filter.carClasses()),
+                normalizeCarState(filter.carState()),
+                filter.dateStart(),
+                filter.dateEnd(),
+                normalizeMoney(filter.minCell()),
+                normalizeMoney(filter.maxCell())
+        );
+
+        // Преобразуем в DTO
+        return carPage.map(carDtoMapper::toDto);
+    }
+
+    private Money normalizeMoney(BigDecimal filter) {
+        return filter != null ? Money.of((filter), "RUB") : null;
+    }
+
+    private List<ModelName> normalizeModelNames(List<String> filter) {
+       return filter != null && !filter.isEmpty()
+                ? filter.stream().map(ModelName::new).toList()
+                : null;
+    }
+
+
+    private List<BrandName> normalizeBrand(List<String> filter) {
+        return filter != null && !filter.isEmpty()
+                ? filter.stream().map(BrandName::new).toList()
+                : null;
+    }
+
+    private Year normalizeYear(Integer year) {
+        return year != null ? Year.of(year) : null;
+    }
+
+    private BodyType normalizeBodyType(String filter) {
+        return filter != null ? new BodyType(filter) : null;
+    }
+
+    private  List<CarClassName> normalizeCarClasses(List<String> filter) {
+
+        return filter != null  && !filter.isEmpty() ? filter.stream().map(CarClassName::new).toList()
+                : null;
+    }
+
+    private  List<CarStateType> normalizeCarState(List<String> filter) {
+        return filter != null && !filter.isEmpty()
+                ? filter.stream().map(CarStateType::valueOf).toList()
+                : null;
     }
 
     @Override

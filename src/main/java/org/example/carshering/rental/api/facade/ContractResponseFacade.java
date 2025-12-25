@@ -11,7 +11,6 @@ import org.example.carshering.identity.application.service.ClientApplicationServ
 import org.example.carshering.rental.api.dto.response.ContractResponse;
 import org.example.carshering.rental.api.mapper.ContractResponseMapper;
 import org.example.carshering.rental.application.dto.response.ContractDto;
-import org.example.carshering.service.interfaces.CarService;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 

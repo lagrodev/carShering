@@ -1,10 +1,9 @@
 package org.example.carshering.fleet.application.service;
 
 import org.example.carshering.common.domain.valueobject.CarId;
-import org.example.carshering.dto.request.CarFilterRequest;
-import org.example.carshering.dto.request.create.CreateCarRequest;
-import org.example.carshering.dto.request.update.UpdateCarRequest;
-import org.example.carshering.fleet.api.dto.responce.CarStateResponse;
+import org.example.carshering.fleet.api.dto.request.CarFilterRequest;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarRequest;
+import org.example.carshering.fleet.api.dto.request.update.UpdateCarRequest;
 import org.example.carshering.fleet.api.dto.responce.MinMaxCellForFilters;
 import org.example.carshering.fleet.application.dto.response.CarDto;
 import org.springframework.data.domain.Page;

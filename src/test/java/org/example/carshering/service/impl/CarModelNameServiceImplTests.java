@@ -1,6 +1,6 @@
 package org.example.carshering.service.impl;
 
-import org.example.carshering.dto.request.create.CreateCarModelName;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarModelName;
 import org.example.carshering.fleet.api.dto.responce.ModelNameResponse;
 import org.example.carshering.fleet.infrastructure.persistence.entity.Model;
 import org.example.carshering.common.exceptions.custom.NotFoundException;

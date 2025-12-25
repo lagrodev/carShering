@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.example.carshering.dto.request.FilterContractRequest;
+import org.example.carshering.rental.api.dto.request.FilterContractRequest;
 import org.example.carshering.rental.api.dto.response.ContractResponse;
 import org.example.carshering.rental.api.facade.ContractResponseFacade;
 import org.example.carshering.rental.application.service.ContractApplicationService;

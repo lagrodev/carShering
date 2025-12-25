@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
-import org.example.carshering.dto.request.ChangePasswordRequest;
+import org.example.carshering.identity.api.dto.request.ChangePasswordRequest;
 import org.example.carshering.fleet.infrastructure.persistence.repository.*;
 import org.example.carshering.identity.api.dto.request.CreateDocumentRequest;
 import org.example.carshering.identity.api.dto.request.UpdateDocumentRequest;
@@ -19,7 +19,6 @@ import org.example.carshering.identity.infrastructure.persistence.repository.Doc
 import org.example.carshering.identity.infrastructure.persistence.repository.RoleRepository;
 import org.example.carshering.it.BaseWebIntegrateTest;
 import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
-import org.example.carshering.repository.RentalStateRepository;
 import org.example.carshering.util.WithMockClientDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,8 +1,8 @@
 //package org.example.carshering.service.impl;
 //
-//import org.example.carshering.dto.request.CarFilterRequest;
-//import org.example.carshering.dto.request.create.CreateCarRequest;
-//import org.example.carshering.dto.request.update.UpdateCarRequest;
+//import org.example.carshering.fleet.api.dto.request.CarFilterRequest;
+//import org.example.carshering.fleet.api.dto.request.create.CreateCarRequest;
+//import org.example.carshering.fleet.api.dto.request.update.UpdateCarRequest;
 //import org.example.carshering.fleet.api.dto.responce.CarDetailResponse;
 //import org.example.carshering.fleet.api.dto.responce.CarListItemResponse;
 //import org.example.carshering.fleet.api.dto.responce.CarStateResponse;

@@ -1,7 +1,6 @@
 package org.example.carshering.fleet.application.service;
 
-import org.example.carshering.dto.request.create.CreateCarModelName;
-import org.example.carshering.fleet.api.dto.request.CreateBrandRequest;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarModelName;
 import org.example.carshering.fleet.application.dto.response.ModelNameDto;
 
 import java.util.List;

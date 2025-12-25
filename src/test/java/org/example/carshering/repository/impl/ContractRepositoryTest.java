@@ -7,7 +7,6 @@ import org.example.carshering.identity.infrastructure.persistence.repository.Cli
 import org.example.carshering.rental.infrastructure.persistence.entity.ContractJpaEntity;
 import org.example.carshering.rental.infrastructure.persistence.entity.RentalState;
 import org.example.carshering.rental.infrastructure.persistence.repository.ContractRepository;
-import org.example.carshering.repository.RentalStateRepository;
 import org.example.carshering.repository.*;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.BeforeEach;

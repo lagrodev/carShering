@@ -1,10 +1,10 @@
 package org.example.carshering.rest.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.carshering.dto.request.create.CreateCarModelName;
-import org.example.carshering.dto.request.create.CreateCarModelRequest;
-import org.example.carshering.dto.request.create.CreateCarModelsBrand;
-import org.example.carshering.dto.request.update.UpdateCarModelRequest;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarModelName;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarModelRequest;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarModelsBrand;
+import org.example.carshering.fleet.api.dto.request.update.UpdateCarModelRequest;
 import org.example.carshering.fleet.api.dto.responce.BrandModelResponse;
 import org.example.carshering.fleet.api.dto.responce.CarModelResponse;
 import org.example.carshering.fleet.api.dto.responce.ModelNameResponse;
@@ -12,10 +12,6 @@ import org.example.carshering.common.exceptions.custom.AlreadyExistsException;
 import org.example.carshering.common.exceptions.custom.NotFoundException;
 import org.example.carshering.fleet.api.rest.admin.AdminModelDetailsController;
 import org.example.carshering.rest.BaseWebMvcTest;
-import org.example.carshering.service.interfaces.CarBrandService;
-import org.example.carshering.service.interfaces.CarClassService;
-import org.example.carshering.service.interfaces.CarModelNameService;
-import org.example.carshering.service.interfaces.CarModelService;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

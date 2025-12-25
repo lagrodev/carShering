@@ -6,7 +6,6 @@ import org.example.carshering.fleet.api.dto.responce.CarListItemResponse;
 import org.example.carshering.common.exceptions.custom.CarNotFoundException;
 import org.example.carshering.fleet.api.rest.all.CarController;
 import org.example.carshering.rest.BaseWebMvcTest;
-import org.example.carshering.service.interfaces.*;
 import org.example.carshering.util.DataUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

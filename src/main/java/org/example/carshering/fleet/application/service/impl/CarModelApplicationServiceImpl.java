@@ -2,9 +2,9 @@ package org.example.carshering.fleet.application.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.carshering.common.exceptions.custom.NotFoundException;
-import org.example.carshering.dto.request.FilterCarModelRequest;
-import org.example.carshering.dto.request.create.CreateCarModelRequest;
-import org.example.carshering.dto.request.update.UpdateCarModelRequest;
+import org.example.carshering.fleet.api.dto.request.FilterCarModelRequest;
+import org.example.carshering.fleet.api.dto.request.create.CreateCarModelRequest;
+import org.example.carshering.fleet.api.dto.request.update.UpdateCarModelRequest;
 import org.example.carshering.fleet.application.dto.response.CarModelDto;
 import org.example.carshering.fleet.application.mapper.CarModelDtoMapper;
 import org.example.carshering.fleet.application.service.CarModelApplicationService;
