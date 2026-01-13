@@ -1,0 +1,70 @@
+@startuml
+title Диаграмма состояний: Contract (Контракт аренды)
+
+[*] --> PENDING : createContract()
+
+state PENDING {
+  PENDING : Ожидает подтверждения
+  PENDING : Можно изменять даты
+}
+
+state CONFIRMED {
+  CONFIRMED : Подтверждён
+  CONFIRMED : Можно изменять даты
+}
+
+state ACTIVE {
+  ACTIVE : Активен (аренда идёт)
+  ACTIVE : Нельзя изменять
+}
+
+state CANCELLATION_REQUESTED {
+  CANCELLATION_REQUESTED : Запрошена отмена
+  CANCELLATION_REQUESTED : Нельзя изменять
+}
+
+state COMPLETED {
+  COMPLETED : Завершён
+  COMPLETED : Финальное состояние
+}
+
+state CANCELLED {
+  CANCELLED : Отменён
+  CANCELLED : Финальное состояние
+}
+
+PENDING --> CONFIRMED : confirm() / by Admin
+PENDING --> CANCELLATION_REQUESTED : requestCancellation()
+
+CONFIRMED --> ACTIVE : activate() / by Scheduler\nwhen startDate <= now
+CONFIRMED --> CANCELLATION_REQUESTED : requestCancellation()
+
+ACTIVE --> COMPLETED : complete() / by Scheduler\nwhen endDate <= now
+ACTIVE --> CANCELLATION_REQUESTED : requestCancellation()
+
+CANCELLATION_REQUESTED --> CANCELLED : cancel() / by Admin
+CANCELLATION_REQUESTED --> ACTIVE : reject cancellation
+
+COMPLETED --> [*]
+CANCELLED --> [*]
+
+note right of PENDING
+  Начальное состояние
+  после создания заявки
+  клиентом
+end note
+
+note right of ACTIVE
+  В этом состоянии
+  клиент использует
+  автомобиль
+end note
+
+note bottom of COMPLETED
+  Успешное завершение
+  процесса аренды
+end note
+
+@enduml
+
+

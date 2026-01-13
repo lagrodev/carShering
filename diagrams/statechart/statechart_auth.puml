@@ -1,0 +1,37 @@
+@startuml
+title Диаграмма состояний: User Authentication (Аутентификация пользователя)
+
+state "Неаутентифицирован" as Unauthenticated
+state "Аутентифицирован" as Authenticated
+state "Требуется верификация email" as EmailVerification
+state "Токен истёк" as TokenExpired
+
+[*] --> Unauthenticated
+
+Unauthenticated --> EmailVerification : register()
+EmailVerification --> Unauthenticated : verification\ntoken expires
+EmailVerification --> Authenticated : verify email\nand login()
+
+Unauthenticated --> Authenticated : login()\nwith valid credentials
+
+Authenticated --> TokenExpired : access token\nexpires
+TokenExpired --> Authenticated : refresh token
+TokenExpired --> Unauthenticated : refresh token\ninvalid/expired
+
+Authenticated --> Unauthenticated : logout()
+
+note right of EmailVerification
+  После регистрации
+  пользователь получает
+  письмо с кодом
+  подтверждения
+end note
+
+note right of TokenExpired
+  JWT access token
+  истекает через 30 минут
+  refresh token - через 7 дней
+end note
+
+@enduml
+

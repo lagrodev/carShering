@@ -1,0 +1,147 @@
+@startuml
+title Component Diagram: Car Sharing System
+
+' ═══════════════════════════════════════════════════════
+' MAIN SYSTEM COMPONENT
+' ═══════════════════════════════════════════════════════
+
+package "backend-0.0.1-SNAPSHOT.jar" {
+
+  ' REST API Layer
+  [REST Controllers] as REST
+
+  ' Security Layer
+  [Security Module] as Security
+
+  ' Business Layer (DDD Bounded Contexts)
+  [Identity Module] <<subsystem>> as Identity
+  [Fleet Module] <<subsystem>> as Fleet
+  [Rental Module] <<subsystem>> as Rental
+
+  ' Data Access Layer
+  [Persistence Module] as Persistence
+}
+
+' ═══════════════════════════════════════════════════════
+' EXTERNAL COMPONENTS
+' ═══════════════════════════════════════════════════════
+
+[spring-boot-web.jar] as SpringWeb
+[spring-security.jar] as SpringSec
+[spring-data-jpa.jar] as SpringJPA
+[postgresql.jar] as PgDriver
+
+database PostgreSQL
+component "SMTP Server" as SMTP
+component "MinIO Storage" as MinIO
+
+' ═══════════════════════════════════════════════════════
+' INTERFACES
+' ═══════════════════════════════════════════════════════
+
+interface "REST API" as IREST
+interface "Authentication" as IAuth
+interface "Database" as IDB
+interface "Email" as IEmail
+
+' Provided interfaces (lollipop)
+REST -up- IREST
+Security -up- IAuth
+Persistence -down- IDB
+SMTP -up- IEmail
+
+' Required interfaces (socket)
+REST --( IAuth
+Identity --( IDB
+Identity --( IEmail
+Fleet --( IDB
+Rental --( IDB
+
+' ═══════════════════════════════════════════════════════
+' DEPENDENCIES
+' ═══════════════════════════════════════════════════════
+
+' Internal dependencies
+REST --> Security : uses
+REST --> Identity : uses
+REST --> Fleet : uses
+REST --> Rental : uses
+
+Identity --> Persistence : uses
+Fleet --> Persistence : uses
+Rental --> Persistence : uses
+Rental --> Fleet : uses (update car)
+
+' External dependencies
+REST ..> SpringWeb : <<import>>
+Security ..> SpringSec : <<import>>
+Persistence ..> SpringJPA : <<import>>
+Persistence ..> PgDriver : <<import>>
+
+Persistence --> PostgreSQL : <<access>>
+Identity ..> SMTP : <<use>>
+Fleet ..> MinIO : <<use>>
+
+' ═══════════════════════════════════════════════════════
+' NOTES
+' ═══════════════════════════════════════════════════════
+
+note right of REST
+  <b>REST Controllers (10)</b>
+  • Auth, Profile, Car
+  • Contract, Favorite
+  • Admin endpoints
+end note
+
+note right of Security
+  <b>Security</b>
+  • JWT Filter
+  • Spring Security
+  • Authentication
+end note
+
+note bottom of Identity
+  <b>Identity Context</b>
+  • Client Service
+  • Auth Service
+  • Document Service
+  • Email Service
+end note
+
+note bottom of Fleet
+  <b>Fleet Context</b>
+  • Car Service
+  • Brand Service
+  • Model Service
+  • Image Service
+end note
+
+note bottom of Rental
+  <b>Rental Context</b>
+  • Contract Service
+  • Scheduler (@Scheduled)
+  • Auto activation/completion
+end note
+
+note bottom of Persistence
+  <b>Data Access</b>
+  • Hibernate/JPA
+  • 7 Repositories
+  • Flyway migrations
+end note
+
+legend bottom
+  <b>Component Diagram Notation:</b>
+
+  [Component] = модульная часть системы
+  ─○ = provided interface (предоставляет)
+  ○─ = required interface (требует)
+  --> = зависимость (uses)
+  ..> = слабая зависимость (import)
+
+  <b>Архитектура:</b>
+  3-layer + DDD (3 Bounded Contexts)
+endlegend
+
+@enduml
+

@@ -1,0 +1,200 @@
+@startuml
+title Deployment Diagram: Car Sharing System
+
+' ═══════════════════════════════════════════════════════
+' CLIENT TIER
+' ═══════════════════════════════════════════════════════
+
+node "Client Workstation" <<device>> {
+  node "Web Browser" <<execution environment>> {
+    artifact "spa-bundle.js" as SPA
+  }
+}
+
+' ═══════════════════════════════════════════════════════
+' APPLICATION SERVER TIER
+' ═══════════════════════════════════════════════════════
+
+node "Docker Host Server" <<server>> {
+
+  ' ─────────────────────────────────────────────────────
+  ' Backend Container
+  ' ─────────────────────────────────────────────────────
+  node "backend-container" <<docker container>> {
+    node "JVM 21" <<execution environment>> {
+      node "Tomcat 10.1" <<web server>> {
+        artifact "backend-0.0.1-SNAPSHOT.jar" as BackendJar
+      }
+    }
+  }
+
+  ' ─────────────────────────────────────────────────────
+  ' Database Container
+  ' ─────────────────────────────────────────────────────
+  node "postgres-container" <<docker container>> {
+    node "PostgreSQL 15" <<execution environment>> {
+      artifact "car_rental.db" as DatabaseFile
+    }
+  }
+
+  ' ─────────────────────────────────────────────────────
+  ' Object Storage Container
+  ' ─────────────────────────────────────────────────────
+  node "minio-container" <<docker container>> {
+    node "MinIO Server" <<execution environment>> {
+      artifact "car-photos bucket" as MinIOBucket
+    }
+  }
+
+  ' ─────────────────────────────────────────────────────
+  ' Mail Container (Development)
+  ' ─────────────────────────────────────────────────────
+  node "mailpit-container" <<docker container>> {
+    node "Mailpit" <<execution environment>> {
+      artifact "mailpit-smtp" as MailpitSMTP
+    }
+  }
+
+  ' ─────────────────────────────────────────────────────
+  ' Docker Infrastructure
+  ' ─────────────────────────────────────────────────────
+  artifact "docker-compose.yaml" as DockerCompose
+  artifact "postgres_data (volume)" as Volume
+}
+
+' ═══════════════════════════════════════════════════════
+' EXTERNAL SERVICES TIER
+' ═══════════════════════════════════════════════════════
+
+node "Production Mail Server" <<external server>> {
+  artifact "SMTP Service" as ProductionSMTP
+}
+
+' ═══════════════════════════════════════════════════════
+' COMMUNICATION PATHS (Protocols)
+' ═══════════════════════════════════════════════════════
+
+SPA ..> BackendJar : <<HTTP/REST>>\nport 8082
+
+BackendJar ..> DatabaseFile : <<JDBC>>\njdbc:postgresql://postgres:5432
+
+BackendJar ..> MinIOBucket : <<S3 API>>\nhttp://minio:9000
+
+BackendJar ..> MailpitSMTP : <<SMTP>>\nport 1025 (dev)
+
+BackendJar ..> ProductionSMTP : <<SMTP>>\nport 587 (prod)
+
+' ═══════════════════════════════════════════════════════
+' DEPLOYMENT RELATIONSHIPS (<<deploy>>, <<manifest>>)
+' ═══════════════════════════════════════════════════════
+
+DatabaseFile --> Volume : <<store>>
+
+DockerCompose ..> "backend-container" : <<orchestrate>>
+DockerCompose ..> "postgres-container" : <<orchestrate>>
+DockerCompose ..> "minio-container" : <<orchestrate>>
+DockerCompose ..> "mailpit-container" : <<orchestrate>>
+
+' ═══════════════════════════════════════════════════════
+' DEPLOYMENT SPECIFICATIONS
+' ═══════════════════════════════════════════════════════
+
+note right of "backend-container"
+  <b>Container Specification:</b>
+  • Base Image: openjdk:21-slim
+  • Port Mapping: 8082 (host) → 8080 (container)
+  • Memory Limit: 2GB
+  • CPU Limit: 2 cores
+  • Network: backend-network
+
+  <b>Artifact Details:</b>
+  backend-0.0.1-SNAPSHOT.jar contains:
+  • REST Controllers (10)
+  • Security Layer (JWT)
+  • Business Services (3 DDD contexts)
+  • Data Access Layer (7 repositories)
+  • Infrastructure (Hibernate, Flyway, MapStruct)
+  • Scheduled Tasks (@Scheduled CRON)
+end note
+
+note right of "postgres-container"
+  <b>Container Specification:</b>
+  • Base Image: postgres:latest
+  • Port Mapping: 5433 (host) → 5432 (container)
+  • Memory Limit: 512MB
+  • CPU Limit: 1 core
+  • Network: backend-network
+
+  <b>Database Details:</b>
+  • Database Name: car_rental
+  • Schema: car_rental
+  • Tables: client, document, car, car_model,
+    contract, refresh_token, favorites, role
+  • Migrations: Flyway (V1__, V24_*, V25_*)
+
+  <b>Persistence:</b>
+  • Volume: postgres_data
+  • Mount: /var/lib/postgresql/data
+end note
+
+note bottom of "Docker Host Server"
+  <b>Server Infrastructure:</b>
+  • OS: Linux (Ubuntu/Debian)
+  • Docker Engine: 24.x+
+  • Docker Compose: 3.8+
+
+  <b>Orchestration:</b>
+  docker-compose.yaml manages:
+  • 4 service containers
+  • 1 persistent volume (postgres_data)
+  • 1 bridge network (default)
+
+  <b>Network Communication:</b>
+  • HTTP/REST → :8082
+  • JDBC → :5432 (internal) / :5433 (external)
+  • SMTP → :1025 (dev) / :587 (prod)
+  • S3 API → :9000
+end note
+
+note right of "Production Mail Server"
+  <b>External Service:</b>
+  • Protocol: SMTP/TLS
+  • Port: 587 (STARTTLS) or 465 (SSL)
+  • Authentication: Required
+
+  <b>Usage:</b>
+  • Email verification
+  • Contract notifications
+  • Password reset emails
+
+  <b>Failover:</b>
+  Development uses Mailpit (localhost:1025)
+end note
+
+legend right
+  <b>UML Deployment Diagram Notation:</b>
+
+  <b>Node:</b> execution hardware/software
+  • <<device>> - end-user device
+  • <<server>> - physical/virtual server
+  • <<docker container>> - container runtime
+  • <<execution environment>> - runtime platform
+  • <<web server>> - HTTP server
+
+  <b>Artifact:</b> physical file/resource
+  • .jar, .js - executable files
+  • .db - database files
+  • bucket - object storage
+  • volume - persistent storage
+
+  <b>Communication Path:</b>
+  ..> = network protocol
+  --> = deployment/storage relationship
+
+  <b>Stereotypes:</b>
+  <<orchestrate>> - managed by orchestrator
+  <<store>> - data persistence
+endlegend
+
+@enduml
+

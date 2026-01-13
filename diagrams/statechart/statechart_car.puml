@@ -1,0 +1,59 @@
+@startuml
+title Диаграмма состояний: Car (Автомобиль)
+
+[*] --> CAR_AVAILABLE : Автомобиль добавлен
+
+state CAR_AVAILABLE {
+  CAR_AVAILABLE : Доступен
+  CAR_AVAILABLE : Может быть забронирован
+}
+
+state CAR_CONFIRMED {
+  CAR_CONFIRMED : Подтверждён (забронирован)
+  CAR_CONFIRMED : Ожидает начала аренды
+}
+
+state CAR_ACTIVE {
+  CAR_ACTIVE : Выполняется (в аренде)
+  CAR_ACTIVE : Используется клиентом
+}
+
+state CAR_CLOSED {
+  CAR_CLOSED : Завершён (после аренды)
+  CAR_CLOSED : Требуется проверка
+}
+
+state CAR_CANCELLED {
+  CAR_CANCELLED : Отменён
+}
+
+CAR_AVAILABLE --> CAR_CONFIRMED : Contract confirmed
+
+CAR_CONFIRMED --> CAR_ACTIVE : Contract activated
+CAR_CONFIRMED --> CAR_AVAILABLE : Contract cancelled
+
+CAR_ACTIVE --> CAR_CLOSED : Contract completed
+CAR_ACTIVE --> CAR_CANCELLED : Contract cancelled\n(force termination)
+
+CAR_CLOSED --> CAR_AVAILABLE : Inspection passed
+
+CAR_CANCELLED --> CAR_AVAILABLE : Return to available
+
+note right of CAR_AVAILABLE
+  Автомобиль готов
+  к бронированию
+end note
+
+note right of CAR_ACTIVE
+  Синхронизировано
+  с активным контрактом
+end note
+
+note bottom of CAR_CLOSED
+  После завершения аренды
+  может потребоваться
+  техническая проверка
+end note
+
+@enduml
+
