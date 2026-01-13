@@ -41,6 +41,10 @@
 
 Диаграммы являются частью проектной документации и лежат в папке `diagrams/`.
 
+### Диаграмма er
+
+![ER diagram](diagrams/image%20(2).png)
+
 ### Компонентная архитектура
 
 ![Component diagram](diagrams/component/component_diagram.png)
